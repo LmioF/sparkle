@@ -26,8 +26,12 @@ export function getCertFingerprint(cert: tls.PeerCertificate) {
 
 export async function getProfileConfig(force = false): Promise<ProfileConfig> {
   if (force || !profileConfig) {
-    const data = await readFile(profileConfigPath(), 'utf-8')
-    profileConfig = parseYaml(data) || { items: [] }
+    try {
+      const data = await readFile(profileConfigPath(), 'utf-8')
+      profileConfig = parseYaml(data) || { items: [] }
+    } catch {
+      profileConfig = { items: [] }
+    }
   }
   if (typeof profileConfig !== 'object') profileConfig = { items: [] }
   return profileConfig
@@ -316,12 +320,16 @@ export async function getProfile(id: string | undefined): Promise<MihomoConfig> 
 // attachment;filename=xxx.yaml; filename*=UTF-8''%xx%xx%xx
 function parseFilename(str: string): string {
   if (str.match(/filename\*=.*''/)) {
-    const filename = decodeURIComponent(str.split(/filename\*=.*''/)[1])
-    return filename
-  } else {
-    const filename = str.split('filename=')[1]
-    return filename
+    const match = str.split(/filename\*=.*''/)
+    if (match[1]) {
+      return decodeURIComponent(match[1])
+    }
   }
+  const parts = str.split('filename=')
+  if (parts[1]) {
+    return parts[1]
+  }
+  return 'Remote File'
 }
 
 // subscription-userinfo: upload=1234; download=2234; total=1024000; expire=2218532293

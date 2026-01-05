@@ -13,8 +13,12 @@ let overrideConfig: OverrideConfig // override.yaml
 
 export async function getOverrideConfig(force = false): Promise<OverrideConfig> {
   if (force || !overrideConfig) {
-    const data = await readFile(overrideConfigPath(), 'utf-8')
-    overrideConfig = parseYaml<OverrideConfig>(data) || { items: [] }
+    try {
+      const data = await readFile(overrideConfigPath(), 'utf-8')
+      overrideConfig = parseYaml<OverrideConfig>(data) || { items: [] }
+    } catch {
+      overrideConfig = { items: [] }
+    }
   }
   if (typeof overrideConfig !== 'object') overrideConfig = { items: [] }
   return overrideConfig
@@ -44,7 +48,7 @@ export async function addOverrideItem(item: Partial<OverrideItem>): Promise<void
   const config = await getOverrideConfig()
   const newItem = await createOverride(item)
   if (await getOverrideItem(item.id)) {
-    updateOverrideItem(newItem)
+    await updateOverrideItem(newItem)
   } else {
     config.items.push(newItem)
   }
