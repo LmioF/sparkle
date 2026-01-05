@@ -52,9 +52,12 @@ function decryptConfig(config: AppConfig): AppConfig {
     const value = result[field]
     if (value && typeof value === 'string') {
       if (!isEncrypted(value)) {
-        ;(result[field] as string) = ''
-      } else {
+        continue
+      }
+      try {
         ;(result[field] as string) = decryptString(value)
+      } catch {
+        // ignore
       }
     }
   }
@@ -81,12 +84,16 @@ export async function getAppConfig(force = false): Promise<AppConfig> {
       const data = await readFile(appConfigPath(), 'utf-8')
       const parsed = parseYaml<AppConfig>(data)
       if (!parsed || !isValidConfig(parsed)) {
-        const backup = await readFile(`${appConfigPath()}.backup`, 'utf-8')
-        appConfig = decryptConfig(parseYaml<AppConfig>(backup))
+        try {
+          const backup = await readFile(`${appConfigPath()}.backup`, 'utf-8')
+          appConfig = decryptConfig(parseYaml<AppConfig>(backup))
+        } catch {
+          appConfig = defaultConfig
+        }
       } else {
         appConfig = decryptConfig(parsed)
       }
-    } catch (e) {
+    } catch {
       appConfig = defaultConfig
     }
   }
