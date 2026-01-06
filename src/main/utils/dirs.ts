@@ -5,6 +5,7 @@ import path from 'path'
 import { execSync } from 'child_process'
 import { getAppConfigSync } from '../config/app'
 import { checkCorePermissionSync } from '../core/manager'
+import { validateCorePathSync } from '../sys/misc'
 
 export const homeDir = app.getPath('home')
 
@@ -65,7 +66,7 @@ export function mihomoIpcPath(): string {
     return '\\\\.\\pipe\\Sparkle\\mihomo'
   }
   const { core = 'mihomo' } = getAppConfigSync()
-  if (core === 'system') {
+  if (core === 'system' || core === 'custom') {
     return '/tmp/sparkle-mihomo-external.sock'
   }
   try {
@@ -102,12 +103,21 @@ export function mihomoCorePath(core: string): string {
     }
     return sysPath
   }
+  if (core === 'custom') {
+    const customPath = customCorePath()
+    return validateCorePathSync(customPath)
+  }
   throw new Error('内核路径错误')
 }
 
 function systemCorePath(): string {
   const { systemCorePath = '' } = getAppConfigSync()
   return systemCorePath
+}
+
+function customCorePath(): string {
+  const { customCorePath = '' } = getAppConfigSync()
+  return customCorePath
 }
 
 export function servicePath(): string {

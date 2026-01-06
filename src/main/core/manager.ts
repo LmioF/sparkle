@@ -95,7 +95,7 @@ export async function startCore(detached = false): Promise<Promise<void>[]> {
   try {
     corePath = mihomoCorePath(core)
   } catch (error) {
-    if (core === 'system') {
+    if (core === 'system' || core === 'custom') {
       await patchAppConfig({ core: 'mihomo' })
       return startCore(detached)
     }
