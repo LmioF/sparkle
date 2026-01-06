@@ -1,6 +1,7 @@
-import React, { createContext, useContext, ReactNode } from 'react'
+import React, { createContext, useContext, ReactNode, useRef } from 'react'
 import useSWR from 'swr'
 import { getAppConfig, patchAppConfig as patch } from '@renderer/utils/ipc'
+import { getSystemCorePaths, getSystemCorePathsCache, isSystemCorePathsLoading } from '@renderer/utils/system-core'
 
 interface AppConfigContextType {
   appConfig: AppConfig | undefined
@@ -12,6 +13,14 @@ const AppConfigContext = createContext<AppConfigContextType | undefined>(undefin
 
 export const AppConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { data: appConfig, mutate: mutateAppConfig } = useSWR('getConfig', () => getAppConfig())
+  const systemCorePreloaded = useRef(false)
+
+  React.useEffect(() => {
+    if (appConfig?.core === 'system' && !systemCorePreloaded.current && getSystemCorePathsCache() === null && !isSystemCorePathsLoading()) {
+      systemCorePreloaded.current = true
+      getSystemCorePaths().catch(() => {})
+    }
+  }, [appConfig?.core])
 
   const patchAppConfig = async (value: Partial<AppConfig>): Promise<void> => {
     try {

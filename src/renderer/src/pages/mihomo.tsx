@@ -16,7 +16,6 @@ import {
   mihomoUpgrade,
   restartCore,
   revokeCorePermission,
-  findSystemMihomo,
   deleteElevateTask,
   checkElevateTask,
   relaunchApp,
@@ -32,29 +31,7 @@ import React, { useState, useEffect } from 'react'
 import ControllerSetting from '@renderer/components/mihomo/controller-setting'
 import EnvSetting from '@renderer/components/mihomo/env-setting'
 import AdvancedSetting from '@renderer/components/mihomo/advanced-settings'
-
-let systemCorePathsCache: string[] | null = null
-let cachePromise: Promise<string[]> | null = null
-
-const getSystemCorePaths = async (): Promise<string[]> => {
-  if (systemCorePathsCache !== null) return systemCorePathsCache
-  if (cachePromise !== null) return cachePromise
-
-  cachePromise = findSystemMihomo()
-    .then((paths) => {
-      systemCorePathsCache = paths
-      cachePromise = null
-      return paths
-    })
-    .catch(() => {
-      cachePromise = null
-      return []
-    })
-
-  return cachePromise
-}
-
-getSystemCorePaths().catch(() => {})
+import { getSystemCorePaths, getSystemCorePathsCache } from '@renderer/utils/system-core'
 
 const Mihomo: React.FC = () => {
   const { appConfig, patchAppConfig } = useAppConfig()
@@ -68,17 +45,22 @@ const Mihomo: React.FC = () => {
   const [showPermissionModal, setShowPermissionModal] = useState(false)
   const [showServiceModal, setShowServiceModal] = useState(false)
   const [pendingPermissionMode, setPendingPermissionMode] = useState<string>('')
-  const [systemCorePaths, setSystemCorePaths] = useState<string[]>(systemCorePathsCache || [])
-  const [loadingPaths, setLoadingPaths] = useState(systemCorePathsCache === null)
+  const [systemCorePaths, setSystemCorePaths] = useState<string[]>(getSystemCorePathsCache() || [])
+  const [loadingPaths, setLoadingPaths] = useState(false)
 
   useEffect(() => {
-    if (systemCorePathsCache !== null) return
+    if (core !== 'system') return
+    const cached = getSystemCorePathsCache()
+    if (cached !== null) {
+      setSystemCorePaths(cached)
+      return
+    }
 
+    setLoadingPaths(true)
     getSystemCorePaths()
       .then(setSystemCorePaths)
-      .catch(() => {})
       .finally(() => setLoadingPaths(false))
-  }, [])
+  }, [core])
 
   const onChangeNeedRestart = async (patch: Partial<MihomoConfig>): Promise<void> => {
     await patchControledMihomoConfig(patch)
