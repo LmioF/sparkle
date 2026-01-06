@@ -435,12 +435,16 @@ async function showProfileInstallConfirm(url: string, name?: string | null): Pro
 
 function parseFilename(str: string): string {
   if (str.match(/filename\*=.*''/)) {
-    const filename = decodeURIComponent(str.split(/filename\*=.*''/)[1])
-    return filename
-  } else {
-    const filename = str.split('filename=')[1]
-    return filename?.replace(/"/g, '') || ''
+    const match = str.split(/filename\*=.*''/)
+    if (match[1]) {
+      return decodeURIComponent(match[1])
+    }
   }
+  const parts = str.split('filename=')
+  if (parts[1]) {
+    return parts[1].replace(/"/g, '')
+  }
+  return ''
 }
 
 async function showOverrideInstallConfirm(url: string, name?: string | null): Promise<boolean> {
