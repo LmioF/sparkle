@@ -169,17 +169,18 @@ const Profiles: React.FC = () => {
   )
 
   useEffect(() => {
-    pageRef.current?.addEventListener('dragover', (e) => {
+    const currentPage = pageRef.current
+    const handleDragOver = (e: DragEvent): void => {
       e.preventDefault()
       e.stopPropagation()
       setFileOver(true)
-    })
-    pageRef.current?.addEventListener('dragleave', (e) => {
+    }
+    const handleDragLeave = (e: DragEvent): void => {
       e.preventDefault()
       e.stopPropagation()
       setFileOver(false)
-    })
-    pageRef.current?.addEventListener('drop', async (event) => {
+    }
+    const handleDrop = async (event: DragEvent): Promise<void> => {
       event.preventDefault()
       event.stopPropagation()
       if (event.dataTransfer?.files) {
@@ -204,11 +205,14 @@ const Profiles: React.FC = () => {
         }
       }
       setFileOver(false)
-    })
+    }
+    currentPage?.addEventListener('dragover', handleDragOver)
+    currentPage?.addEventListener('dragleave', handleDragLeave)
+    currentPage?.addEventListener('drop', handleDrop)
     return (): void => {
-      pageRef.current?.removeEventListener('dragover', () => {})
-      pageRef.current?.removeEventListener('dragleave', () => {})
-      pageRef.current?.removeEventListener('drop', () => {})
+      currentPage?.removeEventListener('dragover', handleDragOver)
+      currentPage?.removeEventListener('dragleave', handleDragLeave)
+      currentPage?.removeEventListener('drop', handleDrop)
     }
   }, [])
 

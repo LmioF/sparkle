@@ -213,10 +213,10 @@ const Connections: React.FC = () => {
       }
     }
 
-    window.electron.ipcRenderer.on('mihomoConnections', handleConnections)
+    const unsubscribe = window.electron.ipcRenderer.on('mihomoConnections', handleConnections)
 
     return (): void => {
-      window.electron.ipcRenderer.removeAllListeners('mihomoConnections')
+      unsubscribe()
     }
   }, [allConnections, activeConnections, closedConnections, deletedIds])
 

@@ -51,11 +51,11 @@ const RuleProvider: React.FC = () => {
   })
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('core-started', () => {
+    const unsubscribe = window.electron.ipcRenderer.on('core-started', () => {
       mutate()
     })
     return (): void => {
-      window.electron.ipcRenderer.removeAllListeners('core-started')
+      unsubscribe()
     }
   }, [])
 

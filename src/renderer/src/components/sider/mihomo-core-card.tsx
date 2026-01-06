@@ -44,16 +44,19 @@ const MihomoCoreCard: React.FC<Props> = (props) => {
     const token = PubSub.subscribe('mihomo-core-changed', () => {
       mutate()
     })
-    window.electron.ipcRenderer.on('mihomoMemory', (_e, info: ControllerMemory) => {
-      setMem(info.inuse)
-    })
-    window.electron.ipcRenderer.on('core-started', () => {
+    const unsubscribeMemory = window.electron.ipcRenderer.on(
+      'mihomoMemory',
+      (_e, info: ControllerMemory) => {
+        setMem(info.inuse)
+      }
+    )
+    const unsubscribeCoreStarted = window.electron.ipcRenderer.on('core-started', () => {
       mutate()
     })
     return (): void => {
       PubSub.unsubscribe(token)
-      window.electron.ipcRenderer.removeAllListeners('mihomoMemory')
-      window.electron.ipcRenderer.removeAllListeners('core-started')
+      unsubscribeMemory()
+      unsubscribeCoreStarted()
     }
   }, [])
 
