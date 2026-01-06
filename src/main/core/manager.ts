@@ -685,7 +685,7 @@ export async function startNetworkDetection(): Promise<void> {
         }
       } else {
         if (!networkDownHandled) {
-          if (sysProxy.enable) disableSysProxy(onlyActiveDevice)
+          if (sysProxy.enable) await disableSysProxy(onlyActiveDevice)
           await stopCore()
           networkDownHandled = true
         }

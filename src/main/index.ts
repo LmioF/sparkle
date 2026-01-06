@@ -13,7 +13,7 @@ import {
 } from 'electron'
 import { addOverrideItem, addProfileItem, getAppConfig, patchControledMihomoConfig } from './config'
 import { quitWithoutCore, startCore, stopCore } from './core/manager'
-import { triggerSysProxy } from './sys/sysproxy'
+import { triggerSysProxy, disableSysProxySync } from './sys/sysproxy'
 import { stopSSIDCheck } from './sys/ssid'
 import icon from '../../resources/icon.png?asset'
 import { createTray } from './resolve/tray'
@@ -35,6 +35,7 @@ import { getUserAgent } from './utils/userAgent'
 
 let quitTimeout: NodeJS.Timeout | null = null
 export let mainWindow: BrowserWindow | null = null
+let sysProxyDisabled = false
 let isCreatingWindow = false
 let windowShown = false
 let createWindowPromiseResolve: (() => void) | null = null
@@ -220,7 +221,8 @@ app.on('before-quit', async (e) => {
         quitTimeout = null
       }
       stopSSIDCheck()
-      triggerSysProxy(false, false)
+      await triggerSysProxy(false, false)
+      sysProxyDisabled = true
       await stopCore()
       app.exit()
       return
@@ -236,18 +238,21 @@ app.on('before-quit', async (e) => {
         quitTimeout = null
       }
       stopSSIDCheck()
-      triggerSysProxy(false, false)
+      await triggerSysProxy(false, false)
+      sysProxyDisabled = true
       await stopCore()
       app.exit()
     }
   } else if (notQuitDialog) {
+    e.preventDefault()
     isQuitting = true
     if (quitTimeout) {
       clearTimeout(quitTimeout)
       quitTimeout = null
     }
     stopSSIDCheck()
-    triggerSysProxy(false, false)
+    await triggerSysProxy(false, false)
+    sysProxyDisabled = true
     await stopCore()
     app.exit()
   }
@@ -259,9 +264,18 @@ powerMonitor.on('shutdown', async () => {
     quitTimeout = null
   }
   stopSSIDCheck()
-  triggerSysProxy(false, false)
+  await triggerSysProxy(false, false)
+  sysProxyDisabled = true
   await stopCore()
   app.exit()
+})
+
+// Last resort to disable system proxy synchronously before quit
+// Only runs if previous async disable failed or was skipped
+app.on('will-quit', () => {
+  if (process.platform === 'win32' && !sysProxyDisabled) {
+    disableSysProxySync()
+  }
 })
 
 // This method will be called when Electron has finished
@@ -581,7 +595,7 @@ export async function createWindow(appConfig?: AppConfig): Promise<void> {
     })
 
     mainWindow.on('session-end', async () => {
-      triggerSysProxy(false, false)
+      await triggerSysProxy(false, false)
       await stopCore()
     })
 

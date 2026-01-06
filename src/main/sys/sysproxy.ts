@@ -1,7 +1,8 @@
 import { getAppConfig, getControledMihomoConfig } from '../config'
+import { getAppConfigSync } from '../config/app'
 import { pacPort, startPacServer, stopPacServer } from '../resolve/server'
 import { promisify } from 'util'
-import { execFile } from 'child_process'
+import { execFile, execFileSync } from 'child_process'
 import { servicePath } from '../utils/dirs'
 import { net } from 'electron'
 import { disableProxy, setPac, setProxy } from '../service/api'
@@ -12,20 +13,29 @@ const SYSPROXY_RETRY_MAX = 10
 let sysProxyRetryCount = 0
 
 export async function triggerSysProxy(enable: boolean, onlyActiveDevice: boolean): Promise<void> {
+  if (triggerSysProxyTimer) {
+    clearTimeout(triggerSysProxyTimer)
+    triggerSysProxyTimer = null
+  }
+
+  if (!enable) {
+    try {
+      await disableSysProxy(onlyActiveDevice)
+    } catch (e) {
+      console.warn('[SysProxy] Failed to disable system proxy:', e)
+    }
+    return
+  }
+
   if (net.isOnline()) {
     sysProxyRetryCount = 0
-    if (enable) {
-      await setSysProxy(onlyActiveDevice)
-    } else {
-      await disableSysProxy(onlyActiveDevice)
-    }
+    await setSysProxy(onlyActiveDevice)
   } else {
     if (sysProxyRetryCount >= SYSPROXY_RETRY_MAX) {
       sysProxyRetryCount = 0
       return
     }
     sysProxyRetryCount++
-    if (triggerSysProxyTimer) clearTimeout(triggerSysProxyTimer)
     triggerSysProxyTimer = setTimeout(() => triggerSysProxy(enable, onlyActiveDevice), 5000)
   }
 }
@@ -139,5 +149,25 @@ export async function disableSysProxy(onlyActiveDevice: boolean): Promise<void> 
     }
   } else {
     await execFilePromise(servicePath(), ['disable'])
+  }
+}
+
+/**
+ * 同步禁用系统代理，作为最后的保障机制。
+ * 注意：在 macOS service 模式下，此函数不执行任何操作，
+ * 因为 service API 仅支持异步调用。此时依赖 before-quit/shutdown
+ * 事件处理器中的异步 disableSysProxy() 调用。
+ */
+export function disableSysProxySync(): void {
+  try {
+    const { sysProxy } = getAppConfigSync()
+    const { settingMode = 'exec' } = sysProxy
+    const useService = process.platform === 'darwin' && settingMode === 'service'
+
+    if (!useService) {
+      execFileSync(servicePath(), ['disable'], { timeout: 5000 })
+    }
+  } catch {
+    // ignore errors during sync disable
   }
 }
