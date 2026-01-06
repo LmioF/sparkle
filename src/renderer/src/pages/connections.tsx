@@ -33,7 +33,7 @@ const Connections: React.FC = () => {
     displayAppName = true
   } = appConfig || {}
   const [connectionsInfo, setConnectionsInfo] = useState<ControllerConnections>()
-  const [allConnections, setAllConnections] =
+  const [_allConnections, setAllConnections] =
     useState<ControllerConnectionDetail[]>(cachedConnections)
   const [activeConnections, setActiveConnections] = useState<ControllerConnectionDetail[]>([])
   const [closedConnections, setClosedConnections] = useState<ControllerConnectionDetail[]>([])
@@ -46,7 +46,11 @@ const Connections: React.FC = () => {
   const [firstItemRefreshTrigger, setFirstItemRefreshTrigger] = useState(0)
 
   const [tab, setTab] = useState('active')
-  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
+  const [_deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
+
+  const allConnectionsRef = useRef<ControllerConnectionDetail[]>(cachedConnections)
+  const activeConnectionsRef = useRef<ControllerConnectionDetail[]>([])
+  const deletedIdsRef = useRef<Set<string>>(new Set())
 
   const iconRequestQueue = useRef(new Set<string>())
   const processingIcons = useRef(new Set<string>())
@@ -121,9 +125,14 @@ const Connections: React.FC = () => {
     if (closedConnections.length === 0) return
 
     const trashIds = closedConnections.map((conn) => conn.id)
-    setDeletedIds((prev) => new Set([...prev, ...trashIds]))
+    setDeletedIds((prev) => {
+      const newSet = new Set([...prev, ...trashIds])
+      deletedIdsRef.current = newSet
+      return newSet
+    })
     setAllConnections((allConns) => {
       const updatedConnections = allConns.filter((conn) => !trashIds.includes(conn.id))
+      allConnectionsRef.current = updatedConnections
       cachedConnections = updatedConnections
       return updatedConnections
     })
@@ -131,9 +140,14 @@ const Connections: React.FC = () => {
   }, [closedConnections])
 
   const trashClosedConnection = useCallback((id: string): void => {
-    setDeletedIds((prev) => new Set([...prev, id]))
+    setDeletedIds((prev) => {
+      const newSet = new Set([...prev, id])
+      deletedIdsRef.current = newSet
+      return newSet
+    })
     setAllConnections((allConns) => {
       const updatedConnections = allConns.filter((conn) => conn.id !== id)
+      allConnectionsRef.current = updatedConnections
       cachedConnections = updatedConnections
       return updatedConnections
     })
@@ -157,8 +171,12 @@ const Connections: React.FC = () => {
 
       if (!info.connections) return
 
-      const prevActiveMap = new Map(activeConnections.map((conn) => [conn.id, conn]))
-      const existingConnectionIds = new Set(allConnections.map((conn) => conn.id))
+      const currentAllConnections = allConnectionsRef.current
+      const currentActiveConnections = activeConnectionsRef.current
+      const currentDeletedIds = deletedIdsRef.current
+
+      const prevActiveMap = new Map(currentActiveConnections.map((conn) => [conn.id, conn]))
+      const existingConnectionIds = new Set(currentAllConnections.map((conn) => conn.id))
 
       const activeConns = info.connections.map((conn) => {
         const preConn = prevActiveMap.get(conn.id)
@@ -179,11 +197,11 @@ const Connections: React.FC = () => {
       })
 
       const newConnections = activeConns.filter(
-        (conn) => !existingConnectionIds.has(conn.id) && !deletedIds.has(conn.id)
+        (conn) => !existingConnectionIds.has(conn.id) && !currentDeletedIds.has(conn.id)
       )
 
       if (newConnections.length > 0) {
-        const updatedAllConnections = [...allConnections, ...newConnections]
+        const updatedAllConnections = [...currentAllConnections, ...newConnections]
 
         const activeConnIds = new Set(activeConns.map((conn) => conn.id))
         const allConns = updatedAllConnections.map((conn) => {
@@ -194,13 +212,15 @@ const Connections: React.FC = () => {
         const closedConns = allConns.filter((conn) => !activeConnIds.has(conn.id))
 
         setActiveConnections(activeConns)
+        activeConnectionsRef.current = activeConns
         setClosedConnections(closedConns)
         const finalAllConnections = allConns.slice(-(activeConns.length + 200))
         setAllConnections(finalAllConnections)
+        allConnectionsRef.current = finalAllConnections
         cachedConnections = finalAllConnections
       } else {
         const activeConnIds = new Set(activeConns.map((conn) => conn.id))
-        const allConns = allConnections.map((conn) => {
+        const allConns = currentAllConnections.map((conn) => {
           const activeConn = activeConns.find((ac) => ac.id === conn.id)
           return activeConn || { ...conn, isActive: false, downloadSpeed: 0, uploadSpeed: 0 }
         })
@@ -208,8 +228,10 @@ const Connections: React.FC = () => {
         const closedConns = allConns.filter((conn) => !activeConnIds.has(conn.id))
 
         setActiveConnections(activeConns)
+        activeConnectionsRef.current = activeConns
         setClosedConnections(closedConns)
         setAllConnections(allConns)
+        allConnectionsRef.current = allConns
         cachedConnections = allConns
       }
     }
@@ -219,7 +241,7 @@ const Connections: React.FC = () => {
     return (): void => {
       unsubscribe()
     }
-  }, [allConnections, activeConnections, closedConnections, deletedIds])
+  }, [])
 
   const processAppNameQueue = useCallback(async () => {
     if (processingAppNames.current.size >= 3 || appNameRequestQueue.current.size === 0) return
