@@ -240,17 +240,23 @@ const App: React.FC = () => {
       setShowOverrideInstallConfirm(true)
     }
 
-    window.electron.ipcRenderer.on('show-quit-confirm', handleShowQuitConfirm)
-    window.electron.ipcRenderer.on('show-profile-install-confirm', handleShowProfileInstallConfirm)
-    window.electron.ipcRenderer.on(
+    const unsubShowQuitConfirm = window.electron.ipcRenderer.on(
+      'show-quit-confirm',
+      handleShowQuitConfirm
+    )
+    const unsubShowProfileInstallConfirm = window.electron.ipcRenderer.on(
+      'show-profile-install-confirm',
+      handleShowProfileInstallConfirm
+    )
+    const unsubShowOverrideInstallConfirm = window.electron.ipcRenderer.on(
       'show-override-install-confirm',
       handleShowOverrideInstallConfirm
     )
 
     return (): void => {
-      window.electron.ipcRenderer.removeAllListeners('show-quit-confirm')
-      window.electron.ipcRenderer.removeAllListeners('show-profile-install-confirm')
-      window.electron.ipcRenderer.removeAllListeners('show-override-install-confirm')
+      unsubShowQuitConfirm()
+      unsubShowProfileInstallConfirm()
+      unsubShowOverrideInstallConfirm()
     }
   }, [])
 

@@ -49,12 +49,15 @@ const FloatingApp: React.FC = () => {
   }, [spinSpeed, spinFloatingIcon])
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('mihomoTraffic', async (_e, info: ControllerTraffic) => {
-      setUpload(info.up)
-      setDownload(info.down)
-    })
+    const unsubMihomoTraffic = window.electron.ipcRenderer.on(
+      'mihomoTraffic',
+      async (_e, info: ControllerTraffic) => {
+        setUpload(info.up)
+        setDownload(info.down)
+      }
+    )
     return (): void => {
-      window.electron.ipcRenderer.removeAllListeners('mihomoTraffic')
+      unsubMihomoTraffic()
     }
   }, [])
 

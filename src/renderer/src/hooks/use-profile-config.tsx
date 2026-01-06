@@ -82,11 +82,11 @@ export const ProfileConfigProvider: React.FC<{ children: ReactNode }> = ({ child
   }
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('profileConfigUpdated', () => {
+    const unsubProfileConfigUpdated = window.electron.ipcRenderer.on('profileConfigUpdated', () => {
       mutateProfileConfig()
     })
     return (): void => {
-      window.electron.ipcRenderer.removeAllListeners('profileConfigUpdated')
+      unsubProfileConfigUpdated()
     }
   }, [])
 

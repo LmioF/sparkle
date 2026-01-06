@@ -3,11 +3,13 @@ import ReactDOM from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { HeroUIProvider } from '@heroui/react'
+import { SWRConfig } from 'swr'
 import { init, platform } from '@renderer/utils/init'
 import '@renderer/assets/main.css'
 import App from '@renderer/App'
 import BaseErrorBoundary from './components/base/base-error-boundary'
 import { openDevTools, quitApp } from './utils/ipc'
+import { swrConfig } from './utils/swr-config'
 
 import { AppConfigProvider } from './hooks/use-app-config'
 import { ControledMihomoConfigProvider } from './hooks/use-controled-mihomo-config'
@@ -45,26 +47,28 @@ init().then(() => {
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <HeroUIProvider>
-      <NextThemesProvider attribute="class" enableSystem defaultTheme="dark">
-        <BaseErrorBoundary>
-          <HashRouter>
-            <AppConfigProvider>
-              <ControledMihomoConfigProvider>
-                <ProfileConfigProvider>
-                  <OverrideConfigProvider>
-                    <GroupsProvider>
-                      <RulesProvider>
-                        <App />
-                      </RulesProvider>
-                    </GroupsProvider>
-                  </OverrideConfigProvider>
-                </ProfileConfigProvider>
-              </ControledMihomoConfigProvider>
-            </AppConfigProvider>
-          </HashRouter>
-        </BaseErrorBoundary>
-      </NextThemesProvider>
-    </HeroUIProvider>
+    <SWRConfig value={swrConfig}>
+      <HeroUIProvider>
+        <NextThemesProvider attribute="class" enableSystem defaultTheme="dark">
+          <BaseErrorBoundary>
+            <HashRouter>
+              <AppConfigProvider>
+                <ControledMihomoConfigProvider>
+                  <ProfileConfigProvider>
+                    <OverrideConfigProvider>
+                      <GroupsProvider>
+                        <RulesProvider>
+                          <App />
+                        </RulesProvider>
+                      </GroupsProvider>
+                    </OverrideConfigProvider>
+                  </ProfileConfigProvider>
+                </ControledMihomoConfigProvider>
+              </AppConfigProvider>
+            </HashRouter>
+          </BaseErrorBoundary>
+        </NextThemesProvider>
+      </HeroUIProvider>
+    </SWRConfig>
   </React.StrictMode>
 )

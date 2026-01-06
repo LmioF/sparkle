@@ -20,11 +20,14 @@ const TrayMenuApp: React.FC = () => {
   const [testingGroup, setTestingGroup] = useState<string | null>(null)
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('mihomoTraffic', (_e, info: TrafficData) => {
-      setTraffic(info)
-    })
+    const unsubMihomoTraffic = window.electron.ipcRenderer.on(
+      'mihomoTraffic',
+      (_e, info: TrafficData) => {
+        setTraffic(info)
+      }
+    )
     return () => {
-      window.electron.ipcRenderer.removeAllListeners('mihomoTraffic')
+      unsubMihomoTraffic()
     }
   }, [])
 

@@ -65,11 +65,14 @@ export const OverrideConfigProvider: React.FC<{ children: ReactNode }> = ({ chil
   }
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('overrideConfigUpdated', () => {
-      mutateOverrideConfig()
-    })
+    const unsubOverrideConfigUpdated = window.electron.ipcRenderer.on(
+      'overrideConfigUpdated',
+      () => {
+        mutateOverrideConfig()
+      }
+    )
     return (): void => {
-      window.electron.ipcRenderer.removeAllListeners('overrideConfigUpdated')
+      unsubOverrideConfigUpdated()
     }
   }, [])
 
