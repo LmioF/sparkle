@@ -38,7 +38,8 @@ import { applyTheme } from './theme'
 
 export let tray: Tray | null = null
 let customTrayWindow: BrowserWindow | null = null
-let trayIpcRegistered = false
+let trayIconUpdateRegistered = false
+let updateTrayMenuRegistered = false
 
 function formatDelayText(delay: number): string {
   if (delay === 0) {
@@ -459,8 +460,8 @@ export async function createTray(): Promise<void> {
     if (!useDockIcon && app.dock) {
       app.dock.hide()
     }
-    if (!trayIpcRegistered) {
-      trayIpcRegistered = true
+    if (!trayIconUpdateRegistered) {
+      trayIconUpdateRegistered = true
       ipcMain.on('trayIconUpdate', async (_, png: string) => {
         const image = nativeImage.createFromDataURL(png).resize({ height: 16 })
         image.setTemplateImage(true)
@@ -486,8 +487,8 @@ export async function createTray(): Promise<void> {
     tray?.addListener('click', async () => {
       await triggerMainWindow()
     })
-    if (!trayIpcRegistered) {
-      trayIpcRegistered = true
+    if (!updateTrayMenuRegistered) {
+      updateTrayMenuRegistered = true
       ipcMain.on('updateTrayMenu', async () => {
         await updateTrayMenu()
       })

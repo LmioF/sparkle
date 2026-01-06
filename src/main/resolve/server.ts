@@ -15,8 +15,8 @@ import AdmZip from 'adm-zip'
 export let pacPort: number
 export let subStorePort: number
 export let subStoreFrontendPort: number
-let subStoreFrontendServer: http.Server
-let subStoreBackendWorker: Worker
+let subStoreFrontendServer: http.Server | null = null
+let subStoreBackendWorker: Worker | null = null
 
 const defaultPacScript = `
 function FindProxyForURL(url, host) {
@@ -43,7 +43,7 @@ export function findAvailablePort(startPort: number): Promise<number> {
   })
 }
 
-let pacServer: http.Server
+let pacServer: http.Server | null = null
 
 export async function startPacServer(): Promise<void> {
   await stopPacServer()
@@ -68,7 +68,7 @@ export async function startPacServer(): Promise<void> {
 export async function stopPacServer(): Promise<void> {
   if (pacServer) {
     pacServer.close()
-    pacServer = null!
+    pacServer = null
   }
 }
 
@@ -89,7 +89,7 @@ export async function startSubStoreFrontendServer(): Promise<void> {
 export async function stopSubStoreFrontendServer(): Promise<void> {
   if (subStoreFrontendServer) {
     subStoreFrontendServer.close()
-    subStoreFrontendServer = null!
+    subStoreFrontendServer = null
   }
 }
 
@@ -148,7 +148,7 @@ export async function startSubStoreBackendServer(): Promise<void> {
 export async function stopSubStoreBackendServer(): Promise<void> {
   if (subStoreBackendWorker) {
     subStoreBackendWorker.terminate()
-    subStoreBackendWorker = null!
+    subStoreBackendWorker = null
   }
 }
 

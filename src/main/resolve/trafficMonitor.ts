@@ -39,7 +39,7 @@ export async function startMonitor(detached = false): Promise<void> {
   }
 }
 
-async function stopMonitor(): Promise<void> {
+export function stopMonitor(): void {
   if (child) {
     child.kill('SIGINT')
     child = null
