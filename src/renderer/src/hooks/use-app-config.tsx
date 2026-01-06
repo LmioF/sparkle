@@ -1,7 +1,11 @@
 import React, { createContext, useContext, ReactNode, useRef } from 'react'
 import useSWR from 'swr'
 import { getAppConfig, patchAppConfig as patch } from '@renderer/utils/ipc'
-import { getSystemCorePaths, getSystemCorePathsCache, isSystemCorePathsLoading } from '@renderer/utils/system-core'
+import {
+  getSystemCorePaths,
+  getSystemCorePathsCache,
+  isSystemCorePathsLoading
+} from '@renderer/utils/system-core'
 
 interface AppConfigContextType {
   appConfig: AppConfig | undefined
@@ -16,7 +20,12 @@ export const AppConfigProvider: React.FC<{ children: ReactNode }> = ({ children 
   const systemCorePreloaded = useRef(false)
 
   React.useEffect(() => {
-    if (appConfig?.core === 'system' && !systemCorePreloaded.current && getSystemCorePathsCache() === null && !isSystemCorePathsLoading()) {
+    if (
+      appConfig?.core === 'system' &&
+      !systemCorePreloaded.current &&
+      getSystemCorePathsCache() === null &&
+      !isSystemCorePathsLoading()
+    ) {
       systemCorePreloaded.current = true
       getSystemCorePaths().catch(() => {})
     }

@@ -213,11 +213,31 @@ export function resetAppConfig(): void {
   const data = dataDir()
   const exe = exePath()
   if (process.platform === 'win32') {
-    spawn('cmd', ['/C', 'timeout', '/t', '2', '/nobreak', '>nul', '&&', 'rmdir', '/s', '/q', `"${data}"`, '&&', 'start', '""', `"${exe}"`], {
-      shell: true,
-      detached: true,
-      windowsVerbatimArguments: true
-    }).unref()
+    spawn(
+      'cmd',
+      [
+        '/C',
+        'timeout',
+        '/t',
+        '2',
+        '/nobreak',
+        '>nul',
+        '&&',
+        'rmdir',
+        '/s',
+        '/q',
+        `"${data}"`,
+        '&&',
+        'start',
+        '""',
+        `"${exe}"`
+      ],
+      {
+        shell: true,
+        detached: true,
+        windowsVerbatimArguments: true
+      }
+    ).unref()
   } else {
     const escapedData = data.replace(/'/g, "'\\''")
     const escapedArgv = process.argv.map((arg) => `'${arg.replace(/'/g, "'\\''")}'`).join(' ')

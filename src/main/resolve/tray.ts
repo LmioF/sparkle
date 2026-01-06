@@ -111,7 +111,9 @@ async function showCustomTray(): Promise<void> {
     })
 
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-      await customTrayWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/traymenu.html`).catch(() => {})
+      await customTrayWindow
+        .loadURL(`${process.env['ELECTRON_RENDERER_URL']}/traymenu.html`)
+        .catch(() => {})
     } else {
       await customTrayWindow.loadFile(join(__dirname, '../renderer/traymenu.html')).catch(() => {})
     }

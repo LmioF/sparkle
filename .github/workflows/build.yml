@@ -252,20 +252,20 @@ jobs:
             echo "Using existing changelog.md from repository"
             exit 0
           fi
-          
+
           CURRENT_VERSION=$(jq -r .version package.json)
           if git rev-parse "$CURRENT_VERSION" >/dev/null 2>&1; then
             TEXT=$(git log ${CURRENT_VERSION}..HEAD --pretty=format:%s | grep -v '[0-9]\+\.[0-9]\+\.[0-9]\+$' | sed ':a;N;$!ba;s/\n/\\n/g' || echo "")
           else
             TEXT=$(git log -20 --pretty=format:%s | grep -v '[0-9]\+\.[0-9]\+\.[0-9]\+$' | sed ':a;N;$!ba;s/\n/\\n/g' || echo "")
           fi
-          
+
           if [ -z "$TEXT" ]; then
             echo '# 更新日志' > changelog.md
             echo ' - Bug fixes and improvements' >> changelog.md
             exit 0
           fi
-          
+
           # 如果没有配置 API，使用原始 commit 信息
           if [ -z "$API_URL" ] || [ -z "$API_KEY" ]; then
             echo "API not configured, using raw commit messages"
@@ -273,7 +273,7 @@ jobs:
             echo "$TEXT" | sed 's/\\n/\n/g' | sed 's/^/ - /g' >> changelog.md
             exit 0
           fi
-          
+
           QUESTION="Translate into Chinese:\n"""\n$TEXT\n""""
           PAYLOAD=$(cat <<EOF
           {
@@ -297,7 +297,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" \
             --max-time 30)
-          
+
           # 检查 API 响应是否有效
           CONTENT=$(echo $RESPONSE | jq -r '.choices[0].message.content // empty')
           if [ -z "$CONTENT" ]; then

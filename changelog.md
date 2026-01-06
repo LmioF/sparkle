@@ -17,6 +17,7 @@
 ### 重要修复 (P2)
 
 #### 配置模块
+
 - 修复 getAppConfig 读取备份文件时缺少错误处理
 - 修复 decryptConfig 解密失败时静默清空字段值
 - 修复 getControledMihomoConfig 缺少文件读取错误处理
@@ -26,6 +27,7 @@
 - 修复 parseFilename 可能返回 undefined
 
 #### 核心模块
+
 - 修复 runOverrideScript 缺少脚本执行超时控制
 - 修复 generateProfile 缺少错误处理
 - 修复 overrideProfile 中 getOverride 失败会中断整个覆写流程
@@ -37,12 +39,14 @@
 - 修复 profileUpdater 使用 setTimeout 而非 setInterval 导致定时更新只执行一次
 
 #### WebSocket 和 API
+
 - 修复 WebSocket 重连无延迟导致快速重试
 - 修复 WebSocket 连接可能泄漏
 - 修复 mihomoGroups 中 all 数组可能包含 undefined 元素
 - 修复 subStorePort 可能为 undefined 导致无效 URL
 
 #### Resolve 模块
+
 - 修复 filename 参数路径遍历漏洞
 - 修复 addLocalFile/addLocalFolder 缺少错误处理
 - 修复 webdavUrl 未验证
@@ -65,16 +69,19 @@
 - 修复 mainWindow 空值检查
 
 #### 入口文件
+
 - 修复 customRelaunch 函数在 Linux 上 shell 命令拼接问题
 - 修复 createWindowPromise 变量遮蔽
 
 #### Service 模块
+
 - 修复请求签名重放攻击风险
 - 修复密钥存储安全性
 - 修复 initKeyManager 并发控制
 - 修复 serviceStatus stderr 检查逻辑
 
 #### Sys 模块
+
 - 修复 Linux 脚本单引号转义
 - 修复 setupFirewall PowerShell 路径转义
 - 修复 SSID 检查定时器无清理机制
@@ -83,6 +90,7 @@
 - 修复 macOS checkAutoRun 错误处理
 
 #### Utils 模块
+
 - 修复 Windows 图标提取中 mklink 命令未等待完成
 - 修复 exec 调用缺少错误处理和回调
 - 修复 decryptString 对无效加密格式抛出异常行为不一致
@@ -90,6 +98,7 @@
 - 修复 AbortController 创建但未实际使用
 
 #### Renderer 进程
+
 - 修复 IPC 监听器清理不正确
 - 修复 removeAllListeners 可能影响其他组件
 - 修复 handleImport 函数缺少 try-catch
@@ -108,6 +117,7 @@
 ### 低优先级修复 (P3)
 
 #### Main 进程
+
 - 修复配置模块删除文件前未检查 item 是否存在
 - 修复 IPC 监听器可能未被清理
 - 修复 Promise.all 错误处理不完善
@@ -135,6 +145,7 @@
 - 修复 parseYaml 返回空对象可能隐藏解析错误
 
 #### Renderer 进程
+
 - 修复 handleCoreUpgrade 中 setTimeout 内的 PubSub.publish 没有错误处理
 - 修复 iconRequestQueue 和 appNameRequestQueue 可能累积过多请求
 - 修复 handleSniffPortChange 中端口字符串分割后未验证是否为有效端口号
