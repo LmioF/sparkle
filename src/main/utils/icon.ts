@@ -205,8 +205,14 @@ export async function getIconDataURL(appPath: string): Promise<string> {
           tempLinkPath = path.join(tempDir, `${randomName}${fileExt}`)
 
           try {
-            exec(`mklink "${tempLinkPath}" "${appPath}"`)
-            targetPath = tempLinkPath
+            await new Promise<void>((resolve) => {
+              exec(`mklink "${tempLinkPath}" "${appPath}"`, (error) => {
+                if (!error && fs.existsSync(tempLinkPath!)) {
+                  targetPath = tempLinkPath!
+                }
+                resolve()
+              })
+            })
           } catch {
             // ignore
           }

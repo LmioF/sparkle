@@ -11,18 +11,22 @@ export async function getUserAgent(): Promise<string> {
   }
 
   try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
-
-    const result = await mihomoVersion()
-    clearTimeout(timeoutId)
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
+    const result = await Promise.race([
+      mihomoVersion(),
+      new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('timeout')), TIMEOUT_MS)
+      })
+    ]).finally(() => {
+      if (timeoutId) clearTimeout(timeoutId)
+    })
 
     if (result?.version) {
       return `clash.meta/${result.version}`
     }
 
     return DEFAULT_USER_AGENT
-  } catch (error) {
+  } catch {
     return DEFAULT_USER_AGENT
   }
 }
