@@ -35,7 +35,6 @@ import SubStoreCard from '@renderer/components/sider/substore-card'
 import MihomoIcon from './components/base/mihomo-icon'
 import useSWR from 'swr'
 import ConfirmModal from '@renderer/components/base/base-confirm'
-import { CardSkeleton } from '@renderer/components/base/skeleton'
 
 let navigate: NavigateFunction
 
@@ -74,8 +73,6 @@ const App: React.FC = () => {
   const siderWidthValueRef = useRef(siderWidthValue)
   const [resizing, setResizing] = useState(false)
   const resizingRef = useRef(resizing)
-  const [siderReady, setSiderReady] = useState(false)
-  const INITIAL_VISIBLE_COUNT = 4
   const sensors = useSensors(useSensor(PointerSensor))
   const { setTheme, systemTheme } = useTheme()
   navigate = useNavigate()
@@ -107,32 +104,17 @@ const App: React.FC = () => {
   }, [siderOrderArray, siderWidth])
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setSiderReady(true)
-    }, 50)
-    return () => clearTimeout(timer)
-  }, [])
-
-  useEffect(() => {
     siderWidthValueRef.current = siderWidthValue
     resizingRef.current = resizing
   }, [siderWidthValue, resizing])
 
   useEffect(() => {
-    const checkTour = (): void => {
-      const tourShown = window.localStorage.getItem('tourShown')
-      if (!tourShown) {
-        window.localStorage.setItem('tourShown', 'true')
-        import('@renderer/utils/driver').then(({ startTour }) => {
-          startTour(navigate)
-        })
-      }
-    }
-
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(checkTour, { timeout: 2000 })
-    } else {
-      setTimeout(checkTour, 1000)
+    const tourShown = window.localStorage.getItem('tourShown')
+    if (!tourShown) {
+      window.localStorage.setItem('tourShown', 'true')
+      import('@renderer/utils/driver').then(({ startTour }) => {
+        startTour(navigate)
+      })
     }
   }, [])
 
@@ -373,12 +355,9 @@ const App: React.FC = () => {
             className={`${latest ? 'h-[calc(100%-275px)]' : 'h-[calc(100%-227px)]'} overflow-y-auto no-scrollbar`}
           >
             <div className="h-full w-full flex flex-col gap-2">
-              {order.map((key: string, index: number) => {
+              {order.map((key: string) => {
                 const Component = componentMap[key]
                 if (!Component) return null
-                if (!siderReady && index >= INITIAL_VISIBLE_COUNT) {
-                  return <CardSkeleton key={key} iconOnly />
-                }
                 return <Component key={key} iconOnly={true} />
               })}
             </div>
@@ -434,12 +413,9 @@ const App: React.FC = () => {
             <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={onDragEnd}>
               <div className="grid grid-cols-2 gap-2 m-2">
                 <SortableContext items={order}>
-                  {order.map((key: string, index: number) => {
+                  {order.map((key: string) => {
                     const Component = componentMap[key]
                     if (!Component) return null
-                    if (!siderReady && index >= INITIAL_VISIBLE_COUNT) {
-                      return <CardSkeleton key={key} />
-                    }
                     return <Component key={key} />
                   })}
                 </SortableContext>
