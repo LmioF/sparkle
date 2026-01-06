@@ -9,8 +9,7 @@ interface GistInfo {
 }
 
 function isValidGistId(id: string): boolean {
-  // GitHub gist ID 是 32 个字符的十六进制字符串
-  return /^[a-f0-9]{32}$/i.test(id)
+  return /^[a-f0-9]{20,32}$/i.test(id)
 }
 
 async function listGists(token: string): Promise<GistInfo[]> {
@@ -123,7 +122,6 @@ export async function getGistUrl(): Promise<string> {
     if (gist) {
       return gist.html_url
     } else {
-      // 直接创建新 gist 并返回 URL，避免二次查询
       const newGist = await createGistAndReturn(githubToken, await getRuntimeConfigStr())
       return newGist.html_url
     }
