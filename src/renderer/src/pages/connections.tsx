@@ -17,6 +17,7 @@ import { cropAndPadTransparent } from '@renderer/utils/image'
 import { platform } from '@renderer/utils/init'
 import { useControledMihomoConfig } from '@renderer/hooks/use-controled-mihomo-config'
 import { MdTune } from 'react-icons/md'
+import { saveIconToCache, getIconFromCache } from '@renderer/utils/icon-cache'
 
 let cachedConnections: ControllerConnectionDetail[] = []
 const MAX_QUEUE_SIZE = 100
@@ -55,6 +56,7 @@ const Connections: React.FC = () => {
   const iconRequestQueue = useRef(new Set<string>())
   const processingIcons = useRef(new Set<string>())
   const processIconTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const processIconIdleCallback = useRef<number | null>(null)
 
   const appNameRequestQueue = useRef(new Set<string>())
   const processingAppNames = useRef(new Set<string>())
@@ -295,11 +297,7 @@ const Connections: React.FC = () => {
           processedDataURL = await cropAndPadTransparent(fullDataURL)
         }
 
-        try {
-          localStorage.setItem(path, processedDataURL)
-        } catch {
-          // ignore
-        }
+        saveIconToCache(path, processedDataURL)
 
         setIconMap((prev) => ({ ...prev, [path]: processedDataURL }))
 
@@ -317,7 +315,13 @@ const Connections: React.FC = () => {
     await Promise.all(promises)
 
     if (iconRequestQueue.current.size > 0) {
-      processIconTimer.current = setTimeout(processIconQueue, 50)
+      if ('requestIdleCallback' in window) {
+        processIconIdleCallback.current = requestIdleCallback(() => processIconQueue(), {
+          timeout: 1000
+        })
+      } else {
+        processIconTimer.current = setTimeout(processIconQueue, 50)
+      }
     }
   }, [filteredConnections])
 
@@ -350,9 +354,9 @@ const Connections: React.FC = () => {
 
       if (iconRequestQueue.current.size >= MAX_QUEUE_SIZE) return
 
-      const fromStorage = localStorage.getItem(path)
-      if (fromStorage) {
-        setIconMap((prev) => ({ ...prev, [path]: fromStorage }))
+      const fromCache = getIconFromCache(path)
+      if (fromCache) {
+        setIconMap((prev) => ({ ...prev, [path]: fromCache }))
         if (isVisible && filteredConnections[0]?.metadata.processPath === path) {
           setFirstItemRefreshTrigger((prev) => prev + 1)
         }
@@ -385,6 +389,7 @@ const Connections: React.FC = () => {
     }
 
     if (processIconTimer.current) clearTimeout(processIconTimer.current)
+    if (processIconIdleCallback.current) cancelIdleCallback(processIconIdleCallback.current)
     if (processAppNameTimer.current) clearTimeout(processAppNameTimer.current)
 
     processIconTimer.current = setTimeout(processIconQueue, 10)
@@ -394,6 +399,7 @@ const Connections: React.FC = () => {
 
     return (): void => {
       if (processIconTimer.current) clearTimeout(processIconTimer.current)
+      if (processIconIdleCallback.current) cancelIdleCallback(processIconIdleCallback.current)
       if (processAppNameTimer.current) clearTimeout(processAppNameTimer.current)
     }
   }, [
