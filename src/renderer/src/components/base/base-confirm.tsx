@@ -43,8 +43,13 @@ const ConfirmModal: React.FC<Props> = (props) => {
           color={button.color || 'primary'}
           variant={button.variant || 'solid'}
           onPress={async () => {
-            await button.onPress()
-            onChange(false)
+            try {
+              await button.onPress()
+            } catch (e) {
+              alert(e instanceof Error ? e.message : String(e))
+            } finally {
+              onChange(false)
+            }
           }}
         >
           {button.text}
@@ -61,10 +66,15 @@ const ConfirmModal: React.FC<Props> = (props) => {
           size="sm"
           color="danger"
           onPress={async () => {
-            if (onConfirm) {
-              await onConfirm()
+            try {
+              if (onConfirm) {
+                await onConfirm()
+              }
+            } catch (e) {
+              alert(e instanceof Error ? e.message : String(e))
+            } finally {
+              onChange(false)
             }
-            onChange(false)
           }}
         >
           {confirmText}

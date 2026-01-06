@@ -44,6 +44,7 @@ const AppearanceConfig: React.FC = () => {
   } = appConfig || {}
   const [localShowFloating, setLocalShowFloating] = useState(showFloating)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isMountedRef = useRef(true)
 
   useEffect(() => {
     resolveThemes().then((themes) => {
@@ -53,6 +54,7 @@ const AppearanceConfig: React.FC = () => {
 
   useEffect(() => {
     return (): void => {
+      isMountedRef.current = false
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
       }
@@ -97,7 +99,7 @@ const AppearanceConfig: React.FC = () => {
               if (v) {
                 await showFloatingWindow()
                 timeoutRef.current = setTimeout(async () => {
-                  if (localShowFloating) {
+                  if (isMountedRef.current) {
                     await patchAppConfig({ showFloatingWindow: v })
                   }
                   timeoutRef.current = null

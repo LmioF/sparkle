@@ -19,6 +19,7 @@ import { useControledMihomoConfig } from '@renderer/hooks/use-controled-mihomo-c
 import { MdTune } from 'react-icons/md'
 
 let cachedConnections: ControllerConnectionDetail[] = []
+const MAX_QUEUE_SIZE = 100
 
 const Connections: React.FC = () => {
   const { controledMihomoConfig } = useControledMihomoConfig()
@@ -325,6 +326,8 @@ const Connections: React.FC = () => {
     const loadIcon = (path: string, isVisible: boolean = false): void => {
       if (iconMap[path] || processingIcons.current.has(path)) return
 
+      if (iconRequestQueue.current.size >= MAX_QUEUE_SIZE) return
+
       const fromStorage = localStorage.getItem(path)
       if (fromStorage) {
         setIconMap((prev) => ({ ...prev, [path]: fromStorage }))
@@ -339,6 +342,7 @@ const Connections: React.FC = () => {
 
     const loadAppName = (path: string): void => {
       if (appNameCache[path] || processingAppNames.current.has(path)) return
+      if (appNameRequestQueue.current.size >= MAX_QUEUE_SIZE) return
       appNameRequestQueue.current.add(path)
     }
 

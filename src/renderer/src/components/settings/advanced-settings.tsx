@@ -247,7 +247,8 @@ const AdvancedSettings: React.FC = () => {
                 value={interval.toString()}
                 min={1}
                 onValueChange={(v) => {
-                  setInterval(parseInt(v))
+                  const num = parseInt(v)
+                  setInterval(isNaN(num) || num < 1 ? 1 : num)
                 }}
               />
             </div>

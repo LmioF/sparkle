@@ -42,12 +42,12 @@ const ExecLogModal: React.FC<Props> = (props) => {
       <ModalContent>
         <ModalHeader className="flex app-drag">执行日志</ModalHeader>
         <ModalBody>
-          {logs.map((log) => {
+          {logs.map((log, index) => {
             return (
-              <>
+              <React.Fragment key={index}>
                 <small className="break-all select-text">{log}</small>
                 <Divider />
-              </>
+              </React.Fragment>
             )
           })}
         </ModalBody>

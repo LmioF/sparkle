@@ -122,11 +122,15 @@ const MihomoCoreCard: React.FC<Props> = (props) => {
                     setRestarting(true)
                     await restartCore()
                     await new Promise((resolve) => setTimeout(resolve, 2000))
-                    setRestarting(false)
                   } catch (e) {
                     alert(e)
                   } finally {
-                    mutate()
+                    setRestarting(false)
+                    try {
+                      await mutate()
+                    } catch {
+                      // ignore mutate errors
+                    }
                   }
                 }}
               >

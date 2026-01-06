@@ -134,7 +134,8 @@ const AdvancedSetting: React.FC = () => {
             value={intervalInput.toString()}
             min={0}
             onValueChange={(v) => {
-              setIntervalInput(parseInt(v) || 0)
+              const num = parseInt(v)
+              setIntervalInput(isNaN(num) ? 0 : num)
             }}
           />
         </div>
@@ -160,7 +161,8 @@ const AdvancedSetting: React.FC = () => {
             value={idleInput.toString()}
             min={0}
             onValueChange={(v) => {
-              setIdleInput(parseInt(v) || 0)
+              const num = parseInt(v)
+              setIdleInput(isNaN(num) ? 0 : num)
             }}
           />
         </div>

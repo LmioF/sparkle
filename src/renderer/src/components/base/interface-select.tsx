@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Select, SelectItem } from '@heroui/react'
 import { getInterfaces } from '@renderer/utils/ipc'
 
@@ -8,13 +8,19 @@ const InterfaceSelect: React.FC<{
   onChange: (iface: string) => void
 }> = ({ value, onChange, exclude = [] }) => {
   const [ifaces, setIfaces] = useState<string[]>([])
+  const excludeKey = useMemo(() => JSON.stringify([...exclude].sort()), [exclude])
   useEffect(() => {
+    const excludeSet = new Set(exclude)
     const fetchInterfaces = async (): Promise<void> => {
-      const names = Object.keys(await getInterfaces())
-      setIfaces(names.filter((name) => !exclude.includes(name)))
+      try {
+        const names = Object.keys(await getInterfaces())
+        setIfaces(names.filter((name) => !excludeSet.has(name)))
+      } catch {
+        setIfaces([])
+      }
     }
     fetchInterfaces()
-  }, [])
+  }, [excludeKey])
 
   return (
     <Select
