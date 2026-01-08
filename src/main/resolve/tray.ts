@@ -24,6 +24,7 @@ import {
   ipcMain,
   Menu,
   nativeImage,
+  Notification,
   screen,
   shell,
   Tray
@@ -40,6 +41,11 @@ export let tray: Tray | null = null
 let customTrayWindow: BrowserWindow | null = null
 let trayIconUpdateRegistered = false
 let updateTrayMenuRegistered = false
+
+const TRAY_RETRY_DELAYS = [200, 500, 1000, 2000, 3000]
+const TRAY_INITIAL_DELAY = 100
+
+let trayFailureNotification: Notification | null = null
 
 function formatDelayText(delay: number): string {
   if (delay === 0) {
@@ -441,21 +447,92 @@ export const buildContextMenu = async (): Promise<Menu> => {
   return Menu.buildFromTemplate(contextMenu)
 }
 
+async function createWindowsTray(): Promise<boolean> {
+  await new Promise((resolve) => setTimeout(resolve, TRAY_INITIAL_DELAY))
+
+  let lastError: Error | null = null
+
+  try {
+    tray = new Tray(icoIcon)
+    const bounds = tray.getBounds()
+
+    if (bounds.width > 0 && bounds.height > 0) {
+      return true
+    }
+
+    console.warn('托盘图标 bounds 无效，准备重试')
+    tray.destroy()
+    tray = null
+  } catch (error) {
+    lastError = error instanceof Error ? error : new Error(String(error))
+    console.error('托盘图标创建失败:', lastError)
+    if (tray) {
+      try {
+        tray.destroy()
+      } catch {
+        // ignore
+      }
+      tray = null
+    }
+  }
+
+  for (let i = 0; i < TRAY_RETRY_DELAYS.length; i++) {
+    await new Promise((resolve) => setTimeout(resolve, TRAY_RETRY_DELAYS[i]))
+
+    try {
+      tray = new Tray(icoIcon)
+      const bounds = tray.getBounds()
+
+      if (bounds.width > 0 && bounds.height > 0) {
+        console.log(`托盘图标在第 ${i + 1} 次重试后创建成功`)
+        return true
+      }
+
+      console.warn(`第 ${i + 1} 次重试：托盘图标 bounds 仍然无效`)
+      tray.destroy()
+      tray = null
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+      console.error(`第 ${i + 1} 次重试失败:`, lastError)
+      if (tray) {
+        try {
+          tray.destroy()
+        } catch {
+          // ignore
+        }
+        tray = null
+      }
+    }
+  }
+
+  console.error('托盘图标创建失败：已达到最大重试次数', lastError)
+  return false
+}
+
 export async function createTray(): Promise<void> {
   const { useDockIcon = true } = await getAppConfig()
+
   if (process.platform === 'linux') {
     tray = new Tray(pngIcon)
     const menu = await buildContextMenu()
     tray.setContextMenu(menu)
-  }
-  if (process.platform === 'darwin') {
+  } else if (process.platform === 'darwin') {
     const icon = nativeImage.createFromPath(templateIcon).resize({ height: 16 })
     icon.setTemplateImage(true)
     tray = new Tray(icon)
+  } else if (process.platform === 'win32') {
+    const success = await createWindowsTray()
+
+    if (!success) {
+      trayFailureNotification = new Notification({
+        title: 'Sparkle - 托盘图标创建失败',
+        body: '托盘图标无法正常显示。应用功能不受影响，但您可能需要重启应用来恢复托盘功能。'
+      })
+      trayFailureNotification.show()
+      return
+    }
   }
-  if (process.platform === 'win32') {
-    tray = new Tray(icoIcon)
-  }
+
   tray?.setToolTip('Sparkle')
   tray?.setIgnoreDoubleClickEvents(true)
   if (process.platform === 'darwin') {
