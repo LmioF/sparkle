@@ -432,10 +432,6 @@ export async function downloadSubStore(): Promise<void> {
   return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('downloadSubStore'))
 }
 
-export async function ensureSubStoreStarted(): Promise<boolean> {
-  return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('ensureSubStoreStarted'))
-}
-
 export async function subStorePort(): Promise<number> {
   return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('subStorePort'))
 }

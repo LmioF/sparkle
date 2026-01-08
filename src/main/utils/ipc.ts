@@ -128,7 +128,6 @@ import { startMonitor } from '../resolve/trafficMonitor'
 import { closeFloatingWindow, showContextMenu, showFloatingWindow } from '../resolve/floatingWindow'
 import { getAppName } from './appName'
 import { getUserAgent } from './userAgent'
-import { ensureSubStoreStarted } from './init'
 
 function ipcErrorWrapper<T>( // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: (...args: any[]) => Promise<T> // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -272,39 +271,11 @@ export function registerIpcMainHandlers(): void {
   ipcMain.handle('startSubStoreBackendServer', () => ipcErrorWrapper(startSubStoreBackendServer)())
   ipcMain.handle('stopSubStoreBackendServer', () => ipcErrorWrapper(stopSubStoreBackendServer)())
   ipcMain.handle('downloadSubStore', () => ipcErrorWrapper(downloadSubStore)())
-  ipcMain.handle('ensureSubStoreStarted', () => ipcErrorWrapper(ensureSubStoreStarted)())
 
-  ipcMain.handle('subStorePort', () =>
-    ipcErrorWrapper(async () => {
-      const started = await ensureSubStoreStarted()
-      if (!started) throw new Error('Sub-Store is disabled')
-      if (subStorePort === undefined) throw new Error('Sub-Store port not available')
-      return subStorePort
-    })()
-  )
-  ipcMain.handle('subStoreFrontendPort', () =>
-    ipcErrorWrapper(async () => {
-      const started = await ensureSubStoreStarted()
-      if (!started) throw new Error('Sub-Store is disabled')
-      if (subStoreFrontendPort === undefined)
-        throw new Error('Sub-Store frontend port not available')
-      return subStoreFrontendPort
-    })()
-  )
-  ipcMain.handle('subStoreSubs', () =>
-    ipcErrorWrapper(async () => {
-      const started = await ensureSubStoreStarted()
-      if (!started) throw new Error('Sub-Store is disabled')
-      return subStoreSubs()
-    })()
-  )
-  ipcMain.handle('subStoreCollections', () =>
-    ipcErrorWrapper(async () => {
-      const started = await ensureSubStoreStarted()
-      if (!started) throw new Error('Sub-Store is disabled')
-      return subStoreCollections()
-    })()
-  )
+  ipcMain.handle('subStorePort', () => subStorePort)
+  ipcMain.handle('subStoreFrontendPort', () => subStoreFrontendPort)
+  ipcMain.handle('subStoreSubs', () => ipcErrorWrapper(subStoreSubs)())
+  ipcMain.handle('subStoreCollections', () => ipcErrorWrapper(subStoreCollections)())
   ipcMain.handle('getGistUrl', ipcErrorWrapper(getGistUrl))
   ipcMain.handle('setNativeTheme', (_e, theme) => {
     setNativeTheme(theme)

@@ -28,9 +28,7 @@ import path from 'path'
 import {
   startPacServer,
   startSubStoreBackendServer,
-  startSubStoreFrontendServer,
-  stopSubStoreBackendServer,
-  stopSubStoreFrontendServer
+  startSubStoreFrontendServer
 } from '../resolve/server'
 import { triggerSysProxy } from '../sys/sysproxy'
 import {
@@ -43,62 +41,6 @@ import { app } from 'electron'
 import { startSSIDCheck } from '../sys/ssid'
 import { startNetworkDetection } from '../core/manager'
 import { initKeyManager } from '../service/manager'
-
-type SubStoreState = 'idle' | 'started' | 'disabled'
-let _subStoreState: SubStoreState = 'idle'
-let subStoreStarting: Promise<boolean> | null = null
-let lastFailedTime = 0
-const RETRY_COOLDOWN = 10000 // 10秒冷却时间
-
-export function isSubStoreStarted(): boolean {
-  return _subStoreState === 'started'
-}
-
-export function isSubStoreDisabled(): boolean {
-  return _subStoreState === 'disabled'
-}
-
-export async function ensureSubStoreStarted(): Promise<boolean> {
-  if (_subStoreState === 'started') return true
-  if (subStoreStarting) {
-    return subStoreStarting
-  }
-  // 冷却期内直接抛出错误，避免重复尝试
-  if (lastFailedTime && Date.now() - lastFailedTime < RETRY_COOLDOWN) {
-    throw new Error('Sub-Store start failed recently, please retry later')
-  }
-  subStoreStarting = (async (): Promise<boolean> => {
-    try {
-      const { useSubStore = true } = await getAppConfig()
-      if (!useSubStore) {
-        _subStoreState = 'disabled'
-        return false
-      }
-      // 配置重新启用时，重置 disabled 状态
-      if (_subStoreState === 'disabled') {
-        _subStoreState = 'idle'
-      }
-      await Promise.all([startSubStoreFrontendServer(), startSubStoreBackendServer()])
-      _subStoreState = 'started'
-      lastFailedTime = 0
-      return true
-    } catch (e) {
-      _subStoreState = 'idle' // 确保失败后状态重置
-      lastFailedTime = Date.now()
-      // 清理可能部分启动的服务
-      try {
-        await Promise.allSettled([stopSubStoreFrontendServer(), stopSubStoreBackendServer()])
-      } catch {
-        // 忽略清理时的错误
-      }
-      console.error('[Sub-Store] Failed to start:', e)
-      throw e
-    } finally {
-      subStoreStarting = null
-    }
-  })()
-  return subStoreStarting
-}
 
 async function initDirs(): Promise<void> {
   if (!existsSync(dataDir())) {
@@ -279,7 +221,11 @@ export async function init(): Promise<void> {
 
   const { sysProxy, onlyActiveDevice = false, networkDetection = false } = appConfig
 
-  const initTasks: Promise<void>[] = [startSSIDCheck()]
+  const initTasks: Promise<void>[] = [
+    startSubStoreFrontendServer(),
+    startSubStoreBackendServer(),
+    startSSIDCheck()
+  ]
 
   if (networkDetection) {
     initTasks.push(startNetworkDetection())
