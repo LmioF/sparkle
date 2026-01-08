@@ -174,9 +174,7 @@ const Proxies: React.FC = () => {
       for (let j = 0; j < index; j++) {
         i += groupCounts[j]
       }
-      i += Math.floor(
-        allProxies[index].findIndex((proxy) => proxy.name === group.now) / cols
-      )
+      i += Math.floor(allProxies[index].findIndex((proxy) => proxy.name === group.now) / cols)
       virtuosoRef.current?.scrollToIndex({
         index: Math.floor(i),
         align: 'start'
