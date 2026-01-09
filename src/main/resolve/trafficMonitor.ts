@@ -42,15 +42,19 @@ export async function startMonitor(detached = false): Promise<void> {
 
 export async function stopMonitor(): Promise<void> {
   if (child) {
-    child.kill('SIGINT')
-    await new Promise<void>((resolve) => {
-      if (child) {
-        child.once('exit', () => resolve())
-        setTimeout(resolve, 1000)
-      } else {
-        resolve()
-      }
-    })
+    const proc = child
     child = null
+    try {
+      proc.kill('SIGINT')
+    } catch {
+      // ignore kill errors if process already exited
+    }
+    await new Promise<void>((resolve) => {
+      const timer = setTimeout(resolve, 1000)
+      proc.once('exit', () => {
+        clearTimeout(timer)
+        resolve()
+      })
+    })
   }
 }
