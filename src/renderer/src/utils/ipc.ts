@@ -369,6 +369,26 @@ export async function webdavDelete(filename: string): Promise<void> {
   return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('webdavDelete', filename))
 }
 
+export async function localBackup(): Promise<string> {
+  return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('localBackup'))
+}
+
+export async function localRestore(backupDir: string, filename: string): Promise<void> {
+  return ipcErrorWrapper(
+    await window.electron.ipcRenderer.invoke('localRestore', backupDir, filename)
+  )
+}
+
+export async function listLocalBackups(): Promise<{ backupDir: string; files: string[] }> {
+  return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('listLocalBackups'))
+}
+
+export async function localDelete(backupDir: string, filename: string): Promise<void> {
+  return ipcErrorWrapper(
+    await window.electron.ipcRenderer.invoke('localDelete', backupDir, filename)
+  )
+}
+
 export async function setTitleBarOverlay(overlay: TitleBarOverlayOptions): Promise<void> {
   return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('setTitleBarOverlay', overlay))
 }

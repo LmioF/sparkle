@@ -97,7 +97,16 @@ import {
   getCurrentProfileStr,
   getOverrideProfileStr
 } from '../core/factory'
-import { listWebdavBackups, webdavBackup, webdavDelete, webdavRestore } from '../resolve/backup'
+import {
+  listWebdavBackups,
+  webdavBackup,
+  webdavDelete,
+  webdavRestore,
+  localBackup,
+  localRestore,
+  listLocalBackups,
+  localDelete
+} from '../resolve/backup'
 import { getInterfaces } from '../sys/interface'
 import { closeTrayIcon, copyEnv, setDockVisible, showTrayIcon } from '../resolve/tray'
 import { registerShortcut } from '../resolve/shortcut'
@@ -257,6 +266,36 @@ export function registerIpcMainHandlers(): void {
   ipcMain.handle('webdavRestore', (_e, filename) => ipcErrorWrapper(webdavRestore)(filename))
   ipcMain.handle('listWebdavBackups', ipcErrorWrapper(listWebdavBackups))
   ipcMain.handle('webdavDelete', (_e, filename) => ipcErrorWrapper(webdavDelete)(filename))
+  ipcMain.handle('localBackup', async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openDirectory'],
+      title: '选择备份保存位置'
+    })
+    if (result.canceled || !result.filePaths.length) {
+      throw new Error('用户取消操作')
+    }
+    return ipcErrorWrapper(localBackup)(result.filePaths[0])
+  })
+  ipcMain.handle('localRestore', async (_e, backupDir: string, filename: string) => {
+    const path = await import('path')
+    const fullPath = path.join(backupDir, filename)
+    return ipcErrorWrapper(localRestore)(fullPath)
+  })
+  ipcMain.handle('listLocalBackups', async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openDirectory'],
+      title: '选择备份所在目录'
+    })
+    if (result.canceled || !result.filePaths.length) {
+      throw new Error('用户取消操作')
+    }
+    const backupDir = result.filePaths[0]
+    const files = await ipcErrorWrapper(listLocalBackups)(backupDir)
+    return { backupDir, files }
+  })
+  ipcMain.handle('localDelete', (_e, backupDir: string, filename: string) =>
+    ipcErrorWrapper(localDelete)(backupDir, filename)
+  )
   ipcMain.handle('registerShortcut', (_e, oldShortcut, newShortcut, action) =>
     ipcErrorWrapper(registerShortcut)(oldShortcut, newShortcut, action)
   )
