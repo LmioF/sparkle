@@ -147,17 +147,17 @@ const Tun: React.FC = () => {
                   }}
                 />
               </SettingItem>
-              <SettingItem title="严格路由" divider>
-                <Switch
-                  size="sm"
-                  isSelected={values.strictRoute}
-                  onValueChange={(v) => {
-                    setValues({ ...values, strictRoute: v })
-                  }}
-                />
-              </SettingItem>
             </>
           )}
+          <SettingItem title="严格路由" divider>
+            <Switch
+              size="sm"
+              isSelected={values.strictRoute}
+              onValueChange={(v) => {
+                setValues({ ...values, strictRoute: v })
+              }}
+            />
+          </SettingItem>
           <SettingItem title="自动设置路由规则" divider>
             <Switch
               size="sm"
