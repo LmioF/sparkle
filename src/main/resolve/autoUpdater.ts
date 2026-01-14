@@ -206,7 +206,7 @@ export async function downloadAndInstallUpdate(version: string): Promise<void> {
 
     await disableSysProxy(false)
     if (file.endsWith('.exe')) {
-      spawn(path.join(dataDir(), file), ['/S', '--force-run'], {
+      spawn(path.join(dataDir(), file), ['/S', '--updated', '--force-run'], {
         detached: true,
         stdio: 'ignore'
       }).unref()
