@@ -8,11 +8,13 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import React from 'react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 interface Props {
   iconOnly?: boolean
 }
 const SniffCard: React.FC<Props> = (props) => {
+  const { t } = useTranslation('common')
   const { appConfig } = useAppConfig()
   const { iconOnly } = props
   const {
@@ -45,7 +47,7 @@ const SniffCard: React.FC<Props> = (props) => {
   if (iconOnly) {
     return (
       <div className={`${sniffCardStatus} ${!controlSniff ? 'hidden' : ''} flex justify-center`}>
-        <Tooltip content="域名嗅探" placement="right">
+        <Tooltip content={t('sider.sniffCard')} placement="right">
           <Button
             size="sm"
             isIconOnly
@@ -103,7 +105,7 @@ const SniffCard: React.FC<Props> = (props) => {
           <h3
             className={`text-md font-bold ${match ? 'text-primary-foreground' : 'text-foreground'}`}
           >
-            域名嗅探
+            {t('sider.sniffCard')}
           </h3>
         </CardFooter>
       </Card>

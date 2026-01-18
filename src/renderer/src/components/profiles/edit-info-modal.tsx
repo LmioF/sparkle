@@ -15,6 +15,7 @@ import {
   Tooltip
 } from '@heroui/react'
 import React, { useState } from 'react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import SettingItem from '../base/base-setting-item'
 import { useOverrideConfig } from '@renderer/hooks/use-override-config'
 import { restartCore } from '@renderer/utils/ipc'
@@ -32,6 +33,7 @@ interface Props {
 
 const EditInfoModal: React.FC<Props> = (props) => {
   const { item, isCurrent, updateProfileItem, onClose } = props
+  const { t } = useTranslation('profile')
   const { appConfig: { disableAnimation = false } = {} } = useAppConfig()
   const { overrideConfig } = useOverrideConfig()
   const { items: overrideItems = [] } = overrideConfig || {}
@@ -73,9 +75,11 @@ const EditInfoModal: React.FC<Props> = (props) => {
       scrollBehavior="inside"
     >
       <ModalContent>
-        <ModalHeader className="flex app-drag">{item.id ? '编辑信息' : '导入远程配置'}</ModalHeader>
+        <ModalHeader className="flex app-drag">
+          {item.id ? t('editInfo') : t('importRemote')}
+        </ModalHeader>
         <ModalBody>
-          <SettingItem title="名称">
+          <SettingItem title={t('name')}>
             <Input
               size="sm"
               className={cn(inputWidth)}
@@ -87,7 +91,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
           </SettingItem>
           {values.type === 'remote' && (
             <>
-              <SettingItem title="订阅地址">
+              <SettingItem title={t('url')}>
                 <Input
                   size="sm"
                   className={cn(inputWidth)}
@@ -97,7 +101,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   }}
                 />
               </SettingItem>
-              <SettingItem title="证书指纹">
+              <SettingItem title={t('fingerprint')}>
                 <Input
                   size="sm"
                   className={cn(inputWidth)}
@@ -107,7 +111,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   }}
                 />
               </SettingItem>
-              <SettingItem title="指定 UA">
+              <SettingItem title={t('userAgent')}>
                 <Input
                   size="sm"
                   className={cn(inputWidth)}
@@ -117,7 +121,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   }}
                 />
               </SettingItem>
-              <SettingItem title="验证订阅格式">
+              <SettingItem title={t('verifyFormat')}>
                 <Switch
                   size="sm"
                   isSelected={values.verify ?? false}
@@ -126,7 +130,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   }}
                 />
               </SettingItem>
-              <SettingItem title="使用代理更新">
+              <SettingItem title={t('useProxy')}>
                 <Switch
                   size="sm"
                   isSelected={values.useProxy ?? false}
@@ -135,7 +139,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   }}
                 />
               </SettingItem>
-              <SettingItem title="自动更新">
+              <SettingItem title={t('autoUpdate')}>
                 <Switch
                   size="sm"
                   isSelected={values.autoUpdate ?? false}
@@ -146,10 +150,10 @@ const EditInfoModal: React.FC<Props> = (props) => {
               </SettingItem>
               {values.autoUpdate && (
                 <SettingItem
-                  title="更新间隔（分钟）"
+                  title={t('updateInterval')}
                   actions={
                     values.locked && (
-                      <Tooltip content="当前更新间隔由远程管理">
+                      <Tooltip content={t('intervalLockedTip')}>
                         <Button isIconOnly size="sm" variant="light">
                           <IoIosHelpCircle className="text-lg" />
                         </Button>
@@ -171,7 +175,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
               )}
             </>
           )}
-          <SettingItem title="覆写">
+          <SettingItem title={t('override:title')}>
             <div>
               {overrideItems
                 .filter((i) => i.global)
@@ -179,7 +183,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   return (
                     <div className="flex mb-2" key={i.id}>
                       <Button disabled fullWidth variant="flat" size="sm">
-                        {i.name} (全局)
+                        {i.name} ({t('override:global')})
                       </Button>
                     </div>
                   )
@@ -216,7 +220,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu
-                  emptyContent="没有可用的覆写"
+                  emptyContent={t('noAvailableOverride')}
                   onAction={(key) => {
                     setValues({
                       ...values,
@@ -236,10 +240,10 @@ const EditInfoModal: React.FC<Props> = (props) => {
         </ModalBody>
         <ModalFooter>
           <Button size="sm" variant="light" onPress={onClose}>
-            取消
+            {t('common:actions.cancel')}
           </Button>
           <Button size="sm" color="primary" onPress={onSave}>
-            {item.id ? '保存' : '导入'}
+            {item.id ? t('common:actions.save') : t('common:actions.import')}
           </Button>
         </ModalFooter>
       </ModalContent>

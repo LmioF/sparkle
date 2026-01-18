@@ -34,10 +34,12 @@ import SubStoreIcon from '@renderer/components/base/substore-icon'
 import ProfileSettingModal from '@renderer/components/profiles/profile-setting-modal'
 import useSWR from 'swr'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 const emptyItems: ProfileItem[] = []
 
 const Profiles: React.FC = () => {
+  const { t } = useTranslation('profile')
   const {
     profileConfig,
     setProfileConfig,
@@ -83,7 +85,7 @@ const Profiles: React.FC = () => {
     const items: { icon?: ReactNode; key: string; children: ReactNode; divider: boolean }[] = [
       {
         key: 'open-substore',
-        children: '访问 Sub-Store',
+        children: t('openSubStore'),
         icon: <SubStoreIcon className="text-lg" />,
         divider:
           (Boolean(subs) && subs.length > 0) || (Boolean(collections) && collections.length > 0)
@@ -198,10 +200,10 @@ const Profiles: React.FC = () => {
             const content = await readTextFile(path)
             await addProfileItem({ name: file.name, type: 'local', file: content })
           } catch (e) {
-            alert('文件导入失败' + e)
+            alert(t('fileImportFailed') + e)
           }
         } else {
-          alert('不支持的文件类型')
+          alert(t('unsupportedFileType'))
         }
       }
       setFileOver(false)
@@ -223,12 +225,12 @@ const Profiles: React.FC = () => {
   return (
     <BasePage
       ref={pageRef}
-      title="订阅管理"
+      title={t('title')}
       header={
         <>
           <Button
             size="sm"
-            title="更新全部订阅"
+            title={t('updateAll')}
             className="app-nodrag"
             variant="light"
             isIconOnly
@@ -250,7 +252,7 @@ const Profiles: React.FC = () => {
           </Button>
           <Button
             size="sm"
-            title="订阅设置"
+            title={t('settings')}
             className="app-nodrag"
             variant="light"
             isIconOnly
@@ -304,7 +306,7 @@ const Profiles: React.FC = () => {
                   checked={useProxy}
                   onValueChange={setUseProxy}
                 >
-                  代理
+                  {t('useProxy')}
                 </Checkbox>
               </>
             }
@@ -318,7 +320,7 @@ const Profiles: React.FC = () => {
             isLoading={importing}
             onPress={() => handleImport(url)}
           >
-            导入
+            {t('import')}
           </Button>
           {useSubStore && (
             <Dropdown
@@ -421,7 +423,7 @@ const Profiles: React.FC = () => {
                   case 'new': {
                     {
                       await addProfileItem({
-                        name: '新配置',
+                        name: t('newLocalName'),
                         type: 'local',
                         file: 'proxies: []\nproxy-groups: []\nrules: []'
                       })
@@ -444,9 +446,9 @@ const Profiles: React.FC = () => {
                 }
               }}
             >
-              <DropdownItem key="open">打开本地配置</DropdownItem>
-              <DropdownItem key="new">新建本地配置</DropdownItem>
-              <DropdownItem key="import">导入远程配置</DropdownItem>
+              <DropdownItem key="open">{t('openLocal')}</DropdownItem>
+              <DropdownItem key="new">{t('newLocal')}</DropdownItem>
+              <DropdownItem key="import">{t('importRemote')}</DropdownItem>
             </DropdownMenu>
           </Dropdown>
         </div>

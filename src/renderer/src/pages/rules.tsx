@@ -5,8 +5,10 @@ import { useMemo, useState } from 'react'
 import { Divider, Input } from '@heroui/react'
 import { useRules } from '@renderer/hooks/use-rules'
 import { includesIgnoreCase } from '@renderer/utils/includes'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 const Rules: React.FC = () => {
+  const { t } = useTranslation('rule')
   const { rules } = useRules()
   const [filter, setFilter] = useState('')
 
@@ -23,13 +25,13 @@ const Rules: React.FC = () => {
   }, [rules, filter])
 
   return (
-    <BasePage title="分流规则">
+    <BasePage title={t('title')}>
       <div className="sticky top-0 z-40">
         <div className="flex p-2">
           <Input
             size="sm"
             value={filter}
-            placeholder="筛选过滤"
+            placeholder={t('common:actions.filter')}
             isClearable
             onValueChange={setFilter}
           />

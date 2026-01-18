@@ -4,8 +4,11 @@ import SettingItem from '../base/base-setting-item'
 import { Button } from '@heroui/react'
 import { localBackup, listLocalBackups } from '@renderer/utils/ipc'
 import LocalRestoreModal from './local-restore-modal'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 const LocalBackupConfig: React.FC = () => {
+  const { t } = useTranslation('settings')
+  const tCommon = (key: string) => t(`common:${key}`)
   const [backuping, setBackuping] = useState(false)
   const [restoring, setRestoring] = useState(false)
   const [backupDir, setBackupDir] = useState('')
@@ -23,10 +26,13 @@ const LocalBackupConfig: React.FC = () => {
     setBackuping(true)
     try {
       const savedPath = await localBackup()
-      showNotification('备份成功', `备份已保存至：${savedPath}`)
+      showNotification(
+        t('backup.local.backupSuccess'),
+        `${t('backup.local.backupSuccessDesc')}：${savedPath}`
+      )
     } catch (e) {
-      if (e instanceof Error && e.message !== '用户取消操作') {
-        showNotification('备份失败', `${e.message}`, true)
+      if (e instanceof Error && e.message !== tCommon('errors.userCancelled')) {
+        showNotification(t('backup.local.backupFailed'), `${e.message}`, true)
       }
     } finally {
       setBackuping(false)
@@ -40,13 +46,13 @@ const LocalBackupConfig: React.FC = () => {
       setBackupDir(backupDir)
       setFilenames(files)
       if (files.length === 0) {
-        showNotification('提示', '该目录下没有备份文件', false)
+        showNotification(t('backup.local.noBackup'), t('backup.local.noBackupInDir'), false)
       } else {
         setRestoreOpen(true)
       }
     } catch (e) {
-      if (e instanceof Error && e.message !== '用户取消操作') {
-        showNotification('获取备份列表失败', `${e.message}`, true)
+      if (e instanceof Error && e.message !== tCommon('errors.userCancelled')) {
+        showNotification(t('backup.local.fetchListFailed'), `${e.message}`, true)
       }
     } finally {
       setRestoring(false)
@@ -62,15 +68,15 @@ const LocalBackupConfig: React.FC = () => {
           onClose={() => setRestoreOpen(false)}
         />
       )}
-      <SettingCard title="本地备份">
-        <SettingItem title="备份说明">
+      <SettingCard title={t('backup.local.title')}>
+        <SettingItem title={t('backup.local.backupDesc')}>
           <div className="text-sm text-default-500 w-[60%] text-right">
-            备份包含所有配置、订阅和主题
+            {t('backup.local.description')}
           </div>
         </SettingItem>
         <div className="flex justify-between">
           <Button isLoading={backuping} fullWidth size="sm" className="mr-1" onPress={handleBackup}>
-            备份
+            {t('common:actions.backup')}
           </Button>
           <Button
             isLoading={restoring}
@@ -79,7 +85,7 @@ const LocalBackupConfig: React.FC = () => {
             className="ml-1"
             onPress={handleRestore}
           >
-            恢复
+            {t('common:actions.restore')}
           </Button>
         </div>
       </SettingCard>

@@ -1,5 +1,7 @@
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcMainHandlers } from './utils/ipc'
+import { registerI18nHandlers, stopCacheCleanup } from './i18n/handler'
+import { initMainI18n, t } from './utils/i18n'
 import windowStateKeeper from 'electron-window-state'
 import {
   app,
@@ -273,6 +275,8 @@ powerMonitor.on('shutdown', async () => {
 // Last resort to disable system proxy synchronously before quit
 // Only runs if previous async disable failed or was skipped
 app.on('will-quit', () => {
+  stopCacheCleanup()
+
   if (process.platform === 'win32' && !sysProxyDisabled) {
     disableSysProxySync()
   }
@@ -282,12 +286,23 @@ app.on('will-quit', () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
+  // Initialize i18n for main process
+  initMainI18n()
+
+  try {
+    const { mkdir } = await import('fs/promises')
+    const customLocalesDir = join(app.getPath('userData'), 'locales')
+    await mkdir(customLocalesDir, { recursive: true })
+  } catch (error) {
+    console.error('[i18n] Failed to create custom locales directory:', error)
+  }
+
   // Set app user model id for windows
   electronApp.setAppUserModelId('sparkle.app')
   try {
     await initPromise
   } catch (e) {
-    dialog.showErrorBox('应用初始化失败', `${e}`)
+    dialog.showErrorBox(t('common.errors.appCrashed'), `${e}`)
     app.quit()
   }
 
@@ -299,7 +314,9 @@ app.whenReady().then(async () => {
   })
   const appConfig = await getAppConfig()
   const { showFloatingWindow: showFloating = false, disableTray = false } = appConfig
+
   registerIpcMainHandlers()
+  registerI18nHandlers()
 
   const windowPromise = createWindow(appConfig)
 

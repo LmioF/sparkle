@@ -4,6 +4,7 @@ import {
   getRuntimeConfig
 } from '@renderer/utils/ipc'
 import { getHash } from '@renderer/utils/hash'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import Viewer from './viewer'
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
@@ -16,6 +17,7 @@ import { MdEditDocument } from 'react-icons/md'
 import dayjs from 'dayjs'
 
 const RuleProvider: React.FC = () => {
+  const { t } = useTranslation('resource')
   const [showDetails, setShowDetails] = useState({
     show: false,
     path: '',
@@ -77,7 +79,7 @@ const RuleProvider: React.FC = () => {
       await mihomoUpdateRuleProviders(name)
       mutate()
     } catch (e) {
-      new Notification(`${name} 更新失败\n${e}`)
+      new Notification(`${name} ${t('updateFailed')}\n${e}`)
     } finally {
       setUpdating((prev) => {
         prev[index] = false
@@ -111,7 +113,7 @@ const RuleProvider: React.FC = () => {
           }
         />
       )}
-      <SettingItem title="规则集合" divider>
+      <SettingItem title={t('ruleProvider')} divider>
         <Button
           size="sm"
           color="primary"
@@ -121,7 +123,7 @@ const RuleProvider: React.FC = () => {
             })
           }}
         >
-          更新全部
+          {t('updateAll')}
         </Button>
       </SettingItem>
       {providers.map((provider, index) => (
@@ -139,7 +141,7 @@ const RuleProvider: React.FC = () => {
               {provider.format !== 'MrsRule' && provider.vehicleType !== 'Inline' && (
                 <Button
                   isIconOnly
-                  title={provider.vehicleType == 'File' ? '编辑' : '查看'}
+                  title={provider.vehicleType == 'File' ? t('edit') : t('view')}
                   className="ml-2"
                   size="sm"
                   onPress={() => {
@@ -162,7 +164,7 @@ const RuleProvider: React.FC = () => {
               )}
               <Button
                 isIconOnly
-                title="更新"
+                title={t('update')}
                 className="ml-2"
                 size="sm"
                 onPress={() => {

@@ -3,6 +3,7 @@ import { app, dialog, nativeTheme, shell } from 'electron'
 import { readFile } from 'fs/promises'
 import path from 'path'
 import { promisify } from 'util'
+import { t } from '../utils/i18n'
 import {
   dataDir,
   exePath,
@@ -19,7 +20,7 @@ const execFilePromise = promisify(execFile)
 
 export function getFilePath(ext: string[]): string[] | undefined {
   return dialog.showOpenDialogSync({
-    title: '选择订阅文件',
+    title: t('main.dialog.selectSubscriptionFile'),
     filters: [{ name: `${ext} file`, extensions: ext }],
     properties: ['openFile']
   })

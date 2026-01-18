@@ -1,5 +1,6 @@
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from '@heroui/react'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import { relaunchApp, localDelete, localRestore } from '@renderer/utils/ipc'
 import React, { useState } from 'react'
 import { MdDeleteForever } from 'react-icons/md'
@@ -12,6 +13,7 @@ interface Props {
 
 const LocalRestoreModal: React.FC<Props> = (props) => {
   const { backupDir, filenames: names, onClose } = props
+  const { t } = useTranslation('settings')
   const { appConfig: { disableAnimation = false } = {} } = useAppConfig()
   const [filenames, setFilenames] = useState<string[]>(names)
   const [restoring, setRestoring] = useState(false)
@@ -34,10 +36,10 @@ const LocalRestoreModal: React.FC<Props> = (props) => {
       scrollBehavior="inside"
     >
       <ModalContent>
-        <ModalHeader className="flex app-drag">恢复本地备份</ModalHeader>
+        <ModalHeader className="flex app-drag">{t('backup.local.restoreTitle')}</ModalHeader>
         <ModalBody>
           {filenames.length === 0 ? (
-            <div className="flex justify-center">该目录下没有备份文件</div>
+            <div className="flex justify-center">{t('backup.local.noBackupInDir')}</div>
           ) : (
             filenames.map((filename) => (
               <div className="flex" key={filename}>
@@ -59,13 +61,16 @@ const LocalRestoreModal: React.FC<Props> = (props) => {
                       } catch (relaunchError) {
                         // 重启失败，保持模态框打开，显示通知
                         showNotification(
-                          '配置已恢复',
-                          '配置恢复成功，但应用重启失败，请手动重启应用'
+                          t('backup.local.restoreSuccess'),
+                          t('backup.local.restoreSuccessDesc')
                         )
                         setRestoring(false)
                       }
                     } catch (e) {
-                      showNotification('恢复失败', `${e instanceof Error ? e.message : e}`)
+                      showNotification(
+                        t('backup.local.restoreFailed'),
+                        `${e instanceof Error ? e.message : e}`
+                      )
                       setRestoring(false)
                     }
                   }}
@@ -84,9 +89,15 @@ const LocalRestoreModal: React.FC<Props> = (props) => {
                     try {
                       await localDelete(backupDir, filename)
                       setFilenames(filenames.filter((name) => name !== filename))
-                      showNotification('删除成功', `已删除备份文件：${filename}`)
+                      showNotification(
+                        t('backup.local.deleteSuccess'),
+                        `${t('backup.local.deleteSuccessDesc')}：${filename}`
+                      )
                     } catch (e) {
-                      showNotification('删除失败', `${e instanceof Error ? e.message : e}`)
+                      showNotification(
+                        t('backup.local.deleteFailed'),
+                        `${e instanceof Error ? e.message : e}`
+                      )
                     } finally {
                       setDeletingFile(null)
                     }
@@ -100,7 +111,7 @@ const LocalRestoreModal: React.FC<Props> = (props) => {
         </ModalBody>
         <ModalFooter>
           <Button size="sm" variant="light" onPress={onClose} isDisabled={isOperating}>
-            关闭
+            {t('common:actions.close')}
           </Button>
         </ModalFooter>
       </ModalContent>

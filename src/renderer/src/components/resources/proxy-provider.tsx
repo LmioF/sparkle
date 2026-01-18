@@ -4,6 +4,7 @@ import {
   getRuntimeConfig
 } from '@renderer/utils/ipc'
 import { Fragment, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import Viewer from './viewer'
 import useSWR from 'swr'
 import SettingCard from '../base/base-setting-card'
@@ -17,6 +18,7 @@ import { calcTraffic } from '@renderer/utils/calc'
 import { getHash } from '@renderer/utils/hash'
 
 const ProxyProvider: React.FC = () => {
+  const { t } = useTranslation('resource')
   const [showDetails, setShowDetails] = useState({
     show: false,
     path: '',
@@ -79,7 +81,7 @@ const ProxyProvider: React.FC = () => {
       await mihomoUpdateProxyProviders(name)
       mutate()
     } catch (e) {
-      new Notification(`${name} 更新失败\n${e}`)
+      new Notification(`${name} ${t('updateFailed')}\n${e}`)
     } finally {
       setUpdating((prev) => {
         prev[index] = false
@@ -105,7 +107,7 @@ const ProxyProvider: React.FC = () => {
           }
         />
       )}
-      <SettingItem title="代理集合" divider>
+      <SettingItem title={t('proxyProvider')} divider>
         <Button
           size="sm"
           color="primary"
@@ -115,7 +117,7 @@ const ProxyProvider: React.FC = () => {
             })
           }}
         >
-          更新全部
+          {t('updateAll')}
         </Button>
       </SettingItem>
       {providers.map((provider, index) => (
@@ -136,7 +138,7 @@ const ProxyProvider: React.FC = () => {
               </Button> */}
               <Button
                 isIconOnly
-                title={provider.vehicleType == 'File' ? '编辑' : '查看'}
+                title={provider.vehicleType == 'File' ? t('edit') : t('view')}
                 className="ml-2"
                 size="sm"
                 onPress={() => {
@@ -157,7 +159,7 @@ const ProxyProvider: React.FC = () => {
               </Button>
               <Button
                 isIconOnly
-                title="更新"
+                title={t('update')}
                 className="ml-2"
                 size="sm"
                 onPress={() => {
@@ -182,7 +184,7 @@ const ProxyProvider: React.FC = () => {
               <div className="h-[32px] leading-[32px] text-foreground-500">
                 {provider.subscriptionInfo.Expire
                   ? dayjs.unix(provider.subscriptionInfo.Expire).format('YYYY-MM-DD')
-                  : '长期有效'}
+                  : t('longTerm')}
               </div>
             </SettingItem>
           )}

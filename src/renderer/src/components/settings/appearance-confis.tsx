@@ -19,13 +19,16 @@ import {
   writeTheme
 } from '@renderer/utils/ipc'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import { platform } from '@renderer/utils/init'
 import { useTheme } from 'next-themes'
 import { IoIosHelpCircle, IoMdCloudDownload } from 'react-icons/io'
 import { MdEditDocument } from 'react-icons/md'
 import CSSEditorModal from './css-editor-modal'
+import { LanguageSwitcher } from './language-switcher'
 
 const AppearanceConfig: React.FC = () => {
+  const { t } = useTranslation('settings')
   const { appConfig, patchAppConfig } = useAppConfig()
   const [customThemes, setCustomThemes] = useState<{ key: string; label: string }[]>()
   const [openCSSEditor, setOpenCSSEditor] = useState(false)
@@ -74,11 +77,37 @@ const AppearanceConfig: React.FC = () => {
           }}
         />
       )}
-      <SettingCard title="外观设置">
+      <SettingCard title={t('appearance.title')}>
         <SettingItem
-          title="显示悬浮窗"
+          title={t('appearance.language')}
+          divider
+          /* 暂时隐藏打开自定义语言目录的按钮
           actions={
-            <Tooltip content="未禁用GPU加速的情况下，悬浮窗可能会导致应用崩溃">
+            <Tooltip content={t('appearance.openCustomLocalesDir')}>
+              <Button
+                size="sm"
+                isIconOnly
+                variant="light"
+                onPress={async () => {
+                  try {
+                    await openCustomLocalesDir()
+                  } catch (e) {
+                    alert(e)
+                  }
+                }}
+              >
+                <FaFolderOpen className="text-lg" />
+              </Button>
+            </Tooltip>
+          }
+          */
+        >
+          <LanguageSwitcher />
+        </SettingItem>
+        <SettingItem
+          title={t('appearance.showFloatingWindow')}
+          actions={
+            <Tooltip content={t('appearance.showFloatingWindowTip')}>
               <Button isIconOnly size="sm" variant="light">
                 <IoIosHelpCircle className="text-lg" />
               </Button>
@@ -113,7 +142,7 @@ const AppearanceConfig: React.FC = () => {
         </SettingItem>
         {localShowFloating && (
           <>
-            <SettingItem title="根据网速旋转悬浮窗图标" divider>
+            <SettingItem title={t('appearance.spinFloatingIcon')} divider>
               <Switch
                 size="sm"
                 isSelected={spinFloatingIcon}
@@ -123,7 +152,7 @@ const AppearanceConfig: React.FC = () => {
                 }}
               />
             </SettingItem>
-            <SettingItem title="禁用托盘图标" divider>
+            <SettingItem title={t('appearance.disableTray')} divider>
               <Switch
                 size="sm"
                 isSelected={disableTray}
@@ -141,7 +170,7 @@ const AppearanceConfig: React.FC = () => {
         )}
         {platform !== 'linux' && (
           <>
-            <SettingItem title="托盘菜单显示节点信息" divider>
+            <SettingItem title={t('appearance.proxyInTray')} divider>
               <Switch
                 size="sm"
                 isSelected={proxyInTray}
@@ -151,7 +180,11 @@ const AppearanceConfig: React.FC = () => {
               />
             </SettingItem>
             <SettingItem
-              title={`${platform === 'win32' ? '任务栏' : '状态栏'}显示网速信息`}
+              title={
+                platform === 'win32'
+                  ? t('appearance.showTrafficTaskbar')
+                  : t('appearance.showTrafficStatusbar')
+              }
               divider
             >
               <Switch
@@ -167,7 +200,7 @@ const AppearanceConfig: React.FC = () => {
         )}
         {platform === 'darwin' && (
           <>
-            <SettingItem title="显示 Dock 图标" divider>
+            <SettingItem title={t('appearance.useDockIcon')} divider>
               <Switch
                 size="sm"
                 isSelected={useDockIcon}
@@ -179,7 +212,7 @@ const AppearanceConfig: React.FC = () => {
             </SettingItem>
           </>
         )}
-        <SettingItem title="使用系统标题栏" divider>
+        <SettingItem title={t('appearance.useWindowFrame')} divider>
           <Switch
             size="sm"
             isSelected={useWindowFrame}
@@ -189,7 +222,7 @@ const AppearanceConfig: React.FC = () => {
             }}
           />
         </SettingItem>
-        <SettingItem title="背景色" divider>
+        <SettingItem title={t('appearance.theme')} divider>
           <Tabs
             size="sm"
             color="primary"
@@ -199,20 +232,20 @@ const AppearanceConfig: React.FC = () => {
               patchAppConfig({ appTheme: key as AppTheme })
             }}
           >
-            <Tab key="system" title="自动" />
-            <Tab key="dark" title="深色" />
-            <Tab key="light" title="浅色" />
+            <Tab key="system" title={t('appearance.themeAuto')} />
+            <Tab key="dark" title={t('appearance.themeDark')} />
+            <Tab key="light" title={t('appearance.themeLight')} />
           </Tabs>
         </SettingItem>
         <SettingItem
-          title="主题"
+          title={t('appearance.customTheme')}
           actions={
             <>
               <Button
                 size="sm"
                 isLoading={fetching}
                 isIconOnly
-                title="拉取主题"
+                title={t('appearance.fetchTheme')}
                 variant="light"
                 onPress={async () => {
                   setFetching(true)
@@ -231,7 +264,7 @@ const AppearanceConfig: React.FC = () => {
               <Button
                 size="sm"
                 isIconOnly
-                title="导入主题"
+                title={t('appearance.importTheme')}
                 variant="light"
                 onPress={async () => {
                   const files = await getFilePath(['css'])
@@ -249,7 +282,7 @@ const AppearanceConfig: React.FC = () => {
               <Button
                 size="sm"
                 isIconOnly
-                title="编辑主题"
+                title={t('appearance.editTheme')}
                 variant="light"
                 onPress={async () => {
                   setOpenCSSEditor(true)

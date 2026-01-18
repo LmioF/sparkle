@@ -8,12 +8,14 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import React from 'react'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 interface Props {
   iconOnly?: boolean
 }
 
 const TunSwitcher: React.FC<Props> = (props) => {
+  const { t } = useTranslation('common')
   const { iconOnly } = props
   const location = useLocation()
   const navigate = useNavigate()
@@ -45,14 +47,14 @@ const TunSwitcher: React.FC<Props> = (props) => {
       window.electron.ipcRenderer.send('updateFloatingWindow')
       window.electron.ipcRenderer.send('updateTrayMenu')
     } catch (e) {
-      alert('TUN 模式切换失败: ' + e)
+      alert(t('sider.tunSwitchFailed') + ': ' + e)
     }
   }
 
   if (iconOnly) {
     return (
       <div className={`${tunCardStatus} flex justify-center`}>
-        <Tooltip content="虚拟网卡" placement="right">
+        <Tooltip content={t('sider.tunCard')} placement="right">
           <Button
             size="sm"
             isIconOnly
@@ -109,7 +111,7 @@ const TunSwitcher: React.FC<Props> = (props) => {
           <h3
             className={`text-md font-bold ${match ? 'text-primary-foreground' : 'text-foreground'}`}
           >
-            虚拟网卡
+            {t('sider.tunCard')}
           </h3>
         </CardFooter>
       </Card>

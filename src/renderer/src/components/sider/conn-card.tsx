@@ -9,6 +9,7 @@ import { IoLink } from 'react-icons/io5'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { platform } from '@renderer/utils/init'
 import TrafficChart from './traffic-chart'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 let currentUpload: number | undefined = undefined
 let currentDownload: number | undefined = undefined
@@ -20,6 +21,7 @@ interface Props {
 }
 
 const ConnCard: React.FC<Props> = (props) => {
+  const { t } = useTranslation('common')
   const { iconOnly } = props
   const { appConfig } = useAppConfig()
   const {
@@ -105,7 +107,7 @@ const ConnCard: React.FC<Props> = (props) => {
   if (iconOnly) {
     return (
       <div className={`${connectionCardStatus} flex justify-center`}>
-        <Tooltip content="连接" placement="right">
+        <Tooltip content={t('sider.connCard')} placement="right">
           <Button
             size="sm"
             isIconOnly
@@ -172,7 +174,7 @@ const ConnCard: React.FC<Props> = (props) => {
               <div
                 className={`flex justify-between items-center w-full text-md font-bold ${match ? 'text-primary-foreground' : 'text-foreground'}`}
               >
-                <h3>连接</h3>
+                <h3>{t('sider.connCard')}</h3>
               </div>
             </CardFooter>
             <TrafficChart data={trafficData} isActive={match} />
@@ -205,7 +207,7 @@ const ConnCard: React.FC<Props> = (props) => {
             <h3
               className={`text-md font-bold ${match ? 'text-primary-foreground' : 'text-foreground'}`}
             >
-              连接
+              {t('sider.connCard')}
             </h3>
           </CardFooter>
         </Card>

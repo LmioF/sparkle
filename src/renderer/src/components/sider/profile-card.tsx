@@ -13,6 +13,7 @@ import React, { useState } from 'react'
 import ConfigViewer from './config-viewer'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { TiFolder } from 'react-icons/ti'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 dayjs.extend(relativeTime)
 dayjs.locale('zh-cn')
@@ -22,6 +23,7 @@ interface Props {
 }
 
 const ProfileCard: React.FC<Props> = (props) => {
+  const { t } = useTranslation('common')
   const { appConfig, patchAppConfig } = useAppConfig()
   const { iconOnly } = props
   const {
@@ -50,7 +52,7 @@ const ProfileCard: React.FC<Props> = (props) => {
   const info = items?.find((item) => item.id === current) ?? {
     id: 'default',
     type: 'local',
-    name: '空白订阅'
+    name: t('sider.emptyProfile')
   }
 
   const extra = info?.extra
@@ -60,7 +62,7 @@ const ProfileCard: React.FC<Props> = (props) => {
   if (iconOnly) {
     return (
       <div className={`${profileCardStatus} flex justify-center`}>
-        <Tooltip content="订阅管理" placement="right">
+        <Tooltip content={t('sider.profileCard')} placement="right">
           <Button
             size="sm"
             isIconOnly
@@ -113,7 +115,7 @@ const ProfileCard: React.FC<Props> = (props) => {
                 <Button
                   isIconOnly
                   size="sm"
-                  title="查看当前运行时配置"
+                  title={t('sider.viewRuntimeConfig')}
                   variant="light"
                   color="default"
                   onPress={() => {
@@ -160,7 +162,9 @@ const ProfileCard: React.FC<Props> = (props) => {
                       await patchAppConfig({ profileDisplayDate: 'update' })
                     }}
                   >
-                    {extra.expire ? dayjs.unix(extra.expire).format('YYYY-MM-DD') : '长期有效'}
+                    {extra.expire
+                      ? dayjs.unix(extra.expire).format('YYYY-MM-DD')
+                      : t('sider.expire')}
                   </Button>
                 ) : (
                   <Button
@@ -187,7 +191,7 @@ const ProfileCard: React.FC<Props> = (props) => {
                   variant="bordered"
                   className={`${match ? 'text-primary-foreground border-primary-foreground' : 'border-primary text-primary'}`}
                 >
-                  远程
+                  {t('sider.remote')}
                 </Chip>
                 <small>{dayjs(info.updated).fromNow()}</small>
               </div>
@@ -201,7 +205,7 @@ const ProfileCard: React.FC<Props> = (props) => {
                   variant="bordered"
                   className={`${match ? 'text-primary-foreground border-primary-foreground' : 'border-primary text-primary'}`}
                 >
-                  本地
+                  {t('sider.local')}
                 </Chip>
               </div>
             )}
@@ -240,7 +244,7 @@ const ProfileCard: React.FC<Props> = (props) => {
                 className="bg-transparent"
                 variant="flat"
                 color="default"
-                title="查看当前运行时配置"
+                title={t('sider.viewRuntimeConfig')}
                 onPress={() => {
                   setShowRuntimeConfig(true)
                 }}
@@ -255,7 +259,7 @@ const ProfileCard: React.FC<Props> = (props) => {
             <h3
               className={`text-md font-bold ${match ? 'text-primary-foreground' : 'text-foreground'}`}
             >
-              订阅管理
+              {t('sider.profileCard')}
             </h3>
           </CardFooter>
         </Card>

@@ -13,8 +13,10 @@ import {
 import React, { useEffect, useState } from 'react'
 import { HiExternalLink } from 'react-icons/hi'
 import { IoMdCloudDownload } from 'react-icons/io'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 const SubStore: React.FC = () => {
+  const { t } = useTranslation('substore')
   const { appConfig } = useAppConfig()
   const { useCustomSubStore, customSubStoreUrl } = appConfig || {}
   const [backendPort, setBackendPort] = useState<number | undefined>()
@@ -33,11 +35,11 @@ const SubStore: React.FC = () => {
   return (
     <>
       <BasePage
-        title="Sub-Store"
+        title={t('title')}
         header={
           <div className="flex gap-2">
             <Button
-              title="检查更新"
+              title={t('checkUpdate')}
               isIconOnly
               size="sm"
               className="app-nodrag"
@@ -45,7 +47,7 @@ const SubStore: React.FC = () => {
               isLoading={isUpdating}
               onPress={async () => {
                 try {
-                  new Notification('Sub-Store 更新中...')
+                  new Notification(t('updating'))
                   setIsUpdating(true)
                   await downloadSubStore()
                   await stopSubStoreBackendServer()
@@ -55,9 +57,9 @@ const SubStore: React.FC = () => {
                   await stopSubStoreFrontendServer()
                   await startSubStoreFrontendServer()
                   await getPort()
-                  new Notification('Sub-Store 更新完成')
+                  new Notification(t('updateSuccess'))
                 } catch (e) {
-                  new Notification(`Sub-Store 更新失败：${e}`)
+                  new Notification(`${t('updateFailed')}：${e}`)
                 } finally {
                   setIsUpdating(false)
                 }
@@ -66,7 +68,7 @@ const SubStore: React.FC = () => {
               <IoMdCloudDownload className="text-lg" />
             </Button>
             <Button
-              title="在浏览器中打开"
+              title={t('openInBrowser')}
               isIconOnly
               size="sm"
               className="app-nodrag"

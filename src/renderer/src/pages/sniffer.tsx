@@ -6,8 +6,10 @@ import EditableList from '@renderer/components/base/base-list-editor'
 import { useControledMihomoConfig } from '@renderer/hooks/use-controled-mihomo-config'
 import { restartCore } from '@renderer/utils/ipc'
 import React, { useState } from 'react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 const Sniffer: React.FC = () => {
+  const { t } = useTranslation('sniffer')
   const { controledMihomoConfig, patchControledMihomoConfig } = useControledMihomoConfig()
   const { sniffer } = controledMihomoConfig || {}
   const {
@@ -78,7 +80,7 @@ const Sniffer: React.FC = () => {
 
   return (
     <BasePage
-      title="域名嗅探设置"
+      title={t('title')}
       header={
         changed && (
           <Button
@@ -100,13 +102,13 @@ const Sniffer: React.FC = () => {
               })
             }
           >
-            保存
+            {t('common:actions.save')}
           </Button>
         )
       }
     >
       <SettingCard>
-        <SettingItem title="覆盖连接地址" divider>
+        <SettingItem title={t('overrideDestination')} divider>
           <Switch
             size="sm"
             isSelected={values.overrideDestination}
@@ -126,7 +128,7 @@ const Sniffer: React.FC = () => {
             }}
           />
         </SettingItem>
-        <SettingItem title="对真实 IP 映射嗅探" divider>
+        <SettingItem title={t('sniffRealIP')} divider>
           <Switch
             size="sm"
             isSelected={values.forceDNSMapping}
@@ -135,7 +137,7 @@ const Sniffer: React.FC = () => {
             }}
           />
         </SettingItem>
-        <SettingItem title="对未映射 IP 地址嗅探" divider>
+        <SettingItem title={t('sniffUnmappedIP')} divider>
           <Switch
             size="sm"
             isSelected={values.parsePureIP}
@@ -144,56 +146,56 @@ const Sniffer: React.FC = () => {
             }}
           />
         </SettingItem>
-        <SettingItem title="HTTP 端口嗅探" divider>
+        <SettingItem title={t('httpPorts')} divider>
           <Input
             size="sm"
             className="w-[50%]"
-            placeholder="端口号，使用逗号分割多个值"
+            placeholder={t('common:ui.portPlaceholder')}
             value={values.sniff.HTTP?.ports.join(',')}
             onValueChange={(v) => handleSniffPortChange('HTTP', v)}
           />
         </SettingItem>
-        <SettingItem title="TLS 端口嗅探" divider>
+        <SettingItem title={t('tlsPorts')} divider>
           <Input
             size="sm"
             className="w-[50%]"
-            placeholder="端口号，使用逗号分割多个值"
+            placeholder={t('common:ui.portPlaceholder')}
             value={values.sniff.TLS?.ports.join(',')}
             onValueChange={(v) => handleSniffPortChange('TLS', v)}
           />
         </SettingItem>
-        <SettingItem title="QUIC 端口嗅探" divider>
+        <SettingItem title={t('quicPorts')} divider>
           <Input
             size="sm"
             className="w-[50%]"
-            placeholder="端口号，使用逗号分割多个值"
+            placeholder={t('common:ui.portPlaceholder')}
             value={values.sniff.QUIC?.ports.join(',')}
             onValueChange={(v) => handleSniffPortChange('QUIC', v)}
           />
         </SettingItem>
         <EditableList
-          title="跳过域名嗅探"
+          title={t('skipDomain')}
           items={values.skipDomain}
           onChange={(list) => setValues({ ...values, skipDomain: list as string[] })}
-          placeholder="例：+.push.apple.com"
+          placeholder={t('common:ui.domainPlaceholder')}
         />
         <EditableList
-          title="强制域名嗅探"
+          title={t('forceDomain')}
           items={values.forceDomain}
           onChange={(list) => setValues({ ...values, forceDomain: list as string[] })}
-          placeholder="例：v2ex.com"
+          placeholder={t('common:ui.domainPlaceholder2')}
         />
         <EditableList
-          title="跳过目标地址嗅探"
+          title={t('skipDstAddress')}
           items={values.skipDstAddress}
           onChange={(list) => setValues({ ...values, skipDstAddress: list as string[] })}
-          placeholder="例：1.1.1.1/32"
+          placeholder={t('common:ui.addressPlaceholder')}
         />
         <EditableList
-          title="跳过来源地址嗅探"
+          title={t('skipSrcAddress')}
           items={values.skipSrcAddress}
           onChange={(list) => setValues({ ...values, skipSrcAddress: list as string[] })}
-          placeholder="例：192.168.1.1/24"
+          placeholder={t('common:ui.addressPlaceholder2')}
           divider={false}
         />
       </SettingCard>

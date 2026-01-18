@@ -139,7 +139,7 @@ export const BaseEditor: React.FC<Props> = (props) => {
     })
   }
 
-  const diffEditorWillUnmount = (editor: monaco.editor.IStandaloneDiffEditor): void => {
+  const diffEditorWillUnmount = (_editor: monaco.editor.IStandaloneDiffEditor): void => {
     // 不需要在这里清理 model，因为我们已经 patch 了 react-monaco-editor
     // 让库自己在 dispose editor 之前清理 model
   }

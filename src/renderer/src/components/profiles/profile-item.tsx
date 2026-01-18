@@ -15,6 +15,7 @@ import { calcPercent, calcTraffic } from '@renderer/utils/calc'
 import { IoMdMore, IoMdRefresh } from 'react-icons/io'
 import dayjs from 'dayjs'
 import React, { Key, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import EditFileModal from './edit-file-modal'
 import EditInfoModal from './edit-info-modal'
 import { useSortable } from '@dnd-kit/sortable'
@@ -52,6 +53,7 @@ const ProfileItem: React.FC<Props> = (props) => {
     isCurrent,
     switching
   } = props
+  const { t } = useTranslation('profile')
   const extra = info?.extra
   const usage = (extra?.upload ?? 0) + (extra?.download ?? 0)
   const total = extra?.total ?? 0
@@ -79,28 +81,28 @@ const ProfileItem: React.FC<Props> = (props) => {
     const list = [
       {
         key: 'edit-info',
-        label: '编辑信息',
+        label: t('editInfo'),
         showDivider: false,
         color: 'default',
         className: ''
       } as MenuItem,
       {
         key: 'edit-file',
-        label: '编辑文件',
+        label: t('editFile'),
         showDivider: false,
         color: 'default',
         className: ''
       } as MenuItem,
       {
         key: 'open-file',
-        label: '打开文件',
+        label: t('openFile'),
         showDivider: true,
         color: 'default',
         className: ''
       } as MenuItem,
       {
         key: 'delete',
-        label: '删除',
+        label: t('common:actions.delete'),
         showDivider: false,
         color: 'danger',
         className: 'text-danger'
@@ -109,14 +111,14 @@ const ProfileItem: React.FC<Props> = (props) => {
     if (info.home) {
       list.unshift({
         key: 'home',
-        label: '主页',
+        label: t('homepage'),
         showDivider: false,
         color: 'default',
         className: ''
       } as MenuItem)
     }
     return list
-  }, [info])
+  }, [info, t])
 
   const onMenuAction = async (key: Key): Promise<void> => {
     switch (key) {
@@ -184,9 +186,9 @@ const ProfileItem: React.FC<Props> = (props) => {
       {confirmOpen && (
         <ConfirmModal
           onChange={setConfirmOpen}
-          title="确认删除配置？"
-          confirmText="确认删除"
-          cancelText="取消"
+          title={t('confirmDeleteProfile')}
+          confirmText={t('common:actions.confirm') + t('common:actions.delete')}
+          cancelText={t('common:actions.cancel')}
           onConfirm={() => {
             removeProfileItem(info.id)
             mutateProfileConfig()
@@ -276,7 +278,9 @@ const ProfileItem: React.FC<Props> = (props) => {
                       await patchAppConfig({ profileDisplayDate: 'update' })
                     }}
                   >
-                    {extra.expire ? dayjs.unix(extra.expire).format('YYYY-MM-DD') : '长期有效'}
+                    {extra.expire
+                      ? dayjs.unix(extra.expire).format('YYYY-MM-DD')
+                      : t('common:sider.expire')}
                   </Button>
                 ) : (
                   <Button
@@ -303,7 +307,7 @@ const ProfileItem: React.FC<Props> = (props) => {
                   variant="bordered"
                   className={`${isCurrent ? 'text-primary-foreground border-primary-foreground' : 'border-primary text-primary'}`}
                 >
-                  远程
+                  {t('common:sider.remote')}
                 </Chip>
                 <small>{dayjs(info.updated).fromNow()}</small>
               </div>
@@ -317,7 +321,7 @@ const ProfileItem: React.FC<Props> = (props) => {
                   variant="bordered"
                   className={`${isCurrent ? 'text-primary-foreground border-primary-foreground' : 'border-primary text-primary'}`}
                 >
-                  本地
+                  {t('common:sider.local')}
                 </Chip>
               </div>
             )}

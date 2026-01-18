@@ -11,6 +11,7 @@ import {
 import { IoMdMore, IoMdRefresh } from 'react-icons/io'
 import dayjs from 'dayjs'
 import React, { Key, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import EditFileModal from './edit-file-modal'
 import EditInfoModal from './edit-info-modal'
 import { useSortable } from '@dnd-kit/sortable'
@@ -38,6 +39,7 @@ interface MenuItem {
 const OverrideItem: React.FC<Props> = (props) => {
   const { info, addOverrideItem, removeOverrideItem, mutateOverrideConfig, updateOverrideItem } =
     props
+  const { t } = useTranslation('override')
   const [updating, setUpdating] = useState(false)
   const [openInfoEditor, setOpenInfoEditor] = useState(false)
   const [openFileEditor, setOpenFileEditor] = useState(false)
@@ -59,35 +61,35 @@ const OverrideItem: React.FC<Props> = (props) => {
     const list = [
       {
         key: 'edit-info',
-        label: '编辑信息',
+        label: t('editInfo'),
         showDivider: false,
         color: 'default',
         className: ''
       } as MenuItem,
       {
         key: 'edit-file',
-        label: '编辑文件',
+        label: t('editFile'),
         showDivider: false,
         color: 'default',
         className: ''
       } as MenuItem,
       {
         key: 'open-file',
-        label: '打开文件',
+        label: t('openFile'),
         showDivider: false,
         color: 'default',
         className: ''
       } as MenuItem,
       {
         key: 'exec-log',
-        label: '执行日志',
+        label: t('execLog'),
         showDivider: true,
         color: 'default',
         className: ''
       } as MenuItem,
       {
         key: 'delete',
-        label: '删除',
+        label: t('common:actions.delete'),
         showDivider: false,
         color: 'danger',
         className: 'text-danger'
@@ -97,7 +99,7 @@ const OverrideItem: React.FC<Props> = (props) => {
       list.splice(3, 1)
     }
     return list
-  }, [info])
+  }, [info, t])
   const onMenuAction = (key: Key): void => {
     switch (key) {
       case 'edit-info': {
@@ -162,9 +164,9 @@ const OverrideItem: React.FC<Props> = (props) => {
       {confirmOpen && (
         <ConfirmModal
           onChange={setConfirmOpen}
-          title="确认删除覆写？"
-          confirmText="确认删除"
-          cancelText="取消"
+          title={t('confirmDelete')}
+          confirmText={t('common:actions.confirm') + t('common:actions.delete')}
+          cancelText={t('common:actions.cancel')}
           onConfirm={() => {
             removeOverrideItem(info.id)
             mutateOverrideConfig()
@@ -242,7 +244,7 @@ const OverrideItem: React.FC<Props> = (props) => {
               <div className={`mt-2 flex justify-start`}>
                 {info.global && (
                   <Chip size="sm" variant="dot" color="primary" className="mr-2">
-                    全局
+                    {t('global')}
                   </Chip>
                 )}
                 <Chip size="sm" variant="bordered">

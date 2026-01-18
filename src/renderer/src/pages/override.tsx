@@ -26,10 +26,12 @@ import EditInfoModal from '@renderer/components/override/edit-info-modal'
 import { FaPlus } from 'react-icons/fa6'
 import { HiOutlineDocumentText } from 'react-icons/hi'
 import { RiArchiveLine } from 'react-icons/ri'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 const emptyItems: OverrideItem[] = []
 
 const Override: React.FC = () => {
+  const { t } = useTranslation('override')
   const {
     overrideConfig,
     setOverrideConfig,
@@ -124,10 +126,10 @@ const Override: React.FC = () => {
               ext: file.name.endsWith('.js') ? 'js' : 'yaml'
             })
           } catch (e) {
-            alert('文件导入失败' + e)
+            alert(t('fileImportFailed') + e)
           }
         } else {
-          alert('不支持的文件类型')
+          alert(t('unsupportedFileType'))
         }
       }
       isProcessingDrop.current = false
@@ -150,13 +152,13 @@ const Override: React.FC = () => {
   return (
     <BasePage
       ref={pageRef}
-      title="覆写"
+      title={t('title')}
       header={
         <>
           <Button
             size="sm"
             variant="light"
-            title="使用文档"
+            title={t('docs')}
             isIconOnly
             className="app-nodrag"
             onPress={() => {
@@ -167,7 +169,7 @@ const Override: React.FC = () => {
           </Button>
           <Button
             className="app-nodrag"
-            title="常用覆写仓库"
+            title={t('repo')}
             isIconOnly
             variant="light"
             size="sm"
@@ -209,7 +211,7 @@ const Override: React.FC = () => {
             isLoading={importing}
             onPress={handleImport}
           >
-            导入
+            {t('import')}
           </Button>
           <Dropdown>
             <DropdownTrigger>
@@ -237,14 +239,14 @@ const Override: React.FC = () => {
                   }
                 } else if (key === 'new-yaml') {
                   await addOverrideItem({
-                    name: '新建 YAML',
+                    name: t('newYaml'),
                     type: 'local',
                     file: '# https://mihomo.party/docs/guide/override/yaml',
                     ext: 'yaml'
                   })
                 } else if (key === 'new-js') {
                   await addOverrideItem({
-                    name: '新建 JS',
+                    name: t('newJs'),
                     type: 'local',
                     file: '// https://mihomo.party/docs/guide/override/javascript\nfunction main(config) {\n  return config\n}',
                     ext: 'js'
@@ -263,10 +265,10 @@ const Override: React.FC = () => {
                 }
               }}
             >
-              <DropdownItem key="open">打开本地覆写</DropdownItem>
-              <DropdownItem key="import">导入远程覆写</DropdownItem>
-              <DropdownItem key="new-yaml">新建 YAML</DropdownItem>
-              <DropdownItem key="new-js">新建 JavaScript</DropdownItem>
+              <DropdownItem key="open">{t('openLocal')}</DropdownItem>
+              <DropdownItem key="import">{t('importRemote')}</DropdownItem>
+              <DropdownItem key="new-yaml">{t('newYaml')}</DropdownItem>
+              <DropdownItem key="new-js">{t('newJs')}</DropdownItem>
             </DropdownMenu>
           </Dropdown>
         </div>

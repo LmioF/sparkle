@@ -5,10 +5,12 @@ import { Button, Switch, Tab, Tabs, Tooltip } from '@heroui/react'
 import useSWR from 'swr'
 import { checkAutoRun, disableAutoRun, enableAutoRun, relaunchApp } from '@renderer/utils/ipc'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import { IoIosHelpCircle } from 'react-icons/io'
 import ConfirmModal from '../base/base-confirm'
 
 const GeneralConfig: React.FC = () => {
+  const { t } = useTranslation('settings')
   const { data: enable, mutate: mutateEnable } = useSWR('checkAutoRun', checkAutoRun)
   const { appConfig, patchAppConfig } = useAppConfig()
   const {
@@ -27,14 +29,14 @@ const GeneralConfig: React.FC = () => {
     <>
       {showRestartConfirm && (
         <ConfirmModal
-          title="确定要重启应用吗？"
+          title={t('general.restartConfirm')}
           description={
             <div>
-              <p>修改 GPU 加速设置需要重启应用才能生效</p>
+              <p>{t('general.restartConfirmDesc')}</p>
             </div>
           }
-          confirmText="重启"
-          cancelText="取消"
+          confirmText={t('general.restart')}
+          cancelText={t('common:actions.cancel')}
           onChange={(open) => {
             if (!open) {
               setPendingDisableGPU(disableGPU)
@@ -51,7 +53,7 @@ const GeneralConfig: React.FC = () => {
         />
       )}
       <SettingCard>
-        <SettingItem title="开机自启" divider>
+        <SettingItem title={t('general.autoStart')} divider>
           <Switch
             size="sm"
             isSelected={enable}
@@ -70,7 +72,7 @@ const GeneralConfig: React.FC = () => {
             }}
           />
         </SettingItem>
-        <SettingItem title="静默启动" divider>
+        <SettingItem title={t('general.silentStart')} divider>
           <Switch
             size="sm"
             isSelected={silentStart}
@@ -79,7 +81,7 @@ const GeneralConfig: React.FC = () => {
             }}
           />
         </SettingItem>
-        <SettingItem title="自动检查更新" divider>
+        <SettingItem title={t('general.autoCheckUpdate')} divider>
           <Switch
             size="sm"
             isSelected={autoCheckUpdate}
@@ -88,7 +90,7 @@ const GeneralConfig: React.FC = () => {
             }}
           />
         </SettingItem>
-        <SettingItem title="更新通道" divider>
+        <SettingItem title={t('general.updateChannel')} divider>
           <Tabs
             size="sm"
             color="primary"
@@ -97,15 +99,15 @@ const GeneralConfig: React.FC = () => {
               patchAppConfig({ updateChannel: v as 'stable' | 'beta' })
             }}
           >
-            <Tab key="stable" title="正式版" />
-            <Tab key="beta" title="测试版" />
+            <Tab key="stable" title={t('general.updateChannelStable')} />
+            <Tab key="beta" title={t('general.updateChannelBeta')} />
           </Tabs>
         </SettingItem>
 
         <SettingItem
-          title="禁用 GPU 加速"
+          title={t('general.disableGPU')}
           actions={
-            <Tooltip content="开启后，应用将禁用 GPU 加速，可能会提高稳定性，但会降低性能">
+            <Tooltip content={t('general.disableGPUTip')}>
               <Button isIconOnly size="sm" variant="light">
                 <IoIosHelpCircle className="text-lg" />
               </Button>
@@ -123,9 +125,9 @@ const GeneralConfig: React.FC = () => {
           />
         </SettingItem>
         <SettingItem
-          title="禁用动画"
+          title={t('general.disableAnimation')}
           actions={
-            <Tooltip content="开启后，应用将减轻绝大部分动画效果，可能会提高性能">
+            <Tooltip content={t('general.disableAnimationTip')}>
               <Button isIconOnly size="sm" variant="light">
                 <IoIosHelpCircle className="text-lg" />
               </Button>

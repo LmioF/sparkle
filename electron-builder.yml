@@ -18,6 +18,10 @@ files:
 extraResources:
   - from: './extra/'
     to: ''
+  - from: './src/shared/locales/'
+    to: 'resources/locales'
+    filter:
+      - '**/*.json'
 protocols:
   name: 'Sparkle URI Scheme'
   schemes:

@@ -3,23 +3,28 @@ import SettingCard from '../base/base-setting-card'
 import SettingItem from '../base/base-setting-item'
 import { RadioGroup, Radio } from '@heroui/react'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
-const titleMap = {
-  sysproxyCardStatus: '系统代理',
-  tunCardStatus: '虚拟网卡',
-  profileCardStatus: '订阅管理',
-  proxyCardStatus: '代理组',
-  ruleCardStatus: '规则',
-  resourceCardStatus: '外部资源',
-  overrideCardStatus: '覆写',
-  connectionCardStatus: '连接',
-  mihomoCoreCardStatus: '内核',
-  dnsCardStatus: 'DNS',
-  sniffCardStatus: '域名嗅探',
-  logCardStatus: '日志',
-  substoreCardStatus: 'Sub-Store'
-}
+import { useTranslation } from '@renderer/hooks/useTranslation'
+
 const SiderConfig: React.FC = () => {
+  const { t } = useTranslation('settings')
   const { appConfig, patchAppConfig } = useAppConfig()
+
+  const titleMap = {
+    sysproxyCardStatus: t('sider.sysproxyCardStatus'),
+    tunCardStatus: t('sider.tunCardStatus'),
+    profileCardStatus: t('sider.profileCardStatus'),
+    proxyCardStatus: t('sider.proxyCardStatus'),
+    ruleCardStatus: t('sider.ruleCardStatus'),
+    resourceCardStatus: t('sider.resourceCardStatus'),
+    overrideCardStatus: t('sider.overrideCardStatus'),
+    connectionCardStatus: t('sider.connectionCardStatus'),
+    mihomoCoreCardStatus: t('sider.mihomoCoreCardStatus'),
+    dnsCardStatus: t('sider.dnsCardStatus'),
+    sniffCardStatus: t('sider.sniffCardStatus'),
+    logCardStatus: t('sider.logCardStatus'),
+    substoreCardStatus: t('sider.substoreCardStatus')
+  }
+
   const {
     sysproxyCardStatus = 'col-span-1',
     tunCardStatus = 'col-span-1',
@@ -53,7 +58,7 @@ const SiderConfig: React.FC = () => {
   }
 
   return (
-    <SettingCard title="侧边栏设置">
+    <SettingCard title={t('sider.title')}>
       {Object.keys(cardStatus).map((key, index, array) => {
         return (
           <SettingItem title={titleMap[key]} key={key} divider={index !== array.length - 1}>
@@ -64,9 +69,9 @@ const SiderConfig: React.FC = () => {
                 patchAppConfig({ [key]: v as CardStatus })
               }}
             >
-              <Radio value="col-span-2">大</Radio>
-              <Radio value="col-span-1">小</Radio>
-              <Radio value="hidden">隐藏</Radio>
+              <Radio value="col-span-2">{t('common:ui.large')}</Radio>
+              <Radio value="col-span-1">{t('common:ui.small')}</Radio>
+              <Radio value="hidden">{t('common:ui.hidden')}</Radio>
             </RadioGroup>
           </SettingItem>
         )

@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react'
 import { BaseEditor } from '../base/base-editor-lazy'
 import { getOverride, restartCore, setOverride } from '@renderer/utils/ipc'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import ConfirmModal from '../base/base-confirm'
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
 
 const EditFileModal: React.FC<Props> = (props) => {
   const { id, language, onClose } = props
+  const { t } = useTranslation('override')
   const { appConfig: { disableAnimation = false } = {} } = useAppConfig()
   const [currData, setCurrData] = useState('')
   const [originalData, setOriginalData] = useState('')
@@ -64,17 +66,18 @@ const EditFileModal: React.FC<Props> = (props) => {
     >
       {isConfirmOpen && (
         <ConfirmModal
-          title="确认取消"
-          description="您有未保存的修改，确定要取消吗？"
-          confirmText="放弃修改"
-          cancelText="继续编辑"
+          title={t('confirmCancel')}
+          description={t('unsavedChanges')}
+          confirmText={t('discardChanges')}
+          cancelText={t('continueEditing')}
           onChange={setIsConfirmOpen}
           onConfirm={onClose}
         />
       )}
       <ModalContent className="h-full w-[calc(100%-100px)]">
         <ModalHeader className="flex pb-0 app-drag">
-          编辑覆写{language === 'javascript' ? '脚本' : '配置'}
+          {t('editOverride')}
+          {language === 'javascript' ? t('script') : t('config')}
         </ModalHeader>
         <ModalBody className="h-full">
           <BaseEditor
@@ -88,15 +91,15 @@ const EditFileModal: React.FC<Props> = (props) => {
         <ModalFooter className="pt-0 flex justify-between">
           <div className="flex items-center space-x-2">
             <Switch size="sm" isSelected={isDiff} onValueChange={setIsDiff}>
-              显示修改
+              {t('showChanges')}
             </Switch>
             <Switch size="sm" isSelected={sideBySide} onValueChange={setSideBySide}>
-              侧边显示
+              {t('sideBySide')}
             </Switch>
           </div>
           <div className="flex gap-2">
             <Button size="sm" variant="light" onPress={handleClose}>
-              取消
+              {t('common:actions.cancel')}
             </Button>
             <Button
               size="sm"
@@ -111,7 +114,7 @@ const EditFileModal: React.FC<Props> = (props) => {
                 }
               }}
             >
-              保存
+              {t('common:actions.save')}
             </Button>
           </div>
         </ModalFooter>

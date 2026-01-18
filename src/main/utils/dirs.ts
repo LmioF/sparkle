@@ -5,6 +5,7 @@ import path from 'path'
 import { execSync } from 'child_process'
 import { getAppConfigSync } from '../config/app'
 import { checkCorePermissionSync } from '../core/manager'
+import { t } from './i18n'
 
 export const homeDir = app.getPath('home')
 
@@ -97,12 +98,14 @@ export function mihomoCorePath(core: string): string {
   if (core === 'system') {
     const sysPath = systemCorePath()
     if (!sysPath || !existsSync(sysPath)) {
-      const errorMsg = sysPath ? `系统内核路径无效或不存在: ${sysPath}` : '系统内核路径未设置'
+      const errorMsg = sysPath
+        ? t('main.errors.systemCorePathInvalid', { path: sysPath })
+        : t('main.errors.systemCorePathNotSet')
       throw new Error(errorMsg)
     }
     return sysPath
   }
-  throw new Error('内核路径错误')
+  throw new Error(t('main.errors.corePathError'))
 }
 
 function systemCorePath(): string {

@@ -15,6 +15,7 @@ import {
 import React, { useState, useEffect } from 'react'
 import SettingItem from '../base/base-setting-item'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import debounce from '@renderer/utils/debounce'
 
 interface Props {
@@ -23,6 +24,7 @@ interface Props {
 
 const ProxySettingModal: React.FC<Props> = (props) => {
   const { onClose } = props
+  const { t } = useTranslation('proxy')
   const { appConfig, patchAppConfig } = useAppConfig()
 
   const {
@@ -57,9 +59,9 @@ const ProxySettingModal: React.FC<Props> = (props) => {
       scrollBehavior="inside"
     >
       <ModalContent className="flag-emoji">
-        <ModalHeader className="flex pb-0">代理组设置</ModalHeader>
+        <ModalHeader className="flex pb-0">{t('settings')}</ModalHeader>
         <ModalBody className="py-2 gap-1">
-          <SettingItem title="代理节点展示列数" divider>
+          <SettingItem title={t('proxyCols')} divider>
             <Select
               classNames={{ trigger: 'data-[hover=true]:bg-default-200' }}
               className="w-[150px]"
@@ -70,14 +72,14 @@ const ProxySettingModal: React.FC<Props> = (props) => {
                 await patchAppConfig({ proxyCols: v.currentKey as 'auto' | '1' | '2' | '3' | '4' })
               }}
             >
-              <SelectItem key="auto">自动</SelectItem>
-              <SelectItem key="1">一列</SelectItem>
-              <SelectItem key="2">两列</SelectItem>
-              <SelectItem key="3">三列</SelectItem>
-              <SelectItem key="4">四列</SelectItem>
+              <SelectItem key="auto">{t('proxyColsAuto')}</SelectItem>
+              <SelectItem key="1">{t('proxyCols1')}</SelectItem>
+              <SelectItem key="2">{t('proxyCols2')}</SelectItem>
+              <SelectItem key="3">{t('proxyCols3')}</SelectItem>
+              <SelectItem key="4">{t('proxyCols4')}</SelectItem>
             </Select>
           </SettingItem>
-          <SettingItem title="节点排序方式" divider>
+          <SettingItem title={t('proxyDisplayOrder')} divider>
             <Tabs
               size="sm"
               color="primary"
@@ -88,12 +90,12 @@ const ProxySettingModal: React.FC<Props> = (props) => {
                 })
               }}
             >
-              <Tab key="default" title="默认" />
-              <Tab key="delay" title="延迟" />
-              <Tab key="name" title="名称" />
+              <Tab key="default" title={t('orderBy.default')} />
+              <Tab key="delay" title={t('orderBy.delay')} />
+              <Tab key="name" title={t('orderBy.name')} />
             </Tabs>
           </SettingItem>
-          <SettingItem title="代理组详细信息" divider>
+          <SettingItem title={t('groupDisplayLayout')} divider>
             <Tabs
               size="sm"
               color="primary"
@@ -104,12 +106,12 @@ const ProxySettingModal: React.FC<Props> = (props) => {
                 })
               }}
             >
-              <Tab key="hidden" title="隐藏" />
-              <Tab key="single" title="单行" />
-              <Tab key="double" title="双行" />
+              <Tab key="hidden" title={t('displayLayout.hidden')} />
+              <Tab key="single" title={t('displayLayout.single')} />
+              <Tab key="double" title={t('displayLayout.double')} />
             </Tabs>
           </SettingItem>
-          <SettingItem title="代理节点详细信息" divider>
+          <SettingItem title={t('proxyDisplayLayout')} divider>
             <Tabs
               size="sm"
               color="primary"
@@ -120,12 +122,12 @@ const ProxySettingModal: React.FC<Props> = (props) => {
                 })
               }}
             >
-              <Tab key="hidden" title="隐藏" />
-              <Tab key="single" title="单行" />
-              <Tab key="double" title="双行" />
+              <Tab key="hidden" title={t('displayLayout.hidden')} />
+              <Tab key="single" title={t('displayLayout.single')} />
+              <Tab key="double" title={t('displayLayout.double')} />
             </Tabs>
           </SettingItem>
-          <SettingItem title="切换节点时断开连接" divider>
+          <SettingItem title={t('autoCloseConnection')} divider>
             <Switch
               size="sm"
               isSelected={autoCloseConnection}
@@ -134,37 +136,37 @@ const ProxySettingModal: React.FC<Props> = (props) => {
               }}
             />
           </SettingItem>
-          <SettingItem title="延迟测试地址" divider>
+          <SettingItem title={t('delayTestUrl')} divider>
             <Input
               size="sm"
               className="w-[60%]"
               value={url}
-              placeholder="默认 https://www.gstatic.com/generate_204"
+              placeholder={t('delayTestUrlPlaceholder')}
               onValueChange={(v) => {
                 setUrl(v)
                 setUrlDebounce(v)
               }}
             />
           </SettingItem>
-          <SettingItem title="延迟测试并发数量" divider>
+          <SettingItem title={t('delayTestConcurrency')} divider>
             <Input
               type="number"
               size="sm"
               className="w-[100px]"
               value={delayTestConcurrency?.toString()}
-              placeholder="默认 50"
+              placeholder={t('delayTestConcurrencyPlaceholder')}
               onValueChange={(v) => {
                 patchAppConfig({ delayTestConcurrency: parseInt(v) })
               }}
             />
           </SettingItem>
-          <SettingItem title="延迟测试超时时间">
+          <SettingItem title={t('delayTestTimeout')}>
             <Input
               type="number"
               size="sm"
               className="w-[100px]"
               value={delayTestTimeout?.toString()}
-              placeholder="默认 5000"
+              placeholder={t('delayTestTimeoutPlaceholder')}
               onValueChange={(v) => {
                 patchAppConfig({ delayTestTimeout: parseInt(v) })
               }}
@@ -173,7 +175,7 @@ const ProxySettingModal: React.FC<Props> = (props) => {
         </ModalBody>
         <ModalFooter>
           <Button size="sm" variant="light" onPress={onClose}>
-            关闭
+            {t('common:actions.close')}
           </Button>
         </ModalFooter>
       </ModalContent>

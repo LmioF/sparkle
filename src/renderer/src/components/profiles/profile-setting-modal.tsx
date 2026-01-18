@@ -14,6 +14,7 @@ import {
 import React, { useState, useEffect, useRef } from 'react'
 import SettingItem from '../base/base-setting-item'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import { getGistUrl, getUserAgent } from '@renderer/utils/ipc'
 import debounce from '@renderer/utils/debounce'
 import { IoIosHelpCircle } from 'react-icons/io'
@@ -25,6 +26,7 @@ interface Props {
 
 const ProfileSettingModal: React.FC<Props> = (props) => {
   const { onClose } = props
+  const { t } = useTranslation('profile')
   const { appConfig, patchAppConfig } = useAppConfig()
 
   const {
@@ -66,9 +68,9 @@ const ProfileSettingModal: React.FC<Props> = (props) => {
       scrollBehavior="inside"
     >
       <ModalContent className="flag-emoji">
-        <ModalHeader className="flex pb-0">订阅设置</ModalHeader>
+        <ModalHeader className="flex pb-0">{t('settings')}</ModalHeader>
         <ModalBody className="py-2 gap-1">
-          <SettingItem title="显示日期" divider>
+          <SettingItem title={t('displayDate')} divider>
             <Tabs
               size="sm"
               color="primary"
@@ -79,14 +81,14 @@ const ProfileSettingModal: React.FC<Props> = (props) => {
                 })
               }}
             >
-              <Tab key="update" title="更新时间" />
-              <Tab key="expire" title="到期时间" />
+              <Tab key="update" title={t('sortBy.updateTime')} />
+              <Tab key="expire" title={t('sortBy.expireTime')} />
             </Tabs>
           </SettingItem>
           <SettingItem
-            title="为不同订阅分别指定工作目录"
+            title={t('diffWorkDir')}
             actions={
-              <Tooltip content="开启后可以避免不同订阅中存在相同代理组名时无法分别保存选择的节点">
+              <Tooltip content={t('diffWorkDirTip')}>
                 <Button isIconOnly size="sm" variant="light">
                   <IoIosHelpCircle className="text-lg" />
                 </Button>
@@ -102,12 +104,12 @@ const ProfileSettingModal: React.FC<Props> = (props) => {
               }}
             />
           </SettingItem>
-          <SettingItem title="订阅拉取 UA" divider>
+          <SettingItem title={t('userAgent')} divider>
             <Input
               size="sm"
               className="w-[60%]"
               value={ua}
-              placeholder={`默认 ${defaultUserAgent}`}
+              placeholder={`${t('userAgentPlaceholder')} ${defaultUserAgent}`}
               onValueChange={(v) => {
                 setUa(v)
                 setUaDebounce(v)
@@ -115,10 +117,10 @@ const ProfileSettingModal: React.FC<Props> = (props) => {
             />
           </SettingItem>
           <SettingItem
-            title="同步运行时配置到 Gist"
+            title={t('syncToGist')}
             actions={
               <Button
-                title="复制 Gist URL"
+                title={t('copyGistUrl')}
                 isIconOnly
                 size="sm"
                 variant="light"
@@ -142,7 +144,7 @@ const ProfileSettingModal: React.FC<Props> = (props) => {
               size="sm"
               className="w-[60%]"
               value={githubToken}
-              placeholder="GitHub Token"
+              placeholder={t('githubTokenPlaceholder')}
               onValueChange={(v) => {
                 patchAppConfig({ githubToken: v })
               }}
@@ -151,7 +153,7 @@ const ProfileSettingModal: React.FC<Props> = (props) => {
         </ModalBody>
         <ModalFooter>
           <Button size="sm" variant="light" onPress={onClose}>
-            关闭
+            {t('common:actions.close')}
           </Button>
         </ModalFooter>
       </ModalContent>

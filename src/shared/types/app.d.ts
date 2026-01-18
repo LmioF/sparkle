@@ -18,6 +18,7 @@ interface IHost {
 }
 
 interface AppConfig {
+  language?: string
   updateChannel: 'stable' | 'beta'
   core: 'mihomo' | 'mihomo-alpha' | 'system'
   systemCorePath?: string

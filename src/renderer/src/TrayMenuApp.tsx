@@ -5,6 +5,7 @@ import { useGroups } from './hooks/use-groups'
 import { mihomoChangeProxy, mihomoGroupDelay, mihomoCloseAllConnections } from './utils/ipc'
 import { useAppConfig } from './hooks/use-app-config'
 import { calcTraffic } from './utils/calc'
+import { useTranslation } from './hooks/useTranslation'
 
 interface TrafficData {
   up: number
@@ -12,6 +13,7 @@ interface TrafficData {
 }
 
 const TrayMenuApp: React.FC = () => {
+  const { t } = useTranslation('common')
   const { groups, mutate } = useGroups()
   const { appConfig } = useAppConfig()
   const { autoCloseConnection } = appConfig || {}
@@ -140,7 +142,7 @@ const TrayMenuApp: React.FC = () => {
       <ScrollShadow className="flex-1 overflow-y-auto">
         {!groups || groups.length === 0 ? (
           <div className="flex items-center justify-center h-full text-default-400 text-sm">
-            暂无数据
+            {t('ui.noData')}
           </div>
         ) : (
           <Accordion

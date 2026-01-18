@@ -1,6 +1,7 @@
 import { Button, Card, CardBody } from '@heroui/react'
 import { mihomoUnfixedProxy } from '@renderer/utils/ipc'
 import React, { useMemo, useState } from 'react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import { FaMapPin } from 'react-icons/fa6'
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 const ProxyItem: React.FC<Props> = (props) => {
   const { mutateProxies, proxyDisplayLayout, group, proxy, selected, onSelect, onProxyDelay } =
     props
+  const { t } = useTranslation('proxy')
 
   const delay = useMemo(() => {
     if (proxy.history.length > 0) {
@@ -33,8 +35,8 @@ const ProxyItem: React.FC<Props> = (props) => {
   }
 
   function delayText(delay: number): string {
-    if (delay === -1) return '测试'
-    if (delay === 0) return '超时'
+    if (delay === -1) return t('test')
+    if (delay === 0) return t('timeout')
     return delay.toString()
   }
 
@@ -78,7 +80,7 @@ const ProxyItem: React.FC<Props> = (props) => {
                 {fixed && (
                   <Button
                     isIconOnly
-                    title="取消固定"
+                    title={t('unpin')}
                     color="danger"
                     onPress={async () => {
                       await mihomoUnfixedProxy(group.name)
@@ -120,7 +122,7 @@ const ProxyItem: React.FC<Props> = (props) => {
                   <div className="flex items-center">
                     <Button
                       isIconOnly
-                      title="取消固定"
+                      title={t('unpin')}
                       color="danger"
                       onPress={async () => {
                         await mihomoUnfixedProxy(group.name)

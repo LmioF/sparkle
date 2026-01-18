@@ -6,12 +6,14 @@ import { CSS } from '@dnd-kit/utilities'
 import { useRules } from '@renderer/hooks/use-rules'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import React from 'react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 interface Props {
   iconOnly?: boolean
 }
 
 const RuleCard: React.FC<Props> = (props) => {
+  const { t } = useTranslation('common')
   const { appConfig } = useAppConfig()
   const { iconOnly } = props
   const { ruleCardStatus = 'col-span-1', disableAnimation = false } = appConfig || {}
@@ -34,7 +36,7 @@ const RuleCard: React.FC<Props> = (props) => {
   if (iconOnly) {
     return (
       <div className={`${ruleCardStatus} flex justify-center`}>
-        <Tooltip content="规则" placement="right">
+        <Tooltip content={t('sider.ruleCard')} placement="right">
           <Button
             size="sm"
             isIconOnly
@@ -104,7 +106,7 @@ const RuleCard: React.FC<Props> = (props) => {
           <h3
             className={`text-md font-bold ${match ? 'text-primary-foreground' : 'text-foreground'}`}
           >
-            规则
+            {t('sider.ruleCard')}
           </h3>
         </CardFooter>
       </Card>

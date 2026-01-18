@@ -11,6 +11,7 @@ import {
 import React from 'react'
 import SettingItem from '../base/base-setting-item'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import { restartMihomoConnections } from '@renderer/utils/ipc'
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
 
 const ConnectionSettingModal: React.FC<Props> = (props) => {
   const { onClose } = props
+  const { t } = useTranslation('connection')
   const { appConfig, patchAppConfig } = useAppConfig()
 
   const { displayIcon = true, displayAppName = true, connectionInterval = 500 } = appConfig || {}
@@ -34,9 +36,9 @@ const ConnectionSettingModal: React.FC<Props> = (props) => {
       scrollBehavior="inside"
     >
       <ModalContent className="flag-emoji">
-        <ModalHeader className="flex">连接设置</ModalHeader>
+        <ModalHeader className="flex">{t('settings')}</ModalHeader>
         <ModalBody className="py-2 gap-1">
-          <SettingItem title="显示应用图标" divider>
+          <SettingItem title={t('displayIcon')} divider>
             <Switch
               size="sm"
               isSelected={displayIcon}
@@ -45,7 +47,7 @@ const ConnectionSettingModal: React.FC<Props> = (props) => {
               }}
             />
           </SettingItem>
-          <SettingItem title="显示应用名称" divider>
+          <SettingItem title={t('displayAppName')} divider>
             <Switch
               size="sm"
               isSelected={displayAppName}
@@ -54,14 +56,14 @@ const ConnectionSettingModal: React.FC<Props> = (props) => {
               }}
             />
           </SettingItem>
-          <SettingItem title="刷新间隔">
+          <SettingItem title={t('refreshInterval')}>
             <Input
               type="number"
               size="sm"
               className="w-[150px]"
               endContent="ms"
               value={connectionInterval?.toString()}
-              placeholder="默认 500"
+              placeholder={t('refreshIntervalPlaceholder')}
               onValueChange={async (v) => {
                 let num = parseInt(v)
                 if (isNaN(num)) num = 500
@@ -74,7 +76,7 @@ const ConnectionSettingModal: React.FC<Props> = (props) => {
         </ModalBody>
         <ModalFooter>
           <Button size="sm" variant="light" onPress={onClose}>
-            关闭
+            {t('common:actions.close')}
           </Button>
         </ModalFooter>
       </ModalContent>

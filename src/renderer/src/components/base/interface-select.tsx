@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Select, SelectItem } from '@heroui/react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import { getInterfaces } from '@renderer/utils/ipc'
 
 const InterfaceSelect: React.FC<{
@@ -7,6 +8,7 @@ const InterfaceSelect: React.FC<{
   exclude?: string[]
   onChange: (iface: string) => void
 }> = ({ value, onChange, exclude = [] }) => {
+  const { t } = useTranslation('common')
   const [ifaces, setIfaces] = useState<string[]>([])
   const excludeKey = useMemo(() => JSON.stringify([...exclude].sort()), [exclude])
   useEffect(() => {
@@ -30,7 +32,7 @@ const InterfaceSelect: React.FC<{
       disallowEmptySelection={true}
       onSelectionChange={(v) => onChange(v.currentKey as string)}
     >
-      <SelectItem key="">禁用</SelectItem>
+      <SelectItem key="">{t('ui.disabled')}</SelectItem>
       <>
         {ifaces.map((name) => (
           <SelectItem key={name}>{name}</SelectItem>

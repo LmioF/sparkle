@@ -13,6 +13,7 @@ import {
 } from '@heroui/react'
 import React, { useState } from 'react'
 import SettingItem from '../base/base-setting-item'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { restartCore } from '@renderer/utils/ipc'
 
@@ -24,6 +25,7 @@ interface Props {
 
 const EditInfoModal: React.FC<Props> = (props) => {
   const { item, updateOverrideItem, onClose } = props
+  const { t } = useTranslation('override')
   const { appConfig: { disableAnimation = false } = {} } = useAppConfig()
   const [values, setValues] = useState(item)
   const inputWidth = 'w-[400px] md:w-[400px] lg:w-[600px] xl:w-[800px]'
@@ -60,10 +62,10 @@ const EditInfoModal: React.FC<Props> = (props) => {
     >
       <ModalContent>
         <ModalHeader className="flex app-drag">
-          {item.id ? '编辑覆写信息' : '导入远程覆写'}
+          {item.id ? t('editOverrideInfo') : t('importRemote')}
         </ModalHeader>
         <ModalBody>
-          <SettingItem title="名称">
+          <SettingItem title={t('name')}>
             <Input
               size="sm"
               className={cn(inputWidth)}
@@ -75,7 +77,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
           </SettingItem>
           {values.type === 'remote' && (
             <>
-              <SettingItem title="覆写地址">
+              <SettingItem title={t('url')}>
                 <Input
                   size="sm"
                   className={cn(inputWidth)}
@@ -85,7 +87,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   }}
                 />
               </SettingItem>
-              <SettingItem title="证书指纹">
+              <SettingItem title={t('fingerprint')}>
                 <Input
                   size="sm"
                   className={cn(inputWidth)}
@@ -97,7 +99,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
               </SettingItem>
             </>
           )}
-          <SettingItem title="文件类型">
+          <SettingItem title={t('fileType')}>
             <Select
               size="sm"
               className={cn(inputWidth)}
@@ -111,7 +113,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
               <SelectItem key="js">JavaScript</SelectItem>
             </Select>
           </SettingItem>
-          <SettingItem title="全局覆写">
+          <SettingItem title={t('globalOverride')}>
             <Switch
               size="sm"
               isSelected={values.global ?? false}
@@ -123,10 +125,10 @@ const EditInfoModal: React.FC<Props> = (props) => {
         </ModalBody>
         <ModalFooter>
           <Button size="sm" variant="light" onPress={onClose}>
-            取消
+            {t('common:actions.cancel')}
           </Button>
           <Button size="sm" color="primary" onPress={onSave}>
-            {item.id ? '保存' : '导入'}
+            {item.id ? t('common:actions.save') : t('import')}
           </Button>
         </ModalFooter>
       </ModalContent>

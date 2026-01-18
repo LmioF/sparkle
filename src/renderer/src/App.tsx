@@ -35,6 +35,7 @@ import SubStoreCard from '@renderer/components/sider/substore-card'
 import MihomoIcon from './components/base/mihomo-icon'
 import useSWR from 'swr'
 import ConfirmModal from '@renderer/components/base/base-confirm'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 let navigate: NavigateFunction
 
@@ -55,6 +56,7 @@ const defaultSiderOrder = [
 ]
 
 const App: React.FC = () => {
+  const { t } = useTranslation('common')
   const { appConfig, patchAppConfig } = useAppConfig()
   const {
     appTheme = 'system',
@@ -275,18 +277,18 @@ const App: React.FC = () => {
     >
       {showQuitConfirm && (
         <ConfirmModal
-          title="确定要退出 Sparkle 吗？"
+          title={t('app.quitConfirm')}
           description={
             <div>
               <p></p>
-              <p className="text-sm text-gray-500 mt-2">退出后代理功能将停止工作</p>
+              <p className="text-sm text-gray-500 mt-2">{t('app.quitDesc')}</p>
               <p className="text-sm text-gray-400 mt-1">
-                快按两次或长按 {platform === 'darwin' ? '⌘Q' : 'Ctrl+Q'} 可直接退出
+                {t('app.quitShortcut', { shortcut: platform === 'darwin' ? '⌘Q' : 'Ctrl+Q' })}
               </p>
             </div>
           }
-          confirmText="退出"
-          cancelText="取消"
+          confirmText={t('actions.exit')}
+          cancelText={t('actions.cancel')}
           onChange={(open) => {
             if (!open) {
               handleQuitConfirm(false)
@@ -297,20 +299,20 @@ const App: React.FC = () => {
       )}
       {showProfileInstallConfirm && profileInstallData && (
         <ConfirmModal
-          title="确定要导入订阅配置吗？"
+          title={t('app.importProfileConfirm')}
           description={
             <div>
               <p className="text-sm text-gray-600 mb-2">
-                名称：{profileInstallData.name || '未命名'}
+                {t('app.name')}：{profileInstallData.name || t('app.unnamed')}
               </p>
-              <p className="text-sm text-gray-600 mb-2">链接：{profileInstallData.url}</p>
-              <p className="text-sm text-orange-500 mt-2">
-                请确保订阅配置来源可信，恶意配置可能影响您的网络安全
+              <p className="text-sm text-gray-600 mb-2">
+                {t('app.link')}：{profileInstallData.url}
               </p>
+              <p className="text-sm text-orange-500 mt-2">{t('app.importProfileWarning')}</p>
             </div>
           }
-          confirmText="导入"
-          cancelText="取消"
+          confirmText={t('actions.import')}
+          cancelText={t('actions.cancel')}
           onChange={(open) => {
             if (!open) {
               handleProfileInstallConfirm(false)
@@ -322,20 +324,20 @@ const App: React.FC = () => {
       )}
       {showOverrideInstallConfirm && overrideInstallData && (
         <ConfirmModal
-          title="确定要导入覆写文件吗？"
+          title={t('app.importOverrideConfirm')}
           description={
             <div>
               <p className="text-sm text-gray-600 mb-2">
-                名称：{overrideInstallData.name || '未命名'}
+                {t('app.name')}：{overrideInstallData.name || t('app.unnamed')}
               </p>
-              <p className="text-sm text-gray-600 mb-2">链接：{overrideInstallData.url}</p>
-              <p className="text-sm text-orange-500 mt-2">
-                请确保覆写文件来源可信，恶意覆写文件可能影响您的网络安全
+              <p className="text-sm text-gray-600 mb-2">
+                {t('app.link')}：{overrideInstallData.url}
               </p>
+              <p className="text-sm text-orange-500 mt-2">{t('app.importOverrideWarning')}</p>
             </div>
           }
-          confirmText="导入"
-          cancelText="取消"
+          confirmText={t('actions.import')}
+          cancelText={t('actions.cancel')}
           onChange={(open) => {
             if (!open) {
               handleOverrideInstallConfirm(false)

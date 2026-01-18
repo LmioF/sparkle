@@ -8,6 +8,7 @@ import {
   Switch
 } from '@heroui/react'
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import { BaseEditor } from '../base/base-editor-lazy'
 import { getProfileStr, setProfileStr } from '@renderer/utils/ipc'
 import { useNavigate } from 'react-router-dom'
@@ -22,6 +23,7 @@ interface Props {
 
 const EditFileModal: React.FC<Props> = (props) => {
   const { id, isRemote, onClose } = props
+  const { t } = useTranslation('profile')
   const { appConfig: { disableAnimation = false } = {} } = useAppConfig()
   const [currData, setCurrData] = useState('')
   const [originalData, setOriginalData] = useState('')
@@ -46,7 +48,7 @@ const EditFileModal: React.FC<Props> = (props) => {
       setCurrData(data)
       setOriginalData(data)
     } catch (e) {
-      alert('获取配置内容失败: ' + e)
+      alert(t('fetchConfigFailed') + ': ' + e)
       onClose()
     }
   }
@@ -71,10 +73,10 @@ const EditFileModal: React.FC<Props> = (props) => {
     >
       {isConfirmOpen && (
         <ConfirmModal
-          title="确认取消"
-          description="您有未保存的修改，确定要取消吗？"
-          confirmText="放弃修改"
-          cancelText="继续编辑"
+          title={t('override:confirmCancel')}
+          description={t('override:unsavedChanges')}
+          confirmText={t('override:discardChanges')}
+          cancelText={t('override:continueEditing')}
           onChange={setIsConfirmOpen}
           onConfirm={onClose}
         />
@@ -82,10 +84,10 @@ const EditFileModal: React.FC<Props> = (props) => {
       <ModalContent className="h-full w-[calc(100%-100px)]">
         <ModalHeader className="flex pb-0 app-drag">
           <div className="flex justify-start">
-            <div className="flex items-center">编辑订阅</div>
+            <div className="flex items-center">{t('editProfile')}</div>
             {isRemote && (
               <small className="ml-2 text-foreground-500">
-                注意：此处编辑配置更新订阅后会还原，如需要自定义配置请使用
+                {t('editProfileWarning')}
                 <Button
                   size="sm"
                   color="primary"
@@ -95,9 +97,9 @@ const EditFileModal: React.FC<Props> = (props) => {
                     navigate('/override')
                   }}
                 >
-                  覆写
+                  {t('override:title')}
                 </Button>
-                功能
+                {t('feature')}
               </small>
             )}
           </div>
@@ -114,15 +116,15 @@ const EditFileModal: React.FC<Props> = (props) => {
         <ModalFooter className="pt-0 flex justify-between">
           <div className="flex items-center space-x-2">
             <Switch size="sm" isSelected={isDiff} onValueChange={setIsDiff}>
-              显示修改
+              {t('override:showChanges')}
             </Switch>
             <Switch size="sm" isSelected={sideBySide} onValueChange={setSideBySide}>
-              侧边显示
+              {t('override:sideBySide')}
             </Switch>
           </div>
           <div className="flex gap-2">
             <Button size="sm" variant="light" onPress={handleClose}>
-              取消
+              {t('common:actions.cancel')}
             </Button>
             <Button
               size="sm"
@@ -132,11 +134,11 @@ const EditFileModal: React.FC<Props> = (props) => {
                   await setProfileStr(id, currData)
                   onClose()
                 } catch (e) {
-                  alert('保存配置失败: ' + e)
+                  alert(t('saveConfigFailed') + ': ' + e)
                 }
               }}
             >
-              保存
+              {t('common:actions.save')}
             </Button>
           </div>
         </ModalFooter>

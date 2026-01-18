@@ -5,12 +5,14 @@ import { useControledMihomoConfig } from '@renderer/hooks/use-controled-mihomo-c
 import { useGroups } from '@renderer/hooks/use-groups'
 import { mihomoCloseAllConnections, patchMihomoConfig } from '@renderer/utils/ipc'
 import { Key } from 'react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 interface Props {
   iconOnly?: boolean
 }
 
 const OutboundModeSwitcher: React.FC<Props> = (props) => {
+  const { t } = useTranslation('common')
   const { iconOnly } = props
   const { controledMihomoConfig, patchControledMihomoConfig } = useControledMihomoConfig()
   const { mutate: mutateGroups } = useGroups()
@@ -54,9 +56,21 @@ const OutboundModeSwitcher: React.FC<Props> = (props) => {
       }}
       onSelectionChange={(key: Key) => onChangeMode(key as OutboundMode)}
     >
-      <Tab className={`${mode === 'rule' ? 'font-bold' : ''}`} key="rule" title="规则" />
-      <Tab className={`${mode === 'global' ? 'font-bold' : ''}`} key="global" title="全局" />
-      <Tab className={`${mode === 'direct' ? 'font-bold' : ''}`} key="direct" title="直连" />
+      <Tab
+        className={`${mode === 'rule' ? 'font-bold' : ''}`}
+        key="rule"
+        title={t('sider.outboundMode.rule')}
+      />
+      <Tab
+        className={`${mode === 'global' ? 'font-bold' : ''}`}
+        key="global"
+        title={t('sider.outboundMode.global')}
+      />
+      <Tab
+        className={`${mode === 'direct' ? 'font-bold' : ''}`}
+        key="direct"
+        title={t('sider.outboundMode.direct')}
+      />
     </Tabs>
   )
 }

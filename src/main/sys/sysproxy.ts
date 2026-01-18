@@ -6,6 +6,7 @@ import { execFile, execFileSync } from 'child_process'
 import { servicePath } from '../utils/dirs'
 import { net } from 'electron'
 import { disableProxy, setPac, setProxy } from '../service/api'
+import { t } from '../utils/i18n'
 
 let defaultBypass: string[] = []
 let triggerSysProxyTimer: NodeJS.Timeout | null = null
@@ -99,7 +100,7 @@ async function setSysProxy(onlyActiveDevice: boolean): Promise<void> {
         try {
           await setPac(`http://${host || '127.0.0.1'}:${pacPort}/pac`, '', onlyActiveDevice)
         } catch {
-          throw new Error('服务可能未安装')
+          throw new Error(t('main.errors.serviceMayNotInstalled'))
         }
       } else {
         await execFilePromise(servicePath(), [
@@ -117,7 +118,7 @@ async function setSysProxy(onlyActiveDevice: boolean): Promise<void> {
           try {
             await setProxy(`${host || '127.0.0.1'}:${port}`, bypass.join(','), '', onlyActiveDevice)
           } catch {
-            throw new Error('服务可能未安装')
+            throw new Error(t('main.errors.serviceMayNotInstalled'))
           }
         } else {
           await execFilePromise(servicePath(), [
@@ -145,7 +146,7 @@ export async function disableSysProxy(onlyActiveDevice: boolean): Promise<void> 
     try {
       await disableProxy('', onlyActiveDevice)
     } catch (e) {
-      throw new Error('服务可能未安装')
+      throw new Error(t('main.errors.serviceMayNotInstalled'))
     }
   } else {
     await execFilePromise(servicePath(), ['disable'])

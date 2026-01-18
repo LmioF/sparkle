@@ -1,6 +1,7 @@
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from '@heroui/react'
 import { BaseEditor } from '@renderer/components/base/base-editor-lazy'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import React, { useState } from 'react'
 interface Props {
   script: string
@@ -8,6 +9,7 @@ interface Props {
   onConfirm: (script: string) => void
 }
 const PacEditorModal: React.FC<Props> = (props) => {
+  const { t } = useTranslation('sysproxy')
   const { script, onCancel, onConfirm } = props
   const { appConfig: { disableAnimation = false } = {} } = useAppConfig()
   const [currData, setCurrData] = useState(script)
@@ -27,7 +29,7 @@ const PacEditorModal: React.FC<Props> = (props) => {
       scrollBehavior="inside"
     >
       <ModalContent className="h-full w-[calc(100%-100px)]">
-        <ModalHeader className="flex pb-0 app-drag">编辑 PAC 脚本</ModalHeader>
+        <ModalHeader className="flex pb-0 app-drag">{t('editPac')}</ModalHeader>
         <ModalBody className="h-full">
           <BaseEditor
             language="javascript"
@@ -37,10 +39,10 @@ const PacEditorModal: React.FC<Props> = (props) => {
         </ModalBody>
         <ModalFooter className="pt-0">
           <Button size="sm" variant="light" onPress={onCancel}>
-            取消
+            {t('common:actions.cancel')}
           </Button>
           <Button size="sm" color="primary" onPress={() => onConfirm(currData)}>
-            确认
+            {t('common:actions.confirm')}
           </Button>
         </ModalFooter>
       </ModalContent>

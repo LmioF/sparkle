@@ -1,6 +1,7 @@
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from '@heroui/react'
 import { BaseEditor } from '@renderer/components/base/base-editor-lazy'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import { readTheme } from '@renderer/utils/ipc'
 import React, { useEffect, useState } from 'react'
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 }
 const CSSEditorModal: React.FC<Props> = (props) => {
   const { theme, onCancel, onConfirm } = props
+  const { t } = useTranslation('settings')
   const { appConfig: { disableAnimation = false } = {} } = useAppConfig()
   const [currData, setCurrData] = useState('')
 
@@ -36,7 +38,7 @@ const CSSEditorModal: React.FC<Props> = (props) => {
       scrollBehavior="inside"
     >
       <ModalContent className="h-full w-[calc(100%-100px)]">
-        <ModalHeader className="flex pb-0 app-drag">编辑主题</ModalHeader>
+        <ModalHeader className="flex pb-0 app-drag">{t('appearance.editTheme')}</ModalHeader>
         <ModalBody className="h-full">
           <BaseEditor
             language="css"
@@ -46,10 +48,10 @@ const CSSEditorModal: React.FC<Props> = (props) => {
         </ModalBody>
         <ModalFooter className="pt-0">
           <Button size="sm" variant="light" onPress={onCancel}>
-            取消
+            {t('common:actions.cancel')}
           </Button>
           <Button size="sm" color="primary" onPress={() => onConfirm(currData)}>
-            确认
+            {t('common:actions.confirm')}
           </Button>
         </ModalFooter>
       </ModalContent>

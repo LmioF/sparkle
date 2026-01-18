@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import SettingCard from '../base/base-setting-card'
 import SettingItem from '../base/base-setting-item'
 import { Button, Switch } from '@heroui/react'
@@ -8,6 +9,7 @@ import EditableList from '../base/base-list-editor'
 import { platform } from '@renderer/utils/init'
 
 const EnvSetting: React.FC = () => {
+  const { t } = useTranslation('mihomo')
   const { appConfig, patchAppConfig } = useAppConfig()
   const {
     disableLoopbackDetector,
@@ -29,8 +31,8 @@ const EnvSetting: React.FC = () => {
   const [safePathsInput, setSafePathsInput] = useState(safePaths)
 
   return (
-    <SettingCard title="环境变量">
-      <SettingItem title="禁用系统 CA" divider>
+    <SettingCard title={t('env.title')}>
+      <SettingItem title={t('env.disableSystemCA')} divider>
         <Switch
           size="sm"
           isSelected={disableSystemCA}
@@ -39,7 +41,7 @@ const EnvSetting: React.FC = () => {
           }}
         />
       </SettingItem>
-      <SettingItem title="禁用内置 CA" divider>
+      <SettingItem title={t('env.disableEmbedCA')} divider>
         <Switch
           size="sm"
           isSelected={disableEmbedCA}
@@ -48,7 +50,7 @@ const EnvSetting: React.FC = () => {
           }}
         />
       </SettingItem>
-      <SettingItem title="禁用回环检测" divider>
+      <SettingItem title={t('env.disableLoopbackDetector')} divider>
         <Switch
           size="sm"
           isSelected={disableLoopbackDetector}
@@ -58,7 +60,7 @@ const EnvSetting: React.FC = () => {
         />
       </SettingItem>
       {platform == 'linux' && (
-        <SettingItem title="禁用 nftables" divider>
+        <SettingItem title={t('env.disableNftables')} divider>
           <Switch
             size="sm"
             isSelected={disableNftables}
@@ -68,7 +70,7 @@ const EnvSetting: React.FC = () => {
           />
         </SettingItem>
       )}
-      <SettingItem title="可信路径">
+      <SettingItem title={t('env.safePaths')}>
         {safePathsInput.join('') != safePaths.join('') && (
           <Button
             size="sm"
@@ -77,7 +79,7 @@ const EnvSetting: React.FC = () => {
               handleConfigChangeWithRestart('safePaths', safePathsInput)
             }}
           >
-            确认
+            {t('common:actions.confirm')}
           </Button>
         )}
       </SettingItem>

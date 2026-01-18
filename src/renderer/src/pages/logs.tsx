@@ -5,7 +5,7 @@ import { Button, Divider, Input } from '@heroui/react'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { IoLocationSharp } from 'react-icons/io5'
 import { CgTrash } from 'react-icons/cg'
-
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import { includesIgnoreCase } from '@renderer/utils/includes'
 
 const cachedLogs: {
@@ -35,6 +35,7 @@ window.electron.ipcRenderer.on('mihomoLogs', (_e, log: ControllerLog) => {
 })
 
 const Logs: React.FC = () => {
+  const { t } = useTranslation('log')
   const [logs, setLogs] = useState<ControllerLog[]>(cachedLogs.log)
   const [filter, setFilter] = useState('')
   const [trace, setTrace] = useState(true)
@@ -68,13 +69,13 @@ const Logs: React.FC = () => {
   }, [])
 
   return (
-    <BasePage title="实时日志">
+    <BasePage title={t('title')}>
       <div className="sticky top-0 z-40">
         <div className="w-full flex p-2">
           <Input
             size="sm"
             value={filter}
-            placeholder="筛选过滤"
+            placeholder={t('common:actions.filter')}
             isClearable
             onValueChange={setFilter}
           />
@@ -93,7 +94,7 @@ const Logs: React.FC = () => {
           <Button
             size="sm"
             isIconOnly
-            title="清空日志"
+            title={t('clear')}
             className="ml-2"
             variant="light"
             color="danger"

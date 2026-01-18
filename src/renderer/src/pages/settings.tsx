@@ -12,18 +12,21 @@ import { FaTelegramPlane } from 'react-icons/fa'
 import SiderConfig from '@renderer/components/settings/sider-config'
 import SubStoreConfig from '@renderer/components/settings/substore-config'
 import AppearanceConfig from '@renderer/components/settings/appearance-confis'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 const Settings: React.FC = () => {
+  const { t } = useTranslation('settings')
+
   return (
     <BasePage
-      title="应用设置"
+      title={t('title')}
       header={
         <>
           {/* <Button
             isIconOnly
             size="sm"
             variant="light"
-            title="官方文档"
+            title={t('common:ui.officialDocs')}
             className="app-nodrag"
             onPress={() => {
               window.open('https://')
@@ -36,7 +39,7 @@ const Settings: React.FC = () => {
             size="sm"
             variant="light"
             className="app-nodrag"
-            title="GitHub 仓库"
+            title={t('common:ui.githubRepo')}
             onPress={() => {
               window.open('https://github.com/INKCR0W/sparkle')
             }}
@@ -48,7 +51,7 @@ const Settings: React.FC = () => {
             size="sm"
             variant="light"
             className="app-nodrag"
-            title="Telegram 频道"
+            title={t('common:ui.telegramChannel')}
             onPress={() => {
               window.open('https://t.me/atri0828')
             }}

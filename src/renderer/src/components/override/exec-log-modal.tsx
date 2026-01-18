@@ -8,6 +8,7 @@ import {
   Divider
 } from '@heroui/react'
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import { getOverride } from '@renderer/utils/ipc'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 
@@ -18,6 +19,7 @@ interface Props {
 
 const ExecLogModal: React.FC<Props> = (props) => {
   const { id, onClose } = props
+  const { t } = useTranslation('override')
   const { appConfig: { disableAnimation = false } = {} } = useAppConfig()
   const [logs, setLogs] = useState<string[]>([])
 
@@ -40,7 +42,7 @@ const ExecLogModal: React.FC<Props> = (props) => {
       scrollBehavior="inside"
     >
       <ModalContent>
-        <ModalHeader className="flex app-drag">执行日志</ModalHeader>
+        <ModalHeader className="flex app-drag">{t('execLog')}</ModalHeader>
         <ModalBody>
           {logs.map((log, index) => {
             return (
@@ -53,7 +55,7 @@ const ExecLogModal: React.FC<Props> = (props) => {
         </ModalBody>
         <ModalFooter>
           <Button size="sm" variant="light" onPress={onClose}>
-            关闭
+            {t('common:actions.close')}
           </Button>
         </ModalFooter>
       </ModalContent>

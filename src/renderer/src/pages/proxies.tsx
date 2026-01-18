@@ -19,8 +19,10 @@ import { useProxiesState } from '@renderer/hooks/use-proxies-state'
 import CollapseInput from '@renderer/components/base/collapse-input'
 import { includesIgnoreCase } from '@renderer/utils/includes'
 import { useControledMihomoConfig } from '@renderer/hooks/use-controled-mihomo-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 const Proxies: React.FC = () => {
+  const { t } = useTranslation('proxy')
   const { controledMihomoConfig } = useControledMihomoConfig()
   const { mode = 'rule' } = controledMihomoConfig || {}
   const { groups = [], mutate } = useGroups()
@@ -274,12 +276,12 @@ const Proxies: React.FC = () => {
                       {group.all.length}
                     </Chip>
                     <CollapseInput
-                      title="搜索节点"
+                      title={t('searchNode')}
                       value={groupSearchValue}
                       onValueChange={(v) => updateSearchValue(index, v)}
                     />
                     <Button
-                      title="定位到当前节点"
+                      title={t('locateCurrentNode')}
                       variant="light"
                       size="sm"
                       isIconOnly
@@ -288,7 +290,7 @@ const Proxies: React.FC = () => {
                       <FaLocationCrosshairs className="text-lg text-foreground-500" />
                     </Button>
                     <Button
-                      title="延迟测试"
+                      title={t('delayTest')}
                       variant="light"
                       isLoading={isGroupDelaying}
                       size="sm"
@@ -307,7 +309,7 @@ const Proxies: React.FC = () => {
           </Card>
         </div>
       ) : (
-        <div>Never See This</div>
+        <div>{t('neverSeeThis')}</div>
       )
     },
     [
@@ -359,7 +361,7 @@ const Proxies: React.FC = () => {
           })}
         </div>
       ) : (
-        <div>Never See This</div>
+        <div>{t('neverSeeThis')}</div>
       )
     },
     [
@@ -377,14 +379,14 @@ const Proxies: React.FC = () => {
 
   return (
     <BasePage
-      title="代理组"
+      title={t('title')}
       header={
         <Button
           size="sm"
           isIconOnly
           variant="light"
           className="app-nodrag"
-          title="代理组设置"
+          title={t('settings')}
           onPress={() => setIsSettingModalOpen(true)}
         >
           <MdTune className="text-lg" />
@@ -396,7 +398,7 @@ const Proxies: React.FC = () => {
         <div className="h-full w-full flex justify-center items-center">
           <div className="flex flex-col items-center">
             <MdDoubleArrow className="text-foreground-500 text-[100px]" />
-            <h2 className="text-foreground-500 text-[20px]">直连模式</h2>
+            <h2 className="text-foreground-500 text-[20px]">{t('directMode')}</h2>
           </div>
         </div>
       ) : (

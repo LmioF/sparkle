@@ -5,6 +5,7 @@ import { initServiceAPI, getServiceAxios, ping, test } from './api'
 import { getAppConfig, patchAppConfig } from '../config/app'
 import { execFile } from 'child_process'
 import { promisify } from 'util'
+import { t } from '../utils/i18n'
 
 let keyManager: KeyManager | null = null
 let initKeyManagerPromise: Promise<KeyManager> | null = null
@@ -51,7 +52,7 @@ export async function initKeyManager(): Promise<KeyManager> {
 
 export function getKeyManager(): KeyManager {
   if (!keyManager) {
-    throw new Error('密钥管理器未初始化，请先调用 initKeyManager')
+    throw new Error(t('main.errors.keyManagerNotInitialized'))
   }
   return keyManager
 }
@@ -61,7 +62,7 @@ export function getPublicKey(): string {
 }
 
 class UserCancelledError extends Error {
-  constructor(message = '用户取消操作') {
+  constructor(message = t('main.errors.userCancelled')) {
     super(message)
     this.name = 'UserCancelledError'
   }
@@ -113,7 +114,11 @@ export async function initService(): Promise<void> {
     if (isUserCancelledError(error)) {
       throw new UserCancelledError()
     }
-    throw new Error(`服务初始化失败：${error instanceof Error ? error.message : String(error)}`)
+    throw new Error(
+      t('main.errors.serviceInitFailed', {
+        error: error instanceof Error ? error.message : String(error)
+      })
+    )
   }
 
   await new Promise((resolve) => setTimeout(resolve, 500))
@@ -128,7 +133,11 @@ export async function installService(): Promise<void> {
     if (isUserCancelledError(error)) {
       throw new UserCancelledError()
     }
-    throw new Error(`服务安装失败：${error instanceof Error ? error.message : String(error)}`)
+    throw new Error(
+      t('main.errors.serviceInstallFailed', {
+        error: error instanceof Error ? error.message : String(error)
+      })
+    )
   }
 }
 
@@ -141,7 +150,11 @@ export async function uninstallService(): Promise<void> {
     if (isUserCancelledError(error)) {
       throw new UserCancelledError()
     }
-    throw new Error(`服务卸载失败：${error instanceof Error ? error.message : String(error)}`)
+    throw new Error(
+      t('main.errors.serviceUninstallFailed', {
+        error: error instanceof Error ? error.message : String(error)
+      })
+    )
   }
 }
 
@@ -154,7 +167,11 @@ export async function startService(): Promise<void> {
     if (isUserCancelledError(error)) {
       throw new UserCancelledError()
     }
-    throw new Error(`服务启动失败：${error instanceof Error ? error.message : String(error)}`)
+    throw new Error(
+      t('main.errors.serviceStartFailed', {
+        error: error instanceof Error ? error.message : String(error)
+      })
+    )
   }
 }
 
@@ -167,7 +184,11 @@ export async function stopService(): Promise<void> {
     if (isUserCancelledError(error)) {
       throw new UserCancelledError()
     }
-    throw new Error(`服务停止失败：${error instanceof Error ? error.message : String(error)}`)
+    throw new Error(
+      t('main.errors.serviceStopFailed', {
+        error: error instanceof Error ? error.message : String(error)
+      })
+    )
   }
 }
 
@@ -180,7 +201,11 @@ export async function restartService(): Promise<void> {
     if (isUserCancelledError(error)) {
       throw new UserCancelledError()
     }
-    throw new Error(`服务重启失败：${error instanceof Error ? error.message : String(error)}`)
+    throw new Error(
+      t('main.errors.serviceRestartFailed', {
+        error: error instanceof Error ? error.message : String(error)
+      })
+    )
   }
 }
 

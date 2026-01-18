@@ -13,6 +13,7 @@ import React, { useState } from 'react'
 import { downloadAndInstallUpdate } from '@renderer/utils/ipc'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { FiX, FiDownload } from 'react-icons/fi'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 interface Props {
   version: string
@@ -27,6 +28,7 @@ interface Props {
 }
 
 const UpdaterModal: React.FC<Props> = (props) => {
+  const { t } = useTranslation('updater')
   const { version, changelog, updateStatus, onCancel, onClose } = props
   const { appConfig: { disableAnimation = false } = {} } = useAppConfig()
   const [downloading, setDownloading] = useState(false)
@@ -65,7 +67,7 @@ const UpdaterModal: React.FC<Props> = (props) => {
         <ModalHeader className="flex justify-between app-drag">
           <div className="flex items-center gap-2">
             <FiDownload className="text-lg" />
-            {version} 版本就绪
+            {version} {t('versionReady')}
           </div>
           {!isDownloading && (
             <Button
@@ -80,7 +82,7 @@ const UpdaterModal: React.FC<Props> = (props) => {
                 open(`https://github.com/INKCR0W/sparkle/releases/tag/${version}`)
               }}
             >
-              前往下载
+              {t('goToDownload')}
             </Button>
           )}
         </ModalHeader>
@@ -88,7 +90,7 @@ const UpdaterModal: React.FC<Props> = (props) => {
           {updateStatus?.downloading && (
             <div className="space-y-3 mb-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-default-600">下载进度</span>
+                <span className="text-sm text-default-600">{t('downloadProgress')}</span>
                 <span className="text-sm font-medium">{updateStatus.progress}%</span>
               </div>
               <Progress
@@ -124,7 +126,7 @@ const UpdaterModal: React.FC<Props> = (props) => {
             onPress={handleCancel}
             startContent={updateStatus?.downloading ? <FiX /> : undefined}
           >
-            {updateStatus?.downloading ? '取消下载' : '取消'}
+            {updateStatus?.downloading ? t('cancelDownload') : t('common:actions.cancel')}
           </Button>
           {!updateStatus?.downloading && (
             <Button
@@ -134,7 +136,7 @@ const UpdaterModal: React.FC<Props> = (props) => {
               startContent={<FiDownload />}
               onPress={onUpdate}
             >
-              立即更新
+              {t('updateNow')}
             </Button>
           )}
         </ModalFooter>

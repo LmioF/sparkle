@@ -18,11 +18,13 @@ import {
 } from '@renderer/utils/ipc'
 import useSWR from 'swr'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 interface Props {
   onClose: () => void
 }
 const ConfigViewer: React.FC<Props> = ({ onClose }) => {
+  const { t } = useTranslation('common')
   const { appConfig: { disableAnimation = false } = {} } = useAppConfig()
   const [runtimeConfig, setRuntimeConfig] = useState('')
   const [rawProfile, setRawProfile] = useState('')
@@ -61,7 +63,7 @@ const ConfigViewer: React.FC<Props> = ({ onClose }) => {
       scrollBehavior="inside"
     >
       <ModalContent className="h-full w-[calc(100%-100px)]">
-        <ModalHeader className="flex pb-0 app-drag">当前运行时配置</ModalHeader>
+        <ModalHeader className="flex pb-0 app-drag">{t('sider.runtimeConfig.title')}</ModalHeader>
         <ModalBody className="h-full">
           <BaseEditor
             language="yaml"
@@ -82,10 +84,10 @@ const ConfigViewer: React.FC<Props> = ({ onClose }) => {
         <ModalFooter className="pt-0 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Switch size="sm" isSelected={isDiff} onValueChange={setIsDiff}>
-              对比当前配置
+              {t('sider.runtimeConfig.diffMode')}
             </Switch>
             <Switch size="sm" isSelected={sideBySide} onValueChange={setSideBySide}>
-              侧边显示
+              {t('sider.runtimeConfig.sideBySide')}
             </Switch>
             <Switch
               size="sm"
@@ -97,7 +99,7 @@ const ConfigViewer: React.FC<Props> = ({ onClose }) => {
                 }
               }}
             >
-              显示原始文本
+              {t('sider.runtimeConfig.showOriginal')}
             </Switch>
             <Switch
               size="sm"
@@ -109,11 +111,11 @@ const ConfigViewer: React.FC<Props> = ({ onClose }) => {
                 }
               }}
             >
-              显示覆写后文本
+              {t('sider.runtimeConfig.showOverride')}
             </Switch>
           </div>
           <Button size="sm" variant="light" onPress={onClose}>
-            关闭
+            {t('actions.close')}
           </Button>
         </ModalFooter>
       </ModalContent>

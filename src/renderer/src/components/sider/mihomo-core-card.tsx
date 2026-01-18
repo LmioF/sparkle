@@ -10,12 +10,14 @@ import PubSub from 'pubsub-js'
 import useSWR from 'swr'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { LuCpu } from 'react-icons/lu'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 interface Props {
   iconOnly?: boolean
 }
 
 const MihomoCoreCard: React.FC<Props> = (props) => {
+  const { t } = useTranslation('common')
   const { appConfig } = useAppConfig()
   const { iconOnly } = props
   const { mihomoCoreCardStatus = 'col-span-2', disableAnimation = false } = appConfig || {}
@@ -70,7 +72,7 @@ const MihomoCoreCard: React.FC<Props> = (props) => {
   if (iconOnly) {
     return (
       <div className={`${mihomoCoreCardStatus} flex justify-center`}>
-        <Tooltip content="内核设置" placement="right">
+        <Tooltip content={t('sider.mihomoCard')} placement="right">
           <Button
             size="sm"
             isIconOnly
@@ -151,7 +153,7 @@ const MihomoCoreCard: React.FC<Props> = (props) => {
             <div
               className={`flex justify-between w-full text-md font-bold ${match ? 'text-primary-foreground' : 'text-foreground'}`}
             >
-              <h4>内核设置</h4>
+              <h4>{t('sider.mihomoCard')}</h4>
               <h4>{calcTraffic(mem)}</h4>
             </div>
           </CardFooter>
@@ -183,7 +185,7 @@ const MihomoCoreCard: React.FC<Props> = (props) => {
             <h3
               className={`text-md font-bold ${match ? 'text-primary-foreground' : 'text-foreground'}`}
             >
-              内核设置
+              {t('sider.mihomoCard')}
             </h3>
           </CardFooter>
         </Card>

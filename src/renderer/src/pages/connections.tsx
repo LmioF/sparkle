@@ -19,11 +19,13 @@ import { useControledMihomoConfig } from '@renderer/hooks/use-controled-mihomo-c
 import { MdTune } from 'react-icons/md'
 import { saveIconToCache, getIconFromCache } from '@renderer/utils/icon-cache'
 import { IoPause, IoPlay } from 'react-icons/io5'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 let cachedConnections: ControllerConnectionDetail[] = []
 const MAX_QUEUE_SIZE = 100
 
 const Connections: React.FC = () => {
+  const { t } = useTranslation('connection')
   const { controledMihomoConfig } = useControledMihomoConfig()
   const { 'find-process-mode': findProcessMode = 'always' } = controledMihomoConfig || {}
   const [filter, setFilter] = useState('')
@@ -487,7 +489,7 @@ const Connections: React.FC = () => {
 
   return (
     <BasePage
-      title="连接"
+      title={t('title')}
       header={
         <>
           <div className="flex">
@@ -508,7 +510,7 @@ const Connections: React.FC = () => {
             >
               <Button
                 className="app-nodrag ml-1"
-                title={tab === 'active' ? '关闭全部连接' : '清空已关闭连接'}
+                title={tab === 'active' ? t('closeAll') : t('clearClosed')}
                 isIconOnly
                 size="sm"
                 variant="light"
@@ -535,7 +537,7 @@ const Connections: React.FC = () => {
             isIconOnly
             className="app-nodrag"
             variant="light"
-            title={isPaused ? '恢复' : '暂停'}
+            title={isPaused ? t('resume') : t('pause')}
             onPress={() => setIsPaused(!isPaused)}
           >
             {isPaused ? <IoPlay className="text-lg" /> : <IoPause className="text-lg" />}
@@ -545,7 +547,7 @@ const Connections: React.FC = () => {
             isIconOnly
             className="app-nodrag"
             variant="light"
-            title="连接设置"
+            title={t('settings')}
             onPress={() => setIsSettingModalOpen(true)}
           >
             <MdTune className="text-lg" />
@@ -580,7 +582,7 @@ const Connections: React.FC = () => {
                   content={activeConnections.length}
                   showOutline={false}
                 >
-                  <span className="p-1">活动中</span>
+                  <span className="p-1">{t('active')}</span>
                 </Badge>
               }
             />
@@ -595,7 +597,7 @@ const Connections: React.FC = () => {
                   content={closedConnections.length}
                   showOutline={false}
                 >
-                  <span className="p-1">已关闭</span>
+                  <span className="p-1">{t('closed')}</span>
                 </Badge>
               }
             />
@@ -604,7 +606,7 @@ const Connections: React.FC = () => {
             variant="flat"
             size="sm"
             value={filter}
-            placeholder="筛选过滤"
+            placeholder={t('common:actions.filter')}
             isClearable
             onValueChange={setFilter}
           />
@@ -617,12 +619,12 @@ const Connections: React.FC = () => {
             disallowEmptySelection={true}
             onSelectionChange={handleOrderByChange}
           >
-            <SelectItem key="upload">上传量</SelectItem>
-            <SelectItem key="download">下载量</SelectItem>
-            <SelectItem key="uploadSpeed">上传速度</SelectItem>
-            <SelectItem key="downloadSpeed">下载速度</SelectItem>
-            <SelectItem key="time">时间</SelectItem>
-            <SelectItem key="process">进程名称</SelectItem>
+            <SelectItem key="upload">{t('orderBy.upload')}</SelectItem>
+            <SelectItem key="download">{t('orderBy.download')}</SelectItem>
+            <SelectItem key="uploadSpeed">{t('orderBy.uploadSpeed')}</SelectItem>
+            <SelectItem key="downloadSpeed">{t('orderBy.downloadSpeed')}</SelectItem>
+            <SelectItem key="time">{t('orderBy.time')}</SelectItem>
+            <SelectItem key="process">{t('orderBy.process')}</SelectItem>
           </Select>
           <Button size="sm" isIconOnly className="bg-content2" onPress={handleDirectionToggle}>
             {connectionDirection === 'asc' ? (

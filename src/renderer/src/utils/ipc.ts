@@ -598,3 +598,11 @@ async function alert<T>(msg: T): Promise<void> {
 }
 
 window.alert = alert
+
+export async function openCustomLocalesDir(): Promise<{
+  success: boolean
+  path?: string
+  error?: string
+}> {
+  return ipcErrorWrapper(await window.electron.ipcRenderer.invoke('i18n:openCustomLocalesDir'))
+}

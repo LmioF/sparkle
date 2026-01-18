@@ -1,22 +1,15 @@
 import { Button } from '@heroui/react'
 import { JSX, ReactNode } from 'react'
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 
 const ErrorFallback = ({ error }: FallbackProps): JSX.Element => {
+  const { t } = useTranslation('common')
+
   return (
     <div className="p-4">
-      <h2 className="my-2 text-lg font-bold">
-        {'应用崩溃了 :( 请将以下信息提交给开发者以排查错误'}
-      </h2>
+      <h2 className="my-2 text-lg font-bold">{t('errors.appCrashed')}</h2>
 
-      {/* <Button
-        size="sm"
-        color="primary"
-        variant="flat"
-        onPress={() => open('https://github.com/INKCR0W/sparkle/issues/new/choose')}
-      >
-        GitHub
-      </Button> */}
       <Button
         size="sm"
         color="primary"
@@ -35,7 +28,7 @@ const ErrorFallback = ({ error }: FallbackProps): JSX.Element => {
           navigator.clipboard.writeText('```\n' + error.message + '\n' + error.stack + '\n```')
         }
       >
-        复制报错信息
+        {t('errors.copyError')}
       </Button>
 
       <p className="my-2">{error.message}</p>

@@ -8,6 +8,7 @@ import {
   Snippet
 } from '@heroui/react'
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import { getInterfaces } from '@renderer/utils/ipc'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 
@@ -17,6 +18,7 @@ interface Props {
 
 const InterfaceModal: React.FC<Props> = (props) => {
   const { onClose } = props
+  const { t } = useTranslation('mihomo')
   const { appConfig: { disableAnimation = false } = {} } = useAppConfig()
   const [info, setInfo] = useState<Record<string, NetworkInterfaceInfo[]>>({})
   const getInfo = async (): Promise<void> => {
@@ -38,7 +40,7 @@ const InterfaceModal: React.FC<Props> = (props) => {
       scrollBehavior="inside"
     >
       <ModalContent>
-        <ModalHeader className="flex app-drag">网络信息</ModalHeader>
+        <ModalHeader className="flex app-drag">{t('interface.title')}</ModalHeader>
         <ModalBody>
           {Object.entries(info).map(([key, value]) => {
             return (
@@ -62,7 +64,7 @@ const InterfaceModal: React.FC<Props> = (props) => {
         </ModalBody>
         <ModalFooter>
           <Button size="sm" variant="light" onPress={onClose}>
-            关闭
+            {t('common:actions.close')}
           </Button>
         </ModalFooter>
       </ModalContent>

@@ -1,4 +1,5 @@
 import { app, dialog, ipcMain } from 'electron'
+import { t } from './i18n'
 import {
   mihomoChangeProxy,
   mihomoCloseAllConnections,
@@ -269,10 +270,10 @@ export function registerIpcMainHandlers(): void {
   ipcMain.handle('localBackup', async () => {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory'],
-      title: '选择备份保存位置'
+      title: t('main.dialog.selectBackupLocation')
     })
     if (result.canceled || !result.filePaths.length) {
-      throw new Error('用户取消操作')
+      throw new Error(t('main.errors.userCancelled'))
     }
     return ipcErrorWrapper(localBackup)(result.filePaths[0])
   })
@@ -284,10 +285,10 @@ export function registerIpcMainHandlers(): void {
   ipcMain.handle('listLocalBackups', async () => {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory'],
-      title: '选择备份所在目录'
+      title: t('main.dialog.selectBackupDirectory')
     })
     if (result.canceled || !result.filePaths.length) {
-      throw new Error('用户取消操作')
+      throw new Error(t('main.errors.userCancelled'))
     }
     const backupDir = result.filePaths[0]
     const files = await ipcErrorWrapper(listLocalBackups)(backupDir)

@@ -3,6 +3,7 @@ import SettingCard from '../base/base-setting-card'
 import SettingItem from '../base/base-setting-item'
 import { Button, Input, Select, SelectItem, Switch, Tab, Tabs, Tooltip } from '@heroui/react'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import {
   copyEnv,
   patchControledMihomoConfig,
@@ -18,6 +19,7 @@ import EditableList from '../base/base-list-editor'
 const emptyArray: string[] = []
 
 const AdvancedSettings: React.FC = () => {
+  const { t } = useTranslation('settings')
   const { appConfig, patchAppConfig } = useAppConfig()
   const {
     controlDns = true,
@@ -45,11 +47,11 @@ const AdvancedSettings: React.FC = () => {
   }, [pauseSSIDArray])
 
   return (
-    <SettingCard title="更多设置">
+    <SettingCard title={t('advanced.title')}>
       <SettingItem
-        title="自动开启轻量模式"
+        title={t('advanced.autoLightweight')}
         actions={
-          <Tooltip content="关闭窗口指定时间后自动进入轻量模式">
+          <Tooltip content={t('advanced.autoLightweightTip')}>
             <Button isIconOnly size="sm" variant="light">
               <IoIosHelpCircle className="text-lg" />
             </Button>
@@ -67,7 +69,7 @@ const AdvancedSettings: React.FC = () => {
       </SettingItem>
       {autoLightweight && (
         <>
-          <SettingItem title="轻量模式行为" divider>
+          <SettingItem title={t('advanced.lightweightMode')} divider>
             <Tabs
               size="sm"
               color="primary"
@@ -79,16 +81,16 @@ const AdvancedSettings: React.FC = () => {
                 }
               }}
             >
-              <Tab key="core" title="仅保留内核" />
-              <Tab key="tray" title="仅关闭渲染进程" />
+              <Tab key="core" title={t('advanced.lightweightModeCore')} />
+              <Tab key="tray" title={t('advanced.lightweightModeTray')} />
             </Tabs>
           </SettingItem>
-          <SettingItem title="自动开启轻量模式延时" divider>
+          <SettingItem title={t('advanced.lightweightDelay')} divider>
             <Input
               size="sm"
               className="w-[100px]"
               type="number"
-              endContent="秒"
+              endContent={t('common:ui.seconds')}
               value={autoLightweightDelay.toString()}
               onValueChange={async (v: string) => {
                 let num = parseInt(v)
@@ -102,7 +104,7 @@ const AdvancedSettings: React.FC = () => {
         </>
       )}
       <SettingItem
-        title="复制环境变量类型"
+        title={t('advanced.copyEnvType')}
         actions={envType.map((type) => (
           <Button
             key={type}
@@ -141,7 +143,7 @@ const AdvancedSettings: React.FC = () => {
         </Select>
       </SettingItem>
       {platform === 'win32' && (
-        <SettingItem title="内核进程优先级" divider>
+        <SettingItem title={t('advanced.corePriority')} divider>
           <Select
             classNames={{ trigger: 'data-[hover=true]:bg-default-200' }}
             className="w-[150px]"
@@ -159,16 +161,20 @@ const AdvancedSettings: React.FC = () => {
               }
             }}
           >
-            <SelectItem key="PRIORITY_HIGHEST">实时</SelectItem>
-            <SelectItem key="PRIORITY_HIGH">高</SelectItem>
-            <SelectItem key="PRIORITY_ABOVE_NORMAL">高于正常</SelectItem>
-            <SelectItem key="PRIORITY_NORMAL">正常</SelectItem>
-            <SelectItem key="PRIORITY_BELOW_NORMAL">低于正常</SelectItem>
-            <SelectItem key="PRIORITY_LOW">低</SelectItem>
+            <SelectItem key="PRIORITY_HIGHEST">{t('advanced.priority.realtime')}</SelectItem>
+            <SelectItem key="PRIORITY_HIGH">{t('advanced.priority.high')}</SelectItem>
+            <SelectItem key="PRIORITY_ABOVE_NORMAL">
+              {t('advanced.priority.aboveNormal')}
+            </SelectItem>
+            <SelectItem key="PRIORITY_NORMAL">{t('advanced.priority.normal')}</SelectItem>
+            <SelectItem key="PRIORITY_BELOW_NORMAL">
+              {t('advanced.priority.belowNormal')}
+            </SelectItem>
+            <SelectItem key="PRIORITY_LOW">{t('advanced.priority.low')}</SelectItem>
           </Select>
         </SettingItem>
       )}
-      <SettingItem title="接管 DNS 设置" divider>
+      <SettingItem title={t('advanced.controlDns')} divider>
         <Switch
           size="sm"
           isSelected={controlDns}
@@ -183,7 +189,7 @@ const AdvancedSettings: React.FC = () => {
           }}
         />
       </SettingItem>
-      <SettingItem title="接管域名嗅探设置" divider>
+      <SettingItem title={t('advanced.controlSniff')} divider>
         <Switch
           size="sm"
           isSelected={controlSniff}
@@ -199,9 +205,9 @@ const AdvancedSettings: React.FC = () => {
         />
       </SettingItem>
       <SettingItem
-        title="断网时停止内核"
+        title={t('advanced.networkDetection')}
         actions={
-          <Tooltip content="开启后，应用会在检测到网络断开时自动停止内核，并在网络恢复后自动重启内核">
+          <Tooltip content={t('advanced.networkDetectionTip')}>
             <Button isIconOnly size="sm" variant="light">
               <IoIosHelpCircle className="text-lg" />
             </Button>
@@ -224,7 +230,7 @@ const AdvancedSettings: React.FC = () => {
       </SettingItem>
       {networkDetection && (
         <>
-          <SettingItem title="断网检测间隔" divider>
+          <SettingItem title={t('advanced.networkDetectionInterval')} divider>
             <div className="flex">
               {interval !== networkDetectionInterval && (
                 <Button
@@ -236,14 +242,14 @@ const AdvancedSettings: React.FC = () => {
                     await startNetworkDetection()
                   }}
                 >
-                  确认
+                  {t('common:actions.confirm')}
                 </Button>
               )}
               <Input
                 size="sm"
                 type="number"
                 className="w-[100px]"
-                endContent="秒"
+                endContent={t('common:ui.seconds')}
                 value={interval.toString()}
                 min={1}
                 onValueChange={(v) => {
@@ -253,7 +259,7 @@ const AdvancedSettings: React.FC = () => {
               />
             </div>
           </SettingItem>
-          <SettingItem title="绕过检测的接口">
+          <SettingItem title={t('advanced.networkDetectionBypass')}>
             {bypass.length != networkDetectionBypass.length && (
               <Button
                 size="sm"
@@ -263,14 +269,14 @@ const AdvancedSettings: React.FC = () => {
                   await startNetworkDetection()
                 }}
               >
-                确认
+                {t('common:actions.confirm')}
               </Button>
             )}
           </SettingItem>
           <EditableList items={bypass} onChange={(list) => setBypass(list as string[])} />
         </>
       )}
-      <SettingItem title="在特定的 WiFi SSID 下直连">
+      <SettingItem title={t('advanced.pauseSSID')}>
         {pauseSSIDInput.join('') !== pauseSSIDArray.join('') && (
           <Button
             size="sm"
@@ -279,7 +285,7 @@ const AdvancedSettings: React.FC = () => {
               patchAppConfig({ pauseSSID: pauseSSIDInput })
             }}
           >
-            确认
+            {t('common:actions.confirm')}
           </Button>
         )}
       </SettingItem>

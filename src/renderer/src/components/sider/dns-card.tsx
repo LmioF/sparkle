@@ -1,5 +1,6 @@
 import { Button, Card, CardBody, CardFooter, Tooltip } from '@heroui/react'
 import { useControledMihomoConfig } from '@renderer/hooks/use-controled-mihomo-config'
+import { useTranslation } from '@renderer/hooks/useTranslation'
 import BorderSwitch from '@renderer/components/base/border-swtich'
 import { LuServer } from 'react-icons/lu'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -13,6 +14,7 @@ interface Props {
   iconOnly?: boolean
 }
 const DNSCard: React.FC<Props> = (props) => {
+  const { t } = useTranslation('common')
   const { appConfig } = useAppConfig()
   const { iconOnly } = props
   const {
@@ -45,7 +47,7 @@ const DNSCard: React.FC<Props> = (props) => {
   if (iconOnly) {
     return (
       <div className={`${dnsCardStatus} ${!controlDns ? 'hidden' : ''} flex justify-center`}>
-        <Tooltip content="DNS" placement="right">
+        <Tooltip content={t('sider.dnsCard')} placement="right">
           <Button
             size="sm"
             isIconOnly
@@ -103,7 +105,7 @@ const DNSCard: React.FC<Props> = (props) => {
           <h3
             className={`text-md font-bold ${match ? 'text-primary-foreground' : 'text-foreground'}`}
           >
-            DNS
+            {t('sider.dnsCard')}
           </h3>
         </CardFooter>
       </Card>
