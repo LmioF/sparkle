@@ -21,6 +21,9 @@ export async function getOverrideConfig(force = false): Promise<OverrideConfig> 
     }
   }
   if (typeof overrideConfig !== 'object') overrideConfig = { items: [] }
+  if (!Array.isArray(overrideConfig.items)) {
+    overrideConfig.items = []
+  }
   return overrideConfig
 }
 
@@ -30,7 +33,7 @@ export async function setOverrideConfig(config: OverrideConfig): Promise<void> {
 }
 
 export async function getOverrideItem(id: string | undefined): Promise<OverrideItem | undefined> {
-  const { items } = await getOverrideConfig()
+  const { items = [] } = await getOverrideConfig()
   return items.find((item) => item.id === id)
 }
 

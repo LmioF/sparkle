@@ -35,6 +35,9 @@ export async function getProfileConfig(force = false): Promise<ProfileConfig> {
     }
   }
   if (typeof profileConfig !== 'object') profileConfig = { items: [] }
+  if (!Array.isArray(profileConfig.items)) {
+    profileConfig.items = []
+  }
   return profileConfig
 }
 
@@ -44,7 +47,7 @@ export async function setProfileConfig(config: ProfileConfig): Promise<void> {
 }
 
 export async function getProfileItem(id: string | undefined): Promise<ProfileItem | undefined> {
-  const { items } = await getProfileConfig()
+  const { items = [] } = await getProfileConfig()
   if (!id || id === 'default') return { id: 'default', type: 'local', name: '空白订阅' }
   return items.find((item) => item.id === id)
 }
