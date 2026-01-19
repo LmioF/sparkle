@@ -19,6 +19,20 @@ export async function getControledMihomoConfig(force = false): Promise<Partial<M
   }
   if (typeof controledMihomoConfig !== 'object')
     controledMihomoConfig = defaultControledMihomoConfig
+
+  const portFields = ['port', 'socks-port', 'mixed-port', 'redir-port', 'tproxy-port'] as const
+  for (const field of portFields) {
+    if (field in controledMihomoConfig) {
+      const value = controledMihomoConfig[field]
+      if (typeof value === 'number' && isNaN(value)) {
+        controledMihomoConfig[field] = 0
+      } else if (typeof value === 'string') {
+        const parsed = parseInt(value, 10)
+        controledMihomoConfig[field] = isNaN(parsed) ? 0 : parsed
+      }
+    }
+  }
+
   return controledMihomoConfig
 }
 
@@ -50,6 +64,18 @@ export async function patchControledMihomoConfig(patch: Partial<MihomoConfig>): 
     controledMihomoConfig.hosts = patch.hosts
   }
   controledMihomoConfig = deepMerge(controledMihomoConfig, patch)
+
+  // 写入前清理 NaN 端口值
+  const portFields = ['port', 'socks-port', 'mixed-port', 'redir-port', 'tproxy-port'] as const
+  for (const field of portFields) {
+    if (field in controledMihomoConfig) {
+      const value = controledMihomoConfig[field]
+      if (typeof value === 'number' && isNaN(value)) {
+        controledMihomoConfig[field] = 0
+      }
+    }
+  }
+
   await generateProfile()
   await writeFile(controledMihomoConfigPath(), stringifyYaml(controledMihomoConfig), 'utf-8')
 }
