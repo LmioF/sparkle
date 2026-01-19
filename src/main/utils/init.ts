@@ -91,22 +91,40 @@ async function initConfig(): Promise<void> {
 }
 
 async function initFiles(): Promise<void> {
-  const copy = async (file: string): Promise<void> => {
-    const targetPath = path.join(mihomoWorkDir(), file)
-    const testTargetPath = path.join(mihomoTestDir(), file)
-    const sourcePath = path.join(resourcesFilesDir(), file)
-    if (!existsSync(targetPath) && existsSync(sourcePath)) {
-      await cp(sourcePath, targetPath, { recursive: true })
-    }
-    if (!existsSync(testTargetPath) && existsSync(sourcePath)) {
-      await cp(sourcePath, testTargetPath, { recursive: true })
+  const criticalFiles = ['country.mmdb', 'geoip.dat', 'geosite.dat']
+
+  const copy = async (file: string, critical = false): Promise<void> => {
+    try {
+      const targetPath = path.join(mihomoWorkDir(), file)
+      const testTargetPath = path.join(mihomoTestDir(), file)
+      const sourcePath = path.join(resourcesFilesDir(), file)
+
+      if (!existsSync(sourcePath)) {
+        if (critical) {
+          throw new Error(`Critical file not found: ${file}`)
+        }
+        return
+      }
+
+      if (!existsSync(targetPath)) {
+        await cp(sourcePath, targetPath, { recursive: true })
+      }
+      if (!existsSync(testTargetPath)) {
+        await cp(sourcePath, testTargetPath, { recursive: true })
+      }
+    } catch (error) {
+      if (critical) {
+        throw error
+      }
+      console.warn(`Failed to copy ${file}:`, error)
     }
   }
+
   await Promise.all([
-    copy('country.mmdb'),
+    copy('country.mmdb', criticalFiles.includes('country.mmdb')),
     copy('geoip.metadb'),
-    copy('geoip.dat'),
-    copy('geosite.dat'),
+    copy('geoip.dat', criticalFiles.includes('geoip.dat')),
+    copy('geosite.dat', criticalFiles.includes('geosite.dat')),
     copy('ASN.mmdb'),
     copy('sub-store.bundle.js'),
     copy('sub-store-frontend')
