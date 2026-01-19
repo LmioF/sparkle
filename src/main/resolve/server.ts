@@ -67,9 +67,16 @@ export async function startPacServer(): Promise<void> {
 
 export async function stopPacServer(): Promise<void> {
   if (pacServer) {
-    pacServer.close()
-    pacServer = null
-    pacPort = undefined
+    return new Promise((resolve) => {
+      pacServer!.close(() => {
+        pacServer = null
+        pacPort = undefined
+        resolve()
+      })
+      if (typeof pacServer!.closeAllConnections === 'function') {
+        pacServer!.closeAllConnections()
+      }
+    })
   }
 }
 
@@ -89,9 +96,16 @@ export async function startSubStoreFrontendServer(): Promise<void> {
 
 export async function stopSubStoreFrontendServer(): Promise<void> {
   if (subStoreFrontendServer) {
-    subStoreFrontendServer.close()
-    subStoreFrontendServer = null
-    subStoreFrontendPort = undefined
+    return new Promise((resolve) => {
+      subStoreFrontendServer!.close(() => {
+        subStoreFrontendServer = null
+        subStoreFrontendPort = undefined
+        resolve()
+      })
+      if (typeof subStoreFrontendServer!.closeAllConnections === 'function') {
+        subStoreFrontendServer!.closeAllConnections()
+      }
+    })
   }
 }
 
