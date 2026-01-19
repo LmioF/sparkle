@@ -220,6 +220,8 @@ app.on('window-all-closed', () => {
 })
 
 app.on('before-quit', async (e) => {
+  stopCacheCleanup()
+
   if (!isQuitting && !notQuitDialog) {
     e.preventDefault()
 
