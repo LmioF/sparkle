@@ -256,6 +256,9 @@ export async function init(): Promise<void> {
           await startPacServer()
         }
         await triggerSysProxy(sysProxy.enable, onlyActiveDevice)
+        if (sysProxy.enable) {
+          await new Promise((resolve) => setTimeout(resolve, 500))
+        }
       } catch {
         // ignore
       }
