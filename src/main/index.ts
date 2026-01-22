@@ -400,7 +400,6 @@ async function handleDeepLink(url: string): Promise<void> {
             name: profileName ?? undefined,
             url: profileUrl
           })
-          mainWindow?.webContents.send('profileConfigUpdated')
           new Notification({ title: '订阅导入成功' }).show()
         }
       } catch (e) {

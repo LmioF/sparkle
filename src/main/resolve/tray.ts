@@ -368,7 +368,6 @@ export const buildContextMenu = async (): Promise<Menu> => {
           click: async (): Promise<void> => {
             if (item.id === current) return
             await changeCurrentProfile(item.id)
-            mainWindow?.webContents.send('profileConfigUpdated')
             ipcMain.emit('updateTrayMenu')
           }
         }

@@ -17,6 +17,7 @@ import { subStorePort } from '../resolve/server'
 import { dirname, join, normalize } from 'path'
 import { deepMerge } from '../utils/merge'
 import { getUserAgent } from '../utils/userAgent'
+import { mainWindow } from '..'
 
 let profileConfig: ProfileConfig // profile.yaml
 let changeProfileQueue: Promise<void> = Promise.resolve()
@@ -44,6 +45,7 @@ export async function getProfileConfig(force = false): Promise<ProfileConfig> {
 export async function setProfileConfig(config: ProfileConfig): Promise<void> {
   profileConfig = config
   await writeFile(profileConfigPath(), stringifyYaml(config), 'utf-8')
+  mainWindow?.webContents.send('profileConfigUpdated')
 }
 
 export async function getProfileItem(id: string | undefined): Promise<ProfileItem | undefined> {
