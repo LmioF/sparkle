@@ -540,7 +540,7 @@ const Connections: React.FC = () => {
             title={isPaused ? t('resume') : t('pause')}
             onPress={() => setIsPaused(!isPaused)}
           >
-            {isPaused ? <IoMdPause className="text-lg" /> : <IoMdPause className="text-lg" />}
+            {isPaused ? <IoMdPause className="text-lg" /> : <IoMdPlay className="text-lg" />}
           </Button>
           <Button
             size="sm"
