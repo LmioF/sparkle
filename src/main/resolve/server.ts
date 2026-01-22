@@ -150,7 +150,7 @@ export async function startSubStoreBackendServer(): Promise<void> {
           }
         : env
     })
-    
+
     subStoreBackendWorker.on('error', (error) => {
       console.error('[SubStore] Worker error:', error)
       if (subStoreBackendWorker) {
@@ -161,13 +161,13 @@ export async function startSubStoreBackendServer(): Promise<void> {
       stdout.end()
       stderr.end()
     })
-    
+
     subStoreBackendWorker.on('exit', (code) => {
       console.log('[SubStore] Worker exited with code:', code)
       stdout.end()
       stderr.end()
     })
-    
+
     subStoreBackendWorker.stdout.pipe(stdout)
     subStoreBackendWorker.stderr.pipe(stderr)
   }

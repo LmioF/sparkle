@@ -46,13 +46,13 @@ export async function stopMonitor(): Promise<void> {
     child = null
 
     proc.removeAllListeners()
-    
+
     try {
       proc.kill('SIGINT')
     } catch {
       // ignore kill errors if process already exited
     }
-    
+
     await new Promise<void>((resolve) => {
       const timer = setTimeout(resolve, 1000)
       proc.once('exit', () => {
