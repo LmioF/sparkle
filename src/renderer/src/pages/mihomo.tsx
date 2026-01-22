@@ -317,31 +317,36 @@ const Mihomo: React.FC = () => {
             )}
           </SettingItem>
         )}
-        <SettingItem title={t('runMode')} divider>
-          <Tabs
-            size="sm"
-            color="primary"
-            selectedKey={corePermissionMode}
-            disabledKeys={['service']}
-            onSelectionChange={(key) => handlePermissionModeChange(key as string)}
-          >
-            <Tab
-              key="elevated"
-              title={platform === 'win32' ? t('runModeElevated') : t('runModeAuth')}
-            />
-            <Tab key="service" title={t('runModeService')} />
-          </Tabs>
-        </SettingItem>
+        {platform === 'darwin' && (
+          <SettingItem title={t('runMode')} divider>
+            <Tabs
+              size="sm"
+              color="primary"
+              selectedKey={corePermissionMode}
+              disabledKeys={['service']}
+              onSelectionChange={(key) => handlePermissionModeChange(key as string)}
+            >
+              <Tab
+                key="elevated"
+                //title={platform === 'win32' ? t('runModeElevated') : t('runModeAuth')}
+                title={t('runModeAuth')}
+              />
+              <Tab key="service" title={t('runModeService')} />
+            </Tabs>
+          </SettingItem>
+        )}
         <SettingItem title={platform === 'win32' ? t('taskStatus') : t('authStatus')} divider>
           <Button size="sm" color="primary" onPress={() => setShowPermissionModal(true)}>
             {t('manage')}
           </Button>
         </SettingItem>
-        <SettingItem title={t('serviceStatus')} divider>
-          <Button size="sm" color="primary" onPress={() => setShowServiceModal(true)}>
-            {t('manage')}
-          </Button>
-        </SettingItem>
+        {platform === 'darwin' && (
+          <SettingItem title={t('serviceStatus')} divider>
+            <Button size="sm" color="primary" onPress={() => setShowServiceModal(true)}>
+              {t('manage')}
+            </Button>
+          </SettingItem>
+        )}
         <SettingItem title={t('ipv6')} divider>
           <Switch
             size="sm"

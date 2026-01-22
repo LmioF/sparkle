@@ -231,7 +231,7 @@ const Sysproxy: React.FC = () => {
             </Button>
           </SettingItem>
         )}
-        {platform == 'darwin' && (
+        {platform === 'darwin' && (
           <>
             <SettingItem title={t('setMethod')} divider>
               <Tabs
