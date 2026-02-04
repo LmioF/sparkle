@@ -4,7 +4,7 @@ import { useAppConfig } from '@renderer/hooks/use-app-config'
 import {
   getImageDataURL,
   mihomoChangeProxy,
-  mihomoCloseAllConnections,
+  mihomoCloseConnections,
   mihomoProxyDelay
 } from '@renderer/utils/ipc'
 import { FaLocationCrosshairs } from 'react-icons/fa6'
@@ -33,6 +33,7 @@ const Proxies: React.FC = () => {
     groupDisplayLayout = 'double',
     proxyDisplayOrder = 'default',
     autoCloseConnection = true,
+    closeMode = 'all',
     proxyCols = 'auto',
     delayTestConcurrency = 50
   } = appConfig || {}
@@ -82,11 +83,15 @@ const Proxies: React.FC = () => {
     async (group: string, proxy: string): Promise<void> => {
       await mihomoChangeProxy(group, proxy)
       if (autoCloseConnection) {
-        await mihomoCloseAllConnections(group)
+        if (closeMode === 'all') {
+          await mihomoCloseConnections()
+        } else if (closeMode === 'group') {
+          await mihomoCloseConnections(group)
+        }
       }
       mutate()
     },
-    [autoCloseConnection, mutate]
+    [autoCloseConnection, closeMode, mutate]
   )
 
   const onProxyDelay = useCallback(

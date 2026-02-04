@@ -33,6 +33,7 @@ const ProxySettingModal: React.FC<Props> = (props) => {
     groupDisplayLayout = 'single',
     proxyDisplayLayout = 'double',
     autoCloseConnection = true,
+    closeMode = 'all',
     delayTestUrl,
     delayTestConcurrency,
     delayTestTimeout
@@ -136,6 +137,23 @@ const ProxySettingModal: React.FC<Props> = (props) => {
               }}
             />
           </SettingItem>
+          {autoCloseConnection && (
+            <SettingItem title="打断模式" divider>
+              <Tabs
+                size="sm"
+                color="primary"
+                selectedKey={closeMode}
+                onSelectionChange={async (v) => {
+                  await patchAppConfig({
+                    closeMode: v as 'all' | 'group'
+                  })
+                }}
+              >
+                <Tab key="all" title="所有连接" />
+                <Tab key="group" title="仅当前组" />
+              </Tabs>
+            </SettingItem>
+          )}
           <SettingItem title={t('delayTestUrl')} divider>
             <Input
               size="sm"
