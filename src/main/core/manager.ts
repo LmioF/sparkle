@@ -109,7 +109,7 @@ export async function startCore(detached = false): Promise<Promise<void>[]> {
 
   await generateProfile()
   await checkProfile()
-  await stopCore()
+  await stopCore(false, true)
   if (tun?.enable && autoSetDNSMode !== 'none') {
     try {
       await setPublicDNS()
@@ -291,7 +291,7 @@ export async function startCore(detached = false): Promise<Promise<void>[]> {
   })
 }
 
-export async function stopCore(force = false): Promise<void> {
+export async function stopCore(force = false, keepDetection = false): Promise<void> {
   if (setPublicDNSTimer) {
     clearTimeout(setPublicDNSTimer)
     setPublicDNSTimer = null
@@ -300,7 +300,9 @@ export async function stopCore(force = false): Promise<void> {
     clearTimeout(recoverDNSTimer)
     recoverDNSTimer = null
   }
-  await stopNetworkDetection()
+  if (!keepDetection) {
+    await stopNetworkDetection()
+  }
 
   stopAllProfileUpdaters()
 
@@ -718,7 +720,7 @@ export async function startNetworkDetection(): Promise<void> {
       } else {
         if (!networkDownHandled) {
           if (sysProxy.enable) await disableSysProxy(onlyActiveDevice)
-          await stopCore()
+          await stopCore(false, true)
           networkDownHandled = true
         }
       }
