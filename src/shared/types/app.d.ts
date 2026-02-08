@@ -86,6 +86,7 @@ interface AppConfig {
   userAgent?: string
   delayTestConcurrency?: number
   delayTestUrl?: string
+  delayTestUrlScope?: 'group' | 'global'
   delayTestTimeout?: number
   encryptedPassword?: number[]
   controlDns?: boolean
