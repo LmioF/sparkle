@@ -76,10 +76,10 @@ const UpdaterModal: React.FC<Props> = (props) => {
               className="flex app-nodrag"
               onPress={() => {
                 if (version.includes('beta')) {
-                  open('https://github.com/INKCR0W/sparkle/releases/tag/pre-release')
+                  open('https://github.com/LmioF/sparkle/releases/tag/pre-release')
                   return
                 }
-                open(`https://github.com/INKCR0W/sparkle/releases/tag/${version}`)
+                open(`https://github.com/LmioF/sparkle/releases/tag/${version}`)
               }}
             >
               {t('goToDownload')}
