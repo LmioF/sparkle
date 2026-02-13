@@ -42,12 +42,18 @@ async function getLatestAlphaVersion() {
     const response = await fetch(MIHOMO_ALPHA_VERSION_URL, {
       method: 'GET'
     })
+    
+    if (!response.ok) {
+        throw new Error(`Upstream returned ${response.status} ${response.statusText}`); // Check status
+    }
+
     let v = await response.text()
-    MIHOMO_ALPHA_VERSION = v.trim() // Trim to remove extra whitespaces
+    MIHOMO_ALPHA_VERSION = v.trim() 
     console.log(`Latest alpha version: ${MIHOMO_ALPHA_VERSION}`)
+    return true 
   } catch (error) {
-    console.error('Error fetching latest alpha version:', error.message)
-    process.exit(1)
+    console.warn('[WARNING] Failed to fetch latest alpha version. Skipping Alpha build.', error.message)
+    return false // Soft fail
   }
 }
 
@@ -401,7 +407,10 @@ const resolveFont = async () => {
 const tasks = [
   {
     name: 'mihomo-alpha',
-    func: () => getLatestAlphaVersion().then(() => resolveSidecar(MihomoAlpha())),
+    func: async () => {
+      const ok = await getLatestAlphaVersion()
+      if (ok) return resolveSidecar(MihomoAlpha())
+    },
     retry: 5
   },
   {
