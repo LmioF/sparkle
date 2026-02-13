@@ -16,11 +16,12 @@ let downloadCancelToken: CancelTokenSource | null = null
 
 async function fetchBetaChangelog(
   currentVersion: string,
-  mixedPort: number
+  mixedPort: number,
+  tunEnabled: boolean // 新增参数
 ): Promise<string | undefined> {
   try {
     const proxyConfig =
-      mixedPort != 0
+    (!tunEnabled && mixedPort != 0) // 如果 TUN 开启，则不使用 proxy 字段
         ? {
             proxy: {
               protocol: 'http' as const,
@@ -77,29 +78,38 @@ async function fetchBetaChangelog(
 }
 
 export async function checkUpdate(): Promise<AppVersion | undefined> {
-  const { 'mixed-port': mixedPort = 7890 } = await getControledMihomoConfig()
-  const { updateChannel = 'stable' } = await getAppConfig()
+  const mihomoConfig = await getControledMihomoConfig() // 获取完整的内核配置
+  const mixedPort = mihomoConfig['mixed-port'] ?? 7890 // 获取代理端口
+  const tunEnabled = mihomoConfig.tun?.enable ?? false // 识别 TUN 是否开启
+
+  const { updateChannel = 'stable' } = await getAppConfig() //
   let url = 'https://github.com/LmioF/sparkle/releases/latest/download/latest.yml'
   if (updateChannel == 'beta') {
     url = 'https://github.com/LmioF/sparkle/releases/download/pre-release/latest.yml'
   }
+
   const res = await axios.get(url, {
     headers: { 'Content-Type': 'application/octet-stream' },
-    ...(mixedPort != 0 && {
-      proxy: {
-        protocol: 'http',
-        host: '127.0.0.1',
-        port: mixedPort
-      }
-    }),
+    // 使用扩展运算符进行条件判断：
+    // 如果 TUN 未开启且端口不为 0，则添加 proxy 配置
+    ...(!tunEnabled &&
+      mixedPort != 0 && {
+        proxy: {
+          protocol: 'http',
+          host: '127.0.0.1',
+          port: mixedPort
+        }
+      }),
     responseType: 'text'
   })
-  const latest = parseYaml<AppVersion>(res.data)
-  const currentVersion = app.getVersion()
+
+  const latest = parseYaml<AppVersion>(res.data) //
+  const currentVersion = app.getVersion() //
   if (latest.version !== currentVersion) {
-    // 对于 beta 通道，尝试获取从当前版本到最新版本的所有 commit
+    // 对于 beta 通道，尝试获取从当前版本到最新版本的所有 commit。
+    // 传递 tunEnabled 状态以确保在 TUN 模式下能正常绕过代理验证获取日志。
     if (updateChannel === 'beta') {
-      const changelog = await fetchBetaChangelog(currentVersion, mixedPort)
+      const changelog = await fetchBetaChangelog(currentVersion, mixedPort, tunEnabled)
       if (changelog) {
         latest.changelog = changelog
       }
@@ -111,7 +121,10 @@ export async function checkUpdate(): Promise<AppVersion | undefined> {
 }
 
 export async function downloadAndInstallUpdate(version: string): Promise<void> {
-  const { 'mixed-port': mixedPort = 7890 } = await getControledMihomoConfig()
+  const mihomoConfig = await getControledMihomoConfig()
+  const mixedPort = mihomoConfig['mixed-port'] ?? 7890
+  const tunEnabled = mihomoConfig.tun?.enable ?? false
+  
   let releaseTag = version
   if (version.includes('beta')) {
     releaseTag = 'pre-release'
@@ -135,7 +148,8 @@ export async function downloadAndInstallUpdate(version: string): Promise<void> {
   const apiUrl = `https://api.github.com/repos/LmioF/sparkle/releases/tags/${releaseTag}`
   const apiRequestConfig: AxiosRequestConfig = {
     headers: { Accept: 'application/vnd.github.v3+json' },
-    ...(mixedPort != 0 && {
+    ...(!tunEnabled &&
+      mixedPort != 0 && {
       proxy: {
         protocol: 'http',
         host: '127.0.0.1',
@@ -166,7 +180,8 @@ export async function downloadAndInstallUpdate(version: string): Promise<void> {
     if (!existsSync(path.join(dataDir(), file))) {
       const res = await axios.get(`${baseUrl}${file}`, {
         responseType: 'arraybuffer',
-        ...(mixedPort != 0 && {
+        ...(!tunEnabled &&
+          mixedPort != 0 && {
           proxy: {
             protocol: 'http',
             host: '127.0.0.1',
