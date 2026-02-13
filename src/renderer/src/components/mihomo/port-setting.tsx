@@ -314,7 +314,7 @@ const PortSetting: React.FC = () => {
           items={skipAuthPrefixesInput}
           onChange={(items) => setSkipAuthPrefixesInput(items as string[])}
           placeholder={t('port.ipRangePlaceholder')}
-          disableFirst
+          /* disableFirst */ // 移除首项锁定，允许对列表第一项进行编辑或删除
           divider={false}
         />
       </SettingCard>
