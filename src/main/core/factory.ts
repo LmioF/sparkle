@@ -252,6 +252,12 @@ function cleanDnsConfig(profile: MihomoConfig, controlDns: boolean): void {
   if (dnsConfig['nameserver-policy'] && Object.keys(dnsConfig['nameserver-policy']).length === 0) {
     delete dnsConfig['nameserver-policy']
   }
+  if (
+    dnsConfig['proxy-server-nameserver-policy'] &&
+    Object.keys(dnsConfig['proxy-server-nameserver-policy']).length === 0
+  ) {
+    delete dnsConfig['proxy-server-nameserver-policy']
+  }
 
   // 删除 fallback 相关配置，mihomo 已不再使用这些配置
   delete dnsConfig.fallback
