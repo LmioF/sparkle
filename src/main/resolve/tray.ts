@@ -214,7 +214,8 @@ export const buildContextMenu = async (): Promise<Menu> => {
                       await mihomoCloseConnections()
                     }
                   }
-                })
+                }
+              })
           ]
         }
       })

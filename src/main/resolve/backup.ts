@@ -126,8 +126,8 @@ export async function listWebdavBackups(): Promise<string[]> {
     password: webdavPassword
   })
   const files = await client.getDirectoryContents(webdavDir, { glob: '*.zip' })
-  const fileList = Array.isArray(files) ? files : files.data
-  return fileList.map((file) => file.basename).sort((a, b) => b.localeCompare(a))
+  const fileList: any[] = Array.isArray(files) ? files : (files as any).data
+  return fileList.map((file) => file.basename).sort((a: string, b: string) => b.localeCompare(a))
 }
 
 export async function webdavDelete(filename: string): Promise<void> {
@@ -311,7 +311,7 @@ export async function localRestore(zipPath: string): Promise<void> {
     zip.extractAllTo(tempDir, true)
 
     // 备份现有文件
-    for (const item of allowedPaths) {
+    for (const item of Array.from(allowedPaths)) {
       const sourcePath = path.join(targetDir, item)
       const backupPath = path.join(backupDir, item)
       try {
@@ -372,7 +372,7 @@ export async function localRestore(zipPath: string): Promise<void> {
       } catch (readTempError) {
         // 无法读取临时目录，尝试根据白名单清理
         console.warn('Failed to read temp directory, cleaning based on whitelist:', readTempError)
-        for (const item of allowedPaths) {
+        for (const item of Array.from(allowedPaths)) {
           const destPath = path.join(targetDir, item)
           try {
             await fs.rm(destPath, { recursive: true, force: true })
