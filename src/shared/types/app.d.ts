@@ -73,6 +73,7 @@ interface AppConfig {
   originDNS?: string
   useWindowFrame: boolean
   proxyInTray: boolean
+  trayProxyDelayLayout?: 'same-line' | 'new-line'
   siderOrder: string[]
   siderWidth: number
   appTheme: AppTheme

@@ -38,6 +38,7 @@ const AppearanceConfig: React.FC = () => {
     useDockIcon = true,
     showTraffic = false,
     proxyInTray = true,
+    trayProxyDelayLayout = 'auto',
     disableTray = false,
     showFloatingWindow: showFloating = false,
     spinFloatingIcon = true,
@@ -179,6 +180,24 @@ const AppearanceConfig: React.FC = () => {
                 }}
               />
             </SettingItem>
+            {proxyInTray && (
+              <SettingItem title="托盘菜单节点延迟显示方式" divider>
+                <Tabs
+                  size="sm"
+                  color="primary"
+                  selectedKey={trayProxyDelayLayout}
+                  onSelectionChange={async (v) => {
+                    await patchAppConfig({
+                      trayProxyDelayLayout: v as 'same-line' | 'new-line'
+                    })
+                    window.electron.ipcRenderer.send('updateTrayMenu')
+                  }}
+                >
+                  <Tab key="same-line" title="同一行" />
+                  <Tab key="new-line" title="换行" />
+                </Tabs>
+              </SettingItem>
+            )}
             <SettingItem
               title={
                 platform === 'win32'
