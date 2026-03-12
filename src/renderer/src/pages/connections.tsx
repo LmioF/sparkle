@@ -551,7 +551,12 @@ const Connections: React.FC = () => {
             className="app-nodrag ml-2"
             variant="light"
             title={isPaused ? t('resume') : t('pause')}
-            onPress={() => setIsPaused(!isPaused)}
+            onPress={() => {
+              setIsPaused((p) => {
+                isPausedRef.current = !p
+                return !p
+              })
+            }}
           >
             {isPaused ? <IoMdPlay className="text-lg" /> : <IoMdPause className="text-lg" />}
           </Button>
