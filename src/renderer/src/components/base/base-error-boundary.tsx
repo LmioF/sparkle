@@ -3,8 +3,23 @@ import { JSX, ReactNode } from 'react'
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary'
 import { useTranslation } from '@renderer/hooks/useTranslation'
 
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message
+  }
+  return String(error)
+}
+
+const getErrorStack = (error: unknown): string => {
+  if (error instanceof Error && typeof error.stack === 'string') {
+    return error.stack
+  }
+  return ''
+}
+
 const ErrorFallback = ({ error }: FallbackProps): JSX.Element => {
-  const err = error as any
+  const message = getErrorMessage(error)
+  const stack = getErrorStack(error)
   const { t } = useTranslation('common')
 
   return (
@@ -25,18 +40,16 @@ const ErrorFallback = ({ error }: FallbackProps): JSX.Element => {
         size="sm"
         variant="flat"
         className="ml-2"
-        onPress={() =>
-          navigator.clipboard.writeText('```\n' + err.message + '\n' + err.stack + '\n```')
-        }
+        onPress={() => navigator.clipboard.writeText('```\n' + message + '\n' + stack + '\n```')}
       >
         {t('errors.copyError')}
       </Button>
 
-      <p className="my-2">{err.message}</p>
+      <p className="my-2">{message}</p>
 
       <details title="Error Stack">
         <summary>Error Stack</summary>
-        <pre>{err.stack}</pre>
+        <pre>{stack}</pre>
       </details>
     </div>
   )
