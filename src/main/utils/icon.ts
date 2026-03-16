@@ -270,10 +270,12 @@ export async function getIconDataURL(appPath: string): Promise<string> {
 }
 
 export async function getImageDataURL(url: string): Promise<string> {
-  const { 'mixed-port': port = 7890 } = await getControledMihomoConfig()
+  const mihomoConfig = await getControledMihomoConfig()
+  const port = mihomoConfig['mixed-port'] ?? 7890
+  const tunEnabled = mihomoConfig.tun?.enable ?? false
   const res = await axios.get(url, {
     responseType: 'arraybuffer',
-    ...(port != 0 && {
+    ...(!tunEnabled && port != 0 && {
       proxy: {
         protocol: 'http',
         host: '127.0.0.1',

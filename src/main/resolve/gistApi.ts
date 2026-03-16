@@ -13,14 +13,16 @@ function isValidGistId(id: string): boolean {
 }
 
 async function listGists(token: string): Promise<GistInfo[]> {
-  const { 'mixed-port': port = 7890 } = await getControledMihomoConfig()
+  const mihomoConfig = await getControledMihomoConfig()
+  const port = mihomoConfig['mixed-port'] ?? 7890
+  const tunEnabled = mihomoConfig.tun?.enable ?? false
   const res = await axios.get('https://api.github.com/gists', {
     headers: {
       Accept: 'application/vnd.github+json',
       Authorization: `Bearer ${token}`,
       'X-GitHub-Api-Version': '2022-11-28'
     },
-    ...(port != 0 && {
+    ...(!tunEnabled && port != 0 && {
       proxy: {
         protocol: 'http',
         host: '127.0.0.1',
@@ -33,7 +35,9 @@ async function listGists(token: string): Promise<GistInfo[]> {
 }
 
 async function createGist(token: string, content: string): Promise<void> {
-  const { 'mixed-port': port = 7890 } = await getControledMihomoConfig()
+  const mihomoConfig = await getControledMihomoConfig()
+  const port = mihomoConfig['mixed-port'] ?? 7890
+  const tunEnabled = mihomoConfig.tun?.enable ?? false
   await axios.post(
     'https://api.github.com/gists',
     {
@@ -47,7 +51,7 @@ async function createGist(token: string, content: string): Promise<void> {
         Authorization: `Bearer ${token}`,
         'X-GitHub-Api-Version': '2022-11-28'
       },
-      ...(port != 0 && {
+      ...(!tunEnabled && port != 0 && {
         proxy: {
           protocol: 'http',
           host: '127.0.0.1',
@@ -59,7 +63,9 @@ async function createGist(token: string, content: string): Promise<void> {
 }
 
 async function createGistAndReturn(token: string, content: string): Promise<GistInfo> {
-  const { 'mixed-port': port = 7890 } = await getControledMihomoConfig()
+  const mihomoConfig = await getControledMihomoConfig()
+  const port = mihomoConfig['mixed-port'] ?? 7890
+  const tunEnabled = mihomoConfig.tun?.enable ?? false
   const res = await axios.post(
     'https://api.github.com/gists',
     {
@@ -73,7 +79,7 @@ async function createGistAndReturn(token: string, content: string): Promise<Gist
         Authorization: `Bearer ${token}`,
         'X-GitHub-Api-Version': '2022-11-28'
       },
-      ...(port != 0 && {
+      ...(!tunEnabled && port != 0 && {
         proxy: {
           protocol: 'http',
           host: '127.0.0.1',
@@ -89,7 +95,9 @@ async function updateGist(token: string, id: string, content: string): Promise<v
   if (!isValidGistId(id)) {
     throw new Error('Invalid gist id')
   }
-  const { 'mixed-port': port = 7890 } = await getControledMihomoConfig()
+  const mihomoConfig = await getControledMihomoConfig()
+  const port = mihomoConfig['mixed-port'] ?? 7890
+  const tunEnabled = mihomoConfig.tun?.enable ?? false
   await axios.patch(
     `https://api.github.com/gists/${encodeURIComponent(id)}`,
     {
@@ -102,7 +110,7 @@ async function updateGist(token: string, id: string, content: string): Promise<v
         Authorization: `Bearer ${token}`,
         'X-GitHub-Api-Version': '2022-11-28'
       },
-      ...(port != 0 && {
+      ...(!tunEnabled && port != 0 && {
         proxy: {
           protocol: 'http',
           host: '127.0.0.1',

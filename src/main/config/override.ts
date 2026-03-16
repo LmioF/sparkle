@@ -82,7 +82,9 @@ export async function createOverride(item: Partial<OverrideItem>): Promise<Overr
   } as OverrideItem
   switch (newItem.type) {
     case 'remote': {
-      const { 'mixed-port': mixedPort = 7890 } = await getControledMihomoConfig()
+      const mihomoConfig = await getControledMihomoConfig()
+      const mixedPort = mihomoConfig['mixed-port'] ?? 7890
+      const tunEnabled = mihomoConfig.tun?.enable ?? false
       if (!item.url) throw new Error('Empty URL')
       let res: AxiosResponse
       try {
@@ -95,7 +97,7 @@ export async function createOverride(item: Partial<OverrideItem>): Promise<Overr
               s.destroy(new Error('证书指纹不匹配'))
           }
 
-          if (mixedPort != 0) {
+          if (!tunEnabled && mixedPort != 0) {
             const urlObj = new URL(item.url)
             const hostname = urlObj.hostname
             const port = urlObj.port || '443'
@@ -138,7 +140,8 @@ export async function createOverride(item: Partial<OverrideItem>): Promise<Overr
 
         res = await axios.get(item.url, {
           httpsAgent,
-          ...(mixedPort != 0 &&
+          ...(!tunEnabled &&
+            mixedPort != 0 &&
             !item.fingerprint && {
               proxy: { protocol: 'http', host: '127.0.0.1', port: mixedPort }
             }),

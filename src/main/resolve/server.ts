@@ -182,7 +182,9 @@ export async function stopSubStoreBackendServer(): Promise<void> {
 }
 
 export async function downloadSubStore(): Promise<void> {
-  const { 'mixed-port': mixedPort = 7890 } = await getControledMihomoConfig()
+  const mihomoConfig = await getControledMihomoConfig()
+  const mixedPort = mihomoConfig['mixed-port'] ?? 7890
+  const tunEnabled = mihomoConfig.tun?.enable ?? false
   const frontendDir = path.join(mihomoWorkDir(), 'sub-store-frontend')
   const backendPath = path.join(mihomoWorkDir(), 'sub-store.bundle.js')
   const tempDir = path.join(mihomoWorkDir(), 'temp')
@@ -194,7 +196,7 @@ export async function downloadSubStore(): Promise<void> {
       {
         responseType: 'arraybuffer',
         headers: { 'Content-Type': 'application/octet-stream' },
-        ...(mixedPort != 0 && {
+        ...(!tunEnabled && mixedPort != 0 && {
           proxy: {
             protocol: 'http',
             host: '127.0.0.1',
@@ -211,7 +213,7 @@ export async function downloadSubStore(): Promise<void> {
       {
         responseType: 'arraybuffer',
         headers: { 'Content-Type': 'application/octet-stream' },
-        ...(mixedPort != 0 && {
+        ...(!tunEnabled && mixedPort != 0 && {
           proxy: {
             protocol: 'http',
             host: '127.0.0.1',

@@ -155,14 +155,16 @@ export async function createProfile(item: Partial<ProfileItem>): Promise<Profile
   } as ProfileItem
   switch (newItem.type) {
     case 'remote': {
-      const { 'mixed-port': mixedPort = 7890 } = await getControledMihomoConfig()
+      const mihomoConfig = await getControledMihomoConfig()
+      const mixedPort = mihomoConfig['mixed-port'] ?? 7890
+      const tunEnabled = mihomoConfig.tun?.enable ?? false
       if (!item.url) throw new Error('Empty URL')
       let res: AxiosResponse
       if (newItem.substore) {
         const urlObj = new URL(`http://127.0.0.1:${subStorePort}${item.url}`)
         urlObj.searchParams.set('target', 'ClashMeta')
         urlObj.searchParams.set('noCache', 'true')
-        if (newItem.useProxy && mixedPort != 0) {
+        if (newItem.useProxy && !tunEnabled && mixedPort != 0) {
           urlObj.searchParams.set('proxy', `http://127.0.0.1:${mixedPort}`)
         } else {
           urlObj.searchParams.delete('proxy')
@@ -184,7 +186,7 @@ export async function createProfile(item: Partial<ProfileItem>): Promise<Profile
                 s.destroy(new Error('证书指纹不匹配'))
             }
 
-            if (newItem.useProxy && mixedPort != 0) {
+            if (newItem.useProxy && !tunEnabled && mixedPort != 0) {
               const urlObj = new URL(item.url)
               const hostname = urlObj.hostname
               const port = urlObj.port || '443'
@@ -228,6 +230,7 @@ export async function createProfile(item: Partial<ProfileItem>): Promise<Profile
           res = await axios.get(item.url, {
             httpsAgent,
             ...(newItem.useProxy &&
+              !tunEnabled &&
               mixedPort &&
               !item.fingerprint && {
                 proxy: { protocol: 'http', host: '127.0.0.1', port: mixedPort }
