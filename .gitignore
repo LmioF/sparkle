@@ -8,3 +8,5 @@ out
 *.log*
 .idea
 *.ttf
+# AI 开发上下文（仅本地保留）
+AI_CONTEXT.md
