@@ -33,6 +33,7 @@ const Connections: React.FC = () => {
   const {
     connectionDirection = 'asc',
     connectionOrderBy = 'time',
+    connectionInterval = 500,
     displayIcon = true,
     displayAppName = true
   } = appConfig || {}
@@ -192,6 +193,7 @@ const Connections: React.FC = () => {
 
       const prevActiveMap = new Map(currentActiveConnections.map((conn) => [conn.id, conn]))
       const existingConnectionIds = new Set(currentAllConnections.map((conn) => conn.id))
+      const speedRatio = 1000 / connectionInterval
 
       const now = Date.now()
       const activeConnIds = new Set(info.connections.map((conn) => conn.id))
@@ -202,8 +204,8 @@ const Connections: React.FC = () => {
 
       const activeConns = info.connections.map((conn) => {
         const preConn = prevActiveMap.get(conn.id)
-        const downloadSpeed = preConn ? conn.download - preConn.download : 0
-        const uploadSpeed = preConn ? conn.upload - preConn.upload : 0
+        const downloadSpeed = preConn ? Math.max(0, Math.round((conn.download - preConn.download) * speedRatio)) : 0
+        const uploadSpeed = preConn ? Math.max(0, Math.round((conn.upload - preConn.upload) * speedRatio)) : 0
         const metadata =
           conn.metadata.type === 'Inner'
             ? { ...conn.metadata, process: 'mihomo', processPath: 'mihomo' }
@@ -268,6 +270,10 @@ const Connections: React.FC = () => {
       unsubscribe()
     }
   }, [])
+
+  useEffect(() => {
+    isPausedRef.current = isPaused
+  }, [isPaused])
 
   const processAppNameQueue = useCallback(async () => {
     if (processingAppNames.current.size >= 3 || appNameRequestQueue.current.size === 0) return
