@@ -340,7 +340,7 @@ const AppearanceConfig: React.FC = () => {
                 size="sm"
                 isLoading={fetching}
                 isIconOnly
-                title={t('appearance.fetchTheme')}
+                aria-label={t('appearance.fetchTheme')}
                 variant="light"
                 onPress={async () => {
                   setFetching(true)
@@ -359,7 +359,7 @@ const AppearanceConfig: React.FC = () => {
               <Button
                 size="sm"
                 isIconOnly
-                title={t('appearance.importTheme')}
+                aria-label={t('appearance.importTheme')}
                 variant="light"
                 onPress={async () => {
                   const files = await getFilePath(['css'])
@@ -377,7 +377,7 @@ const AppearanceConfig: React.FC = () => {
               <Button
                 size="sm"
                 isIconOnly
-                title={t('appearance.editTheme')}
+                aria-label={t('appearance.editTheme')}
                 variant="light"
                 onPress={async () => {
                   setOpenCSSEditor(true)
@@ -390,6 +390,7 @@ const AppearanceConfig: React.FC = () => {
         >
           {customThemes && (
             <Select
+              aria-label="自定义主题"
               classNames={{ trigger: 'data-[hover=true]:bg-default-200' }}
               className="w-[60%]"
               size="sm"

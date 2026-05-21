@@ -94,7 +94,7 @@ const ProxyItem: React.FC<Props> = (props) => {
                 {fixed && (
                   <Button
                     isIconOnly
-                    title={t('unpin')}
+                    aria-label={t('unpin')}
                     color="danger"
                     onPress={async () => {
                       await mihomoUnfixedProxy(group.name)
@@ -108,7 +108,6 @@ const ProxyItem: React.FC<Props> = (props) => {
                 )}
                 <Button
                   isIconOnly
-                  title={proxy.type}
                   isLoading={loading}
                   color={delayColor(delay)}
                   onPress={onDelay}
@@ -122,16 +121,12 @@ const ProxyItem: React.FC<Props> = (props) => {
           ) : (
             <>
               <div className="text-ellipsis overflow-hidden whitespace-nowrap">
-                <div className="flag-emoji inline" title={proxy.name}>
-                  {proxy.name}
-                </div>
+                <div className="flag-emoji inline">{proxy.name}</div>
                 {proxyDisplayLayout === 'single' && (
                   <>
-                    <div className="inline ml-2 text-foreground-500" title={proxy.type}>
-                      {proxy.type}
-                    </div>
+                    <div className="inline ml-2 text-foreground-500">{proxy.type}</div>
                     {isGroup(proxy) && proxy.now && (
-                      <div className="inline ml-2 text-foreground-500 flag-emoji" title={proxy.now}>
+                      <div className="inline ml-2 text-foreground-500 flag-emoji">
                         → {proxy.now}
                       </div>
                     )}
@@ -143,7 +138,7 @@ const ProxyItem: React.FC<Props> = (props) => {
                   <div className="flex items-center">
                     <Button
                       isIconOnly
-                      title={t('unpin')}
+                      aria-label={t('unpin')}
                       color="danger"
                       onPress={async () => {
                         await mihomoUnfixedProxy(group.name)
@@ -159,7 +154,6 @@ const ProxyItem: React.FC<Props> = (props) => {
                 <div className="flex items-center">
                   <Button
                     isIconOnly
-                    title={proxy.type}
                     isLoading={loading}
                     color={delayColor(delay)}
                     onPress={onDelay}

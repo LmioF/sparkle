@@ -116,7 +116,7 @@ const ProfileCard: React.FC<Props> = (props) => {
                 <Button
                   isIconOnly
                   size="sm"
-                  title={t('sider.viewRuntimeConfig')}
+                  aria-label={t('sider.viewRuntimeConfig')}
                   variant="light"
                   color="default"
                   onPress={() => {
@@ -211,7 +211,7 @@ const ProfileCard: React.FC<Props> = (props) => {
               </div>
             )}
             {extra && (
-              <Meter maxValue={total} value={usage}>
+              <Meter aria-label="流量用量" maxValue={total} value={usage}>
                 <Meter.Track
                   className={
                     match
@@ -257,7 +257,7 @@ const ProfileCard: React.FC<Props> = (props) => {
                 className="bg-transparent"
                 variant="flat"
                 color="default"
-                title={t('sider.viewRuntimeConfig')}
+                aria-label={t('sider.viewRuntimeConfig')}
                 onPress={() => {
                   setShowRuntimeConfig(true)
                 }}

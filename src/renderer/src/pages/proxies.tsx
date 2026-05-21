@@ -354,12 +354,11 @@ const Proxies: React.FC = () => {
                       {group.all.length}
                     </Chip>
                     <CollapseInput
-                      title={t('searchNode')}
+                      aria-label={t('searchNode')}
                       value={groupSearchValue}
                       onValueChange={(v) => updateSearchValue(index, v)}
                     />
                     <Button
-                      title={t('locateCurrentNode')}
                       aria-label={t('locateCurrentNode')}
                       variant="light"
                       size="sm"
@@ -369,7 +368,6 @@ const Proxies: React.FC = () => {
                       <FaLocationCrosshairs className="text-lg text-foreground-500" />
                     </Button>
                     <Button
-                      title={t('delayTest')}
                       aria-label={t('delayTest')}
                       variant="light"
                       isLoading={isGroupDelaying}
@@ -472,7 +470,6 @@ const Proxies: React.FC = () => {
           isIconOnly
           variant="light"
           className="app-nodrag"
-          title={t('settings')}
           aria-label={t('settings')}
           onPress={() => setIsSettingModalOpen(true)}
         >

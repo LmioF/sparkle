@@ -116,7 +116,7 @@ const ControllerSetting: React.FC = () => {
               <Button
                 size="sm"
                 isIconOnly
-                title={t('controller.generateSecret')}
+                aria-label={t('controller.generateSecret')}
                 variant="light"
                 onPress={() => setSecretInput(generateRandomString(32))}
               >
@@ -180,7 +180,7 @@ const ControllerSetting: React.FC = () => {
                   <Button
                     size="sm"
                     isIconOnly
-                    title={t('controller.updatePanel')}
+                    aria-label={t('controller.updatePanel')}
                     variant="light"
                     isLoading={upgrading}
                     onPress={upgradeUI}
@@ -188,7 +188,7 @@ const ControllerSetting: React.FC = () => {
                     <IoMdCloudDownload className="text-lg" />
                   </Button>
                   <Button
-                    title={t('controller.openInBrowser')}
+                    aria-label={t('controller.openInBrowser')}
                     isIconOnly
                     size="sm"
                     className="app-nodrag"

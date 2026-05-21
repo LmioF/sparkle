@@ -164,7 +164,7 @@ const RuleProvider: React.FC = () => {
               )}
               <Button
                 isIconOnly
-                title={t('update')}
+                aria-label={t('update')}
                 className="ml-2"
                 size="sm"
                 onPress={() => {

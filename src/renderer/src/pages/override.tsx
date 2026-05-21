@@ -149,7 +149,7 @@ const Override: React.FC = () => {
           <Button
             size="sm"
             variant="light"
-            title={t('docs')}
+            aria-label={t('docs')}
             isIconOnly
             className="app-nodrag"
             onPress={() => {
@@ -160,7 +160,7 @@ const Override: React.FC = () => {
           </Button>
           <Button
             className="app-nodrag"
-            title={t('repo')}
+            aria-label={t('repo')}
             isIconOnly
             variant="light"
             size="sm"

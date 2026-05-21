@@ -720,7 +720,6 @@ const Connections: React.FC = () => {
             >
               <Button
                 className="app-nodrag ml-1"
-                title={tab === 'active' ? t('closeAll') : t('clearClosed')}
                 isIconOnly
                 size="sm"
                 variant="light"
@@ -748,7 +747,6 @@ const Connections: React.FC = () => {
             isIconOnly
             className="app-nodrag ml-2"
             variant="light"
-            title={paused ? t('resume') : t('pause')}
             aria-label={paused ? t('resume') : t('pause')}
             onPress={() =>
               setPaused((p) => {
@@ -764,7 +762,6 @@ const Connections: React.FC = () => {
             isIconOnly
             className="app-nodrag"
             variant="light"
-            title={t('settings')}
             aria-label={t('settings')}
             onPress={() => setIsSettingModalOpen(true)}
           >

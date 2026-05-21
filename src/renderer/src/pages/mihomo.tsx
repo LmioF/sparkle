@@ -177,7 +177,7 @@ const Mihomo: React.FC = () => {
               <Button
                 size="sm"
                 isIconOnly
-                title={t('upgrade')}
+                aria-label={t('upgrade')}
                 variant="light"
                 isLoading={upgrading}
                 onPress={handleCoreUpgrade}

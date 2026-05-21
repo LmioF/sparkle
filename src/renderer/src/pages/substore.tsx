@@ -39,7 +39,7 @@ const SubStore: React.FC = () => {
         header={
           <div className="flex gap-2">
             <Button
-              title={t('checkUpdate')}
+              aria-label={t('checkUpdate')}
               isIconOnly
               size="sm"
               className="app-nodrag"
@@ -68,7 +68,7 @@ const SubStore: React.FC = () => {
               <IoMdCloudDownload className="text-lg" />
             </Button>
             <Button
-              title={t('openInBrowser')}
+              aria-label={t('openInBrowser')}
               isIconOnly
               size="sm"
               className="app-nodrag"

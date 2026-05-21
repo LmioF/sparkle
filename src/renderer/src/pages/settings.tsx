@@ -39,7 +39,7 @@ const Settings: React.FC = () => {
             size="sm"
             variant="light"
             className="app-nodrag"
-            title={t('common:ui.githubRepo')}
+            aria-label={t('common:ui.githubRepo')}
             onPress={() => {
               window.open('https://github.com/INKCR0W/sparkle')
             }}
@@ -51,7 +51,7 @@ const Settings: React.FC = () => {
             size="sm"
             variant="light"
             className="app-nodrag"
-            title={t('common:ui.telegramChannel')}
+            aria-label={t('common:ui.telegramChannel')}
             onPress={() => {
               window.open('https://t.me/atri0828')
             }}

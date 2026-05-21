@@ -58,7 +58,7 @@ const BasePage = forwardRef<HTMLDivElement, Props>((props, ref) => {
               size="sm"
               className="app-nodrag"
               isIconOnly
-              title={t('ui.pinWindow')}
+              aria-label={t('ui.pinWindow')}
               variant="light"
               color={onTop ? 'primary' : 'default'}
               onPress={async () => {
