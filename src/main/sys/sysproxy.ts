@@ -137,6 +137,7 @@ async function setSysProxy(onlyActiveDevice: boolean, useRegistry = false): Prom
       } else {
         updateSysproxyGuardEventStream(false)
         await execFilePromise(servicePath(), [
+          'sysproxy',
           'pac',
           '--url',
           `http://${host || '127.0.0.1'}:${pacPort}/pac`,
@@ -165,6 +166,7 @@ async function setSysProxy(onlyActiveDevice: boolean, useRegistry = false): Prom
         } else {
           updateSysproxyGuardEventStream(false)
           await execFilePromise(servicePath(), [
+            'sysproxy',
             'proxy',
             '--server',
             `${host || '127.0.0.1'}:${port}`,
@@ -195,7 +197,7 @@ async function disableSysProxy(onlyActiveDevice: boolean, useRegistry = false): 
       throw new Error(t('main.errors.serviceMayNotInstalled'))
     }
   } else {
-    await execFilePromise(servicePath(), ['disable', ...registryArgs(useRegistry)])
+    await execFilePromise(servicePath(), ['sysproxy', 'disable', ...registryArgs(useRegistry)])
   }
 }
 
