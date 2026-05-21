@@ -294,7 +294,8 @@
       "coreRestarting": "Core is Restarting",
       "coreRestartingDesc": "Please try again later",
       "sysproxyGuardRestored": "System Proxy Restored",
-      "sysproxyGuardRestoreFailed": "Failed to Restore System Proxy"
+      "sysproxyGuardRestoreFailed": "Failed to Restore System Proxy",
+      "serviceUnavailableSwitched": "Service unavailable. Switched to non-service mode."
     },
     "menu": {
       "about": "About",
@@ -785,7 +786,8 @@
       "start": "Start",
       "stop": "Stop",
       "uninstall": "Uninstall",
-      "statusPaused": "Paused"
+      "statusPaused": "Paused",
+      "resetAuth": "Reset Auth"
     },
     "port": {
       "title": "Port Settings",

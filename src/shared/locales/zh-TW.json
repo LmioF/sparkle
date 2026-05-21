@@ -294,7 +294,8 @@
       "coreRestarting": "核心正在重啟中",
       "coreRestartingDesc": "請稍候再試",
       "sysproxyGuardRestored": "系統代理已恢復",
-      "sysproxyGuardRestoreFailed": "系統代理恢復失敗"
+      "sysproxyGuardRestoreFailed": "系統代理恢復失敗",
+      "serviceUnavailableSwitched": "服務不可用，已切換到非服務模式"
     },
     "menu": {
       "about": "關於",
@@ -785,7 +786,8 @@
       "start": "啟動",
       "stop": "停止",
       "uninstall": "解除安裝",
-      "statusPaused": "已暫停"
+      "statusPaused": "已暫停",
+      "resetAuth": "重置認證"
     },
     "port": {
       "title": "連接埠設定",

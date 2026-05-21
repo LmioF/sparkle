@@ -294,7 +294,8 @@
       "coreRestarting": "内核正在重启中",
       "coreRestartingDesc": "请稍候再试",
       "sysproxyGuardRestored": "系统代理已恢复",
-      "sysproxyGuardRestoreFailed": "系统代理恢复失败"
+      "sysproxyGuardRestoreFailed": "系统代理恢复失败",
+      "serviceUnavailableSwitched": "服务不可用，已切换到非服务模式"
     },
     "menu": {
       "about": "关于",
@@ -785,7 +786,8 @@
       "start": "启动",
       "stop": "停止",
       "uninstall": "卸载",
-      "statusPaused": "已暂停"
+      "statusPaused": "已暂停",
+      "resetAuth": "重置认证"
     },
     "port": {
       "title": "端口设置",

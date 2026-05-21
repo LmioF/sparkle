@@ -8,7 +8,7 @@ import {
   patchAppConfig,
   patchControledMihomoConfig
 } from '../config'
-import { app, dialog, ipcMain } from 'electron'
+import { app, dialog, ipcMain, Notification } from 'electron'
 import {
   startMihomoTraffic,
   startMihomoConnections,
@@ -37,12 +37,16 @@ import {
   stopCore as stopServiceCore,
   startServiceCoreEventStream,
   stopServiceCoreEventStream,
+  stopServiceSysproxyEventStream,
   subscribeServiceCoreEvents,
   subscribeServiceCoreEventStream,
+  setServiceUnavailableFallbackHandler,
+  isServiceConnectionError,
   type ServiceCoreEvent,
   type ServiceCoreLaunchProfile
 } from '../service/api'
 import { appendAppLog, createLogWritable, setMihomoLogSource } from '../utils/log'
+import { t } from '../utils/i18n'
 import { createCoreHookWaiter, createCoreStartupHook } from './startupHook'
 import { stopChildProcess } from './process-control'
 import {
@@ -83,8 +87,19 @@ let serviceCoreStreamsStarting: Promise<void> | null = null
 let lastServiceCoreEventKey = ''
 let serviceCoreStartupActive = false
 let serviceCoreReconnectResumePromise: Promise<void> | null = null
+let serviceUnavailableModeFallbackPromise: Promise<void> | null = null
 const serviceConnectionRetryTimeout = 10000
 const serviceConnectionRetryInterval = 500
+
+setServiceUnavailableFallbackHandler((reason) => {
+  if (!serviceUnavailableModeFallbackPromise) {
+    serviceUnavailableModeFallbackPromise = fallbackUnavailableServiceModes(reason).finally(() => {
+      serviceUnavailableModeFallbackPromise = null
+    })
+  }
+
+  return serviceUnavailableModeFallbackPromise
+})
 
 type ServiceCoreConnectionProbe = {
   reachable: boolean
@@ -690,18 +705,67 @@ async function fallbackToElevatedCore(
   return startCore(detached)
 }
 
-function isServiceConnectionError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : String(error)
-  return [
-    'ECONNREFUSED',
-    'ECONNRESET',
-    'ENOENT',
-    'EPIPE',
-    'ETIMEDOUT',
-    'socket hang up',
-    'connect ',
-    'no such file'
-  ].some((fragment) => message.toLowerCase().includes(fragment.toLowerCase()))
+async function fallbackUnavailableServiceModes(reason: unknown): Promise<void> {
+  const appConfig = await getAppConfig()
+  const { sysProxy, corePermissionMode = 'elevated', autoSetDNSMode = 'none' } = appConfig
+  const useServiceCore = corePermissionMode === 'service'
+  const useServiceSysProxy = sysProxy?.settingMode === 'service'
+  const useServiceDNS = autoSetDNSMode === 'service'
+
+  if (!useServiceCore && !useServiceSysProxy && !useServiceDNS) {
+    return
+  }
+
+  await appendAppLog(`[Manager]: Service unavailable, fallback service modes, ${reason}\n`)
+
+  if (useServiceCore) {
+    stopMihomoTraffic()
+    stopMihomoConnections()
+    stopMihomoLogs()
+    stopMihomoMemory()
+    serviceCoreStreamsActive = false
+    if (serviceCoreStreamsRestartTimer) {
+      clearTimeout(serviceCoreStreamsRestartTimer)
+      serviceCoreStreamsRestartTimer = null
+    }
+    stopServiceCoreEventStream()
+    releaseServiceCoreEventHandler()
+    setMihomoLogSource('out')
+  }
+
+  if (useServiceSysProxy) {
+    stopServiceSysproxyEventStream()
+  }
+
+  await patchAppConfig({
+    ...(useServiceCore ? { corePermissionMode: 'elevated' as const } : {}),
+    ...(useServiceSysProxy && sysProxy
+      ? {
+          sysProxy: {
+            ...sysProxy,
+            settingMode: 'exec' as const,
+            guard: false,
+            guardNotify: false
+          }
+        }
+      : {}),
+    ...(useServiceDNS ? { autoSetDNSMode: 'exec' as const } : {})
+  })
+
+  mainWindow?.webContents.send('appConfigUpdated')
+  floatingWindow?.webContents.send('appConfigUpdated')
+
+  try {
+    if (useServiceCore) {
+      const promises = await startCore()
+      await Promise.all(promises)
+      mainWindow?.webContents.send('core-started')
+    }
+    new Notification({ title: t('main.notifications.serviceUnavailableSwitched') }).show()
+  } finally {
+    mainWindow?.webContents.reload()
+    floatingWindow?.webContents.reload()
+  }
 }
 
 export async function restartCore(): Promise<void> {

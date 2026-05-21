@@ -23,16 +23,10 @@ interface Props {
   onUninstall: () => Promise<void>
   onStart: () => Promise<void>
   onRestart: () => Promise<void>
-  onStop: () => Promise<void>
-  onServiceUnavailable: () => Promise<void>
 }
 
 type ServiceStatusType = Awaited<ReturnType<typeof serviceStatus>>
 type ConnectionStatusType = 'connected' | 'disconnected' | 'checking' | 'unknown'
-
-function isServiceUnavailable(status: ServiceStatusType): boolean {
-  return status !== 'running'
-}
 
 function isUserCancelledError(error: unknown, userCancelledText: string): boolean {
   const errorMsg = String(error)
@@ -52,16 +46,7 @@ async function readServiceStatus(): Promise<ServiceStatusType> {
 }
 
 const ServiceModal: React.FC<Props> = (props) => {
-  const {
-    onChange,
-    onInit,
-    onInstall,
-    onUninstall,
-    onStart,
-    onStop,
-    onRestart,
-    onServiceUnavailable
-  } = props
+  const { onChange, onInit, onInstall, onUninstall, onStart, onRestart } = props
   const { t } = useTranslation('mihomo')
   const tCommon = (key: string) => t(`common:${key}`)
   const { appConfig: { disableAnimation = false } = {} } = useAppConfig()
@@ -84,18 +69,9 @@ const ServiceModal: React.FC<Props> = (props) => {
     return result
   }, [])
 
-  const switchIfUnavailable = async (
-    nextStatus: ServiceStatusType,
-    enabled: boolean
-  ): Promise<void> => {
-    if (!enabled || !isServiceUnavailable(nextStatus)) return
-    await onServiceUnavailable().catch(alert)
-  }
-
   const handleAction = async (
     action: () => Promise<void>,
-    isStartAction = false,
-    switchOnUnavailable = true
+    isStartAction = false
   ): Promise<void> => {
     setLoading(true)
     try {
@@ -115,10 +91,8 @@ const ServiceModal: React.FC<Props> = (props) => {
       }
 
       await refreshServiceStatus(result)
-      await switchIfUnavailable(result, switchOnUnavailable)
     } catch (e) {
-      const result = await refreshServiceStatus()
-      await switchIfUnavailable(result, switchOnUnavailable)
+      await refreshServiceStatus()
       if (!isUserCancelledError(e, tCommon('errors.userCancelled'))) alert(e)
     } finally {
       setLoading(false)
@@ -291,28 +265,18 @@ const ServiceModal: React.FC<Props> = (props) => {
                 onPress={() => handleAction(onInit)}
                 isLoading={loading}
               >
-                {t('service.init')}
+                {status === 'need-init' ? t('service.init') : t('service.resetAuth')}
               </Button>
               <Button
                 size="sm"
                 color="primary"
                 variant="flat"
-                onPress={() => handleAction(onRestart, false, false)}
+                onPress={() => handleAction(onRestart)}
                 isLoading={loading}
               >
                 {t('service.restart')}
               </Button>
-              {status === 'running' || status === 'need-init' ? (
-                <Button
-                  size="sm"
-                  color="warning"
-                  variant="flat"
-                  onPress={() => handleAction(onStop)}
-                  isLoading={loading}
-                >
-                  {t('service.stop')}
-                </Button>
-              ) : (
+              {status !== 'running' && status !== 'need-init' ? (
                 <Button
                   size="sm"
                   color="success"
@@ -322,7 +286,7 @@ const ServiceModal: React.FC<Props> = (props) => {
                 >
                   {t('service.start')}
                 </Button>
-              )}
+              ) : null}
               <Button
                 size="sm"
                 color="danger"
