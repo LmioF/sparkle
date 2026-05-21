@@ -1,4 +1,5 @@
 import { toast, type ButtonProps } from '@heroui-v3/react'
+import { i18n } from '@renderer/i18n'
 import { getAppConfig } from './ipc'
 
 type AppNotificationVariant = 'default' | 'accent' | 'success' | 'warning' | 'danger'
@@ -6,6 +7,8 @@ type AppNotificationVariant = 'default' | 'accent' | 'success' | 'warning' | 'da
 export interface AppNotificationPayload {
   title: string
   body?: string
+  persistent?: boolean
+  url?: string
   variant?: AppNotificationVariant
   actionProps?: ButtonProps
   timeout?: number
@@ -24,10 +27,17 @@ export function notify(title: unknown, options: AppNotificationOptions = {}): vo
 export function showToastNotification(payload: AppNotificationPayload): void {
   const { title, body } = normalizeToastPayload(payload)
   toast(title, {
-    actionProps: payload.actionProps,
+    actionProps:
+      payload.actionProps ??
+      (payload.url
+        ? {
+            children: i18n.t('common:actions.open'),
+            onPress: () => window.open(payload.url, '_blank', 'noopener,noreferrer')
+          }
+        : undefined),
     description: body,
     onClose: payload.onClose,
-    timeout: payload.timeout,
+    timeout: payload.persistent ? 0 : payload.timeout,
     variant: payload.variant ?? 'default'
   })
 }
@@ -51,7 +61,16 @@ async function showNotification(
     // fall back to the current system notification behavior
   }
 
-  const notification = new window.Notification(payload.title, { body: payload.body })
+  const notification = new window.Notification(payload.title, {
+    body: payload.body,
+    requireInteraction: payload.persistent
+  })
+  notification.onclick = payload.url
+    ? () => {
+        window.open(payload.url, '_blank', 'noopener,noreferrer')
+        notification.close()
+      }
+    : null
   notification.onclose = payload.onClose ?? null
 }
 

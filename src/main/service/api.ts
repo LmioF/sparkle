@@ -397,6 +397,7 @@ export type ServiceCoreEventType =
   | 'takeover'
   | 'ready'
   | 'failed'
+  | 'log'
 
 export interface ServiceCoreEvent {
   seq?: number
@@ -407,6 +408,7 @@ export interface ServiceCoreEvent {
   old_pid?: number
   message?: string
   error?: string
+  data?: Record<string, string>
 }
 
 export type ServiceSysproxyEventType =

@@ -295,7 +295,9 @@
       "coreRestartingDesc": "请稍候再试",
       "sysproxyGuardRestored": "系统代理已恢复",
       "sysproxyGuardRestoreFailed": "系统代理恢复失败",
-      "serviceUnavailableSwitched": "服务不可用，已切换到非服务模式"
+      "serviceUnavailableSwitched": "服务不可用，已切换到非服务模式",
+      "tailscaleAuthRequired": "{name} 需要 Tailscale 认证",
+      "tailscaleAuthOpenLink": "点击打开认证链接"
     },
     "menu": {
       "about": "关于",

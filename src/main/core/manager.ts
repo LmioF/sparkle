@@ -54,7 +54,11 @@ import {
 } from '../service/fallback'
 import { appendAppLog, createLogWritable, setMihomoLogSource } from '../utils/log'
 import { t } from '../utils/i18n'
-import { showNotification } from '../utils/notification'
+import {
+  showNotification,
+  type AppNotificationPayload,
+  type AppNotificationVariant
+} from '../utils/notification'
 import { createCoreHookWaiter, createCoreStartupHook } from './startupHook'
 import { stopChildProcess } from './process-control'
 import {
@@ -97,6 +101,37 @@ let serviceCoreStartupActive = false
 let serviceCoreReconnectResumePromise: Promise<void> | null = null
 let serviceUnavailableModeFallbackPromise: Promise<void> | null = null
 const serviceConnectionRetryInterval = 500
+
+type CoreLogNotification = AppNotificationPayload & {
+  key: string
+  variant?: AppNotificationVariant
+}
+
+interface CoreLogNotificationRule {
+  match: (event: ServiceCoreEvent) => CoreLogNotification | undefined
+}
+
+const notifiedCoreLogKeys = new Set<string>()
+const coreLogNotificationRules: CoreLogNotificationRule[] = [
+  {
+    match: (event) => {
+      if (event.message !== 'tailscale_auth') return undefined
+
+      const name = event.data?.name
+      const url = event.data?.url
+      if (!name || !url) return undefined
+
+      return {
+        key: `tailscale-auth:${url}`,
+        title: t('main.notifications.tailscaleAuthRequired', { name }),
+        body: t('main.notifications.tailscaleAuthOpenLink'),
+        persistent: true,
+        url,
+        variant: 'warning'
+      }
+    }
+  }
+]
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
@@ -585,6 +620,14 @@ function releaseServiceCoreEventHandler(): void {
 }
 
 async function handleServiceCoreEvent(event: ServiceCoreEvent): Promise<void> {
+  console.log(
+    `[Manager]: Service core event: ${event.type}, time: ${event.time}, running: ${event.running}, pid: ${event.pid}, old_pid: ${event.old_pid}, message: ${event.message}, error: ${event.error}, data: ${JSON.stringify(event.data)}`
+  )
+  if (event.type === 'log') {
+    notifyCoreLog(event)
+    return
+  }
+
   if (isDuplicateServiceCoreEvent(event)) {
     return
   }
@@ -633,6 +676,17 @@ async function handleServiceCoreEvent(event: ServiceCoreEvent): Promise<void> {
       serviceCoreStreamsActive = false
       mainWindow?.webContents.send('core-stopped', event)
       break
+  }
+}
+
+function notifyCoreLog(event: ServiceCoreEvent): void {
+  for (const rule of coreLogNotificationRules) {
+    const notification = rule.match(event)
+    if (!notification || notifiedCoreLogKeys.has(notification.key)) continue
+
+    notifiedCoreLogKeys.add(notification.key)
+    const { key: _key, ...payload } = notification
+    void showNotification(payload)
   }
 }
 

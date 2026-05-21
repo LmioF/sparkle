@@ -295,7 +295,9 @@
       "coreRestartingDesc": "Please try again later",
       "sysproxyGuardRestored": "System Proxy Restored",
       "sysproxyGuardRestoreFailed": "Failed to Restore System Proxy",
-      "serviceUnavailableSwitched": "Service unavailable. Switched to non-service mode."
+      "serviceUnavailableSwitched": "Service unavailable. Switched to non-service mode.",
+      "tailscaleAuthRequired": "{name} requires Tailscale authentication",
+      "tailscaleAuthOpenLink": "Click to open the authentication link"
     },
     "menu": {
       "about": "About",
