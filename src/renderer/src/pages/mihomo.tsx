@@ -1,4 +1,4 @@
-import { Button, Input, Select, SelectItem, Switch, Tab, Tabs } from '@heroui/react'
+import { Button, Select, SelectItem, Switch, Tab, Tabs } from '@heroui/react'
 import BasePage from '@renderer/components/base/base-page'
 import SettingCard from '@renderer/components/base/base-setting-card'
 import SettingItem from '@renderer/components/base/base-setting-item'
@@ -31,6 +31,7 @@ import React, { useState, useEffect } from 'react'
 import ControllerSetting from '@renderer/components/mihomo/controller-setting'
 import EnvSetting from '@renderer/components/mihomo/env-setting'
 import AdvancedSetting from '@renderer/components/mihomo/advanced-settings'
+import LogSetting from '@renderer/components/mihomo/log-setting'
 import { getSystemCorePaths, getSystemCorePathsCache } from '@renderer/utils/system-core'
 import { useTranslation } from '@renderer/hooks/useTranslation'
 
@@ -39,12 +40,11 @@ const Mihomo: React.FC = () => {
   const { appConfig, patchAppConfig } = useAppConfig()
   const {
     core = 'mihomo',
-    maxLogDays = 7,
     corePermissionMode = 'elevated',
     coreStartupMode = 'post-up'
   } = appConfig || {}
   const { controledMihomoConfig, patchControledMihomoConfig } = useControledMihomoConfig()
-  const { ipv6, 'log-level': logLevel = 'info' } = controledMihomoConfig || {}
+  const { ipv6 } = controledMihomoConfig || {}
 
   const [upgrading, setUpgrading] = useState(false)
   const [showGrantConfirm, setShowGrantConfirm] = useState(false)
@@ -364,44 +364,18 @@ const Mihomo: React.FC = () => {
             {t('manage')}
           </Button>
         </SettingItem>
-        <SettingItem title={t('ipv6')} divider>
+        <SettingItem compatKey="legacy" title={t('ipv6')} divider>
           <Switch
             size="sm"
             isSelected={ipv6}
             onValueChange={(v) => onChangeNeedRestart({ ipv6: v })}
           />
         </SettingItem>
-        <SettingItem title={t('logRetentionDays')} divider>
-          <Input
-            size="sm"
-            type="number"
-            className="w-25"
-            value={maxLogDays.toString()}
-            onValueChange={(v) => patchAppConfig({ maxLogDays: parseInt(v) })}
-          />
-        </SettingItem>
-        <SettingItem title={t('logLevel')}>
-          <Select
-            classNames={{ trigger: 'data-[hover=true]:bg-default-200' }}
-            className="w-25"
-            size="sm"
-            selectedKeys={new Set([logLevel])}
-            disallowEmptySelection={true}
-            onSelectionChange={(v) =>
-              onChangeNeedRestart({ 'log-level': v.currentKey as LogLevel })
-            }
-          >
-            <SelectItem key="silent">{t('logLevelSilent')}</SelectItem>
-            <SelectItem key="error">{t('logLevelError')}</SelectItem>
-            <SelectItem key="warning">{t('logLevelWarning')}</SelectItem>
-            <SelectItem key="info">{t('logLevelInfo')}</SelectItem>
-            <SelectItem key="debug">{t('logLevelDebug')}</SelectItem>
-          </Select>
-        </SettingItem>
       </SettingCard>
       <PortSetting />
       <ControllerSetting />
       <EnvSetting />
+      <LogSetting />
       <AdvancedSetting />
     </BasePage>
   )

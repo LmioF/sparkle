@@ -56,8 +56,8 @@ const ShortcutConfig: React.FC = () => {
   } = appConfig || {}
 
   return (
-    <SettingCard title={t('shortcut.title')}>
-      <SettingItem title={t('shortcut.toggleWindow')} divider>
+    <SettingCard header={t('shortcut.title')}>
+      <SettingItem compatKey="legacy" title={t('shortcut.toggleWindow')} divider>
         <div className="flex justify-end w-[60%]">
           <ShortcutInput
             value={showWindowShortcut}

@@ -65,8 +65,8 @@ const PortSetting: React.FC = () => {
   return (
     <>
       {lanOpen && <InterfaceModal onClose={() => setLanOpen(false)} />}
-      <SettingCard title={t('port.title')}>
-        <SettingItem title={t('port.mixed')} divider>
+      <SettingCard header={t('port.title')}>
+        <SettingItem compatKey="legacy" title={t('port.mixed')} divider>
           <div className="flex">
             {mixedPortInput !== mixedPort && (
               <Button

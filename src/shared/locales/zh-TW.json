@@ -630,7 +630,15 @@
   },
   "log": {
     "title": "即時日誌",
-    "clear": "清空日誌"
+    "clear": "清空日誌",
+    "filterPlaceholder": "篩選過濾",
+    "logLevelFilter": "日誌等級過濾",
+    "logLevel": "日誌等級",
+    "levelSilent": "靜默",
+    "levelError": "錯誤",
+    "levelWarning": "警告",
+    "levelInfo": "資訊",
+    "levelDebug": "偵錯"
   },
   "resource": {
     "title": "外部資源",
@@ -848,7 +856,16 @@
       "utlsFingerprint": "uTLS 指紋",
       "random": "隨機",
       "interfaceName": "出站介面"
-    }
+    },
+    "logSettingTitle": "日誌設定",
+    "saveLogs": "儲存日誌",
+    "saveLogsTip": "關閉後將停止寫入本機日誌檔，即時日誌頁面仍可查看目前工作階段日誌",
+    "maxLogFileSizeMB": "單檔日誌上限",
+    "maxLogFileSizeTip": "僅影響本機日誌檔，超過大小上限後會自動刪除最早的日誌列",
+    "maxLogEntries": "即時日誌快取數",
+    "maxLogEntriesTip": "僅影響應用內即時日誌頁面保留的條數，不影響本機日誌檔",
+    "days": "天",
+    "entries": "條"
   },
   "tun": {
     "title": "虛擬網路卡設定",

@@ -58,7 +58,7 @@ const SiderConfig: React.FC = () => {
   }
 
   return (
-    <SettingCard title={t('sider.title')}>
+    <SettingCard header={t('sider.title')}>
       {Object.keys(cardStatus).map((key, index, array) => {
         return (
           <SettingItem

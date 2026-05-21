@@ -630,7 +630,15 @@
   },
   "log": {
     "title": "Logs",
-    "clear": "Clear Logs"
+    "clear": "Clear Logs",
+    "filterPlaceholder": "Filter logs",
+    "logLevelFilter": "Log level filter",
+    "logLevel": "Log Level",
+    "levelSilent": "Silent",
+    "levelError": "Error",
+    "levelWarning": "Warning",
+    "levelInfo": "Info",
+    "levelDebug": "Debug"
   },
   "resource": {
     "title": "Resources",
@@ -848,7 +856,16 @@
       "utlsFingerprint": "uTLS Fingerprint",
       "random": "Random",
       "interfaceName": "Outbound Interface"
-    }
+    },
+    "logSettingTitle": "Log Settings",
+    "saveLogs": "Save Logs",
+    "saveLogsTip": "Disabling this stops writing local log files. The live log page can still show logs from the current session",
+    "maxLogFileSizeMB": "Max Log File Size",
+    "maxLogFileSizeTip": "Only affects local log files. Oldest log lines are deleted when the size limit is exceeded",
+    "maxLogEntries": "Live Log Cache Size",
+    "maxLogEntriesTip": "Only affects entries kept on the in-app live log page, not local log files",
+    "days": "days",
+    "entries": "entries"
   },
   "tun": {
     "title": "TUN Settings",

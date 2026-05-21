@@ -630,7 +630,15 @@
   },
   "log": {
     "title": "实时日志",
-    "clear": "清空日志"
+    "clear": "清空日志",
+    "filterPlaceholder": "筛选过滤",
+    "logLevelFilter": "日志等级过滤",
+    "logLevel": "日志等级",
+    "levelSilent": "静默",
+    "levelError": "错误",
+    "levelWarning": "警告",
+    "levelInfo": "信息",
+    "levelDebug": "调试"
   },
   "resource": {
     "title": "外部资源",
@@ -848,7 +856,16 @@
       "utlsFingerprint": "uTLS 指纹",
       "random": "随机",
       "interfaceName": "出站接口"
-    }
+    },
+    "logSettingTitle": "日志设置",
+    "saveLogs": "保存日志",
+    "saveLogsTip": "关闭后将停止写入本地日志文件，实时日志页面仍可继续查看当前会话日志",
+    "maxLogFileSizeMB": "单文件日志上限",
+    "maxLogFileSizeTip": "仅影响本地日志文件，超过大小上限后会自动删除最早的日志行",
+    "maxLogEntries": "实时日志缓存数",
+    "maxLogEntriesTip": "仅影响应用内实时日志页面保留的条数，不影响本地日志文件",
+    "days": "天",
+    "entries": "条"
   },
   "tun": {
     "title": "虚拟网卡设置",

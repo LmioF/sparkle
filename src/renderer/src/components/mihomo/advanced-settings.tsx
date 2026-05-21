@@ -34,8 +34,8 @@ const AdvancedSetting: React.FC = () => {
   }
 
   return (
-    <SettingCard title={t('advanced.title')}>
-      <SettingItem title={t('advanced.findProcess')} divider>
+    <SettingCard header={t('advanced.title')}>
+      <SettingItem compatKey="legacy" title={t('advanced.findProcess')} divider>
         <Tabs
           size="sm"
           color="primary"
@@ -170,8 +170,6 @@ const AdvancedSetting: React.FC = () => {
       </SettingItem>
 
       <SettingItem title={t('advanced.interfaceName')}>
-
-
         <InterfaceSelect
           value={interfaceName}
           exclude={[device, 'lo']}

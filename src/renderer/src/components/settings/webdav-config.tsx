@@ -52,8 +52,8 @@ const WebdavConfig: React.FC = () => {
       {restoreOpen && (
         <WebdavRestoreModal filenames={filenames} onClose={() => setRestoreOpen(false)} />
       )}
-      <SettingCard title={t('backup.webdav.title')}>
-        <SettingItem title={t('backup.webdav.url')} divider>
+      <SettingCard header={t('backup.webdav.title')}>
+        <SettingItem compatKey="legacy" title={t('backup.webdav.url')} divider>
           <Input
             size="sm"
             className="w-[60%]"

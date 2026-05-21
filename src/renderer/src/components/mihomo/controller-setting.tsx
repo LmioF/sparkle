@@ -65,8 +65,12 @@ const ControllerSetting: React.FC = () => {
   }
 
   return (
-    <SettingCard title={t('controller.title')}>
-      <SettingItem title={t('controller.listenAddress')} divider={externalController !== ''}>
+    <SettingCard header={t('controller.title')}>
+      <SettingItem
+        compatKey="legacy"
+        title={t('controller.listenAddress')}
+        divider={externalController !== ''}
+      >
         <div className="flex">
           {externalControllerInput != externalController && !externalControllerError && (
             <Button

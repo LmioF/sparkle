@@ -68,7 +68,7 @@ const LocalBackupConfig: React.FC = () => {
           onClose={() => setRestoreOpen(false)}
         />
       )}
-      <SettingCard title={t('backup.local.title')}>
+      <SettingCard header={t('backup.local.title')}>
         <SettingItem title={t('backup.local.backupDesc')}>
           <div className="text-sm text-default-500 w-[60%] text-right">
             {t('backup.local.description')}

@@ -78,7 +78,7 @@ const AppearanceConfig: React.FC = () => {
           }}
         />
       )}
-      <SettingCard title={t('appearance.title')}>
+      <SettingCard header={t('appearance.title')}>
         <SettingItem
           title={t('appearance.language')}
           divider

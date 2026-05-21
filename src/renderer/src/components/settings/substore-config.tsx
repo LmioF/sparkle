@@ -58,8 +58,8 @@ const SubStoreConfig: React.FC = () => {
   }, [subStoreBackendUploadCron])
 
   return (
-    <SettingCard title={t('substore.title')}>
-      <SettingItem title={t('substore.enable')} divider={useSubStore}>
+    <SettingCard header={t('substore.title')}>
+      <SettingItem compatKey="legacy" title={t('substore.enable')} divider={useSubStore}>
         <Switch
           size="sm"
           isSelected={useSubStore}

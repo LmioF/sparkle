@@ -71,8 +71,8 @@ const AdvancedDnsSetting: React.FC<AdvancedDnsSettingProps> = ({
   ])
 
   return (
-    <SettingCard title={t('advancedSettings')}>
-      <SettingItem title={t('respectRules')} divider>
+    <SettingCard header={t('advancedSettings')}>
+      <SettingItem compatKey="legacy" title={t('respectRules')} divider>
         <Switch
           size="sm"
           isSelected={respectRules}

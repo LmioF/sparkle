@@ -47,7 +47,7 @@ const AdvancedSettings: React.FC = () => {
   }, [pauseSSIDArray])
 
   return (
-    <SettingCard title={t('advanced.title')}>
+    <SettingCard header={t('advanced.title')}>
       <SettingItem
         title={t('advanced.autoLightweight')}
         actions={

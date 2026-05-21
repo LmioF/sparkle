@@ -31,8 +31,8 @@ const EnvSetting: React.FC = () => {
   const [safePathsInput, setSafePathsInput] = useState(safePaths)
 
   return (
-    <SettingCard title={t('env.title')}>
-      <SettingItem title={t('env.disableSystemCA')} divider>
+    <SettingCard header={t('env.title')}>
+      <SettingItem compatKey="legacy" title={t('env.disableSystemCA')} divider>
         <Switch
           size="sm"
           isSelected={disableSystemCA}
