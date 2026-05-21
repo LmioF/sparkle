@@ -16,7 +16,7 @@ import {
   overridePath
 } from '../utils/dirs'
 import { parseYaml, stringifyYaml } from '../utils/yaml'
-import { copyFile, mkdir, writeFile } from 'fs/promises'
+import { copyFile, mkdir, readdir, writeFile } from 'fs/promises'
 import { deepMerge } from '../utils/merge'
 import vm from 'vm'
 import { existsSync, writeFileSync } from 'fs'
@@ -295,12 +295,14 @@ function cleanProxyConfigs(profile: MihomoConfig): void {
 }
 
 async function prepareProfileWorkDir(current: string | undefined): Promise<void> {
-  if (!existsSync(mihomoProfileWorkDir(current))) {
-    await mkdir(mihomoProfileWorkDir(current), { recursive: true })
+  const targetDir = mihomoProfileWorkDir(current)
+  const sourceDir = mihomoWorkDir()
+  if (!existsSync(targetDir)) {
+    await mkdir(targetDir, { recursive: true })
   }
   const copy = async (file: string): Promise<void> => {
-    const targetPath = path.join(mihomoProfileWorkDir(current), file)
-    const sourcePath = path.join(mihomoWorkDir(), file)
+    const targetPath = path.join(targetDir, file)
+    const sourcePath = path.join(sourceDir, file)
     try {
       if (!existsSync(targetPath) && existsSync(sourcePath)) {
         await copyFile(sourcePath, targetPath)
@@ -309,14 +311,17 @@ async function prepareProfileWorkDir(current: string | undefined): Promise<void>
       // ignore copy errors for individual files
     }
   }
-  // 并行复制所有文件，单个文件失败不影响其他文件
-  await Promise.allSettled([
-    copy('country.mmdb'),
-    copy('geoip.metadb'),
-    copy('geoip.dat'),
-    copy('geosite.dat'),
-    copy('ASN.mmdb')
-  ])
+
+  try {
+    const files = await readdir(sourceDir, { withFileTypes: true })
+    await Promise.allSettled(
+      files
+        .filter((file) => file.isFile() && /(?:db|dat)$/i.test(file.name))
+        .map((file) => copy(file.name))
+    )
+  } catch {
+    // ignore resource directory read errors
+  }
 }
 
 async function overrideProfile(

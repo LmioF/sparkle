@@ -11,7 +11,9 @@ import {
   profilePath,
   profilesDir,
   resourcesFilesDir,
+  subStoreBackendPath,
   subStoreDir,
+  subStoreFrontendDir,
   themesDir
 } from './dirs'
 import {
@@ -93,10 +95,8 @@ async function initConfig(): Promise<void> {
 async function initFiles(): Promise<void> {
   const criticalFiles = ['country.mmdb', 'geoip.dat', 'geosite.dat']
 
-  const copy = async (file: string, critical = false): Promise<void> => {
+  const copy = async (file: string, critical = false, customTargetPath?: string): Promise<void> => {
     try {
-      const targetPath = path.join(mihomoWorkDir(), file)
-      const testTargetPath = path.join(mihomoTestDir(), file)
       const sourcePath = path.join(resourcesFilesDir(), file)
 
       if (!existsSync(sourcePath)) {
@@ -105,6 +105,16 @@ async function initFiles(): Promise<void> {
         }
         return
       }
+
+      if (customTargetPath) {
+        if (!existsSync(customTargetPath)) {
+          await cp(sourcePath, customTargetPath, { recursive: true })
+        }
+        return
+      }
+
+      const targetPath = path.join(mihomoWorkDir(), file)
+      const testTargetPath = path.join(mihomoTestDir(), file)
 
       if (!existsSync(targetPath)) {
         await cp(sourcePath, targetPath, { recursive: true })
@@ -126,8 +136,8 @@ async function initFiles(): Promise<void> {
     copy('geoip.dat', criticalFiles.includes('geoip.dat')),
     copy('geosite.dat', criticalFiles.includes('geosite.dat')),
     copy('ASN.mmdb'),
-    copy('sub-store.bundle.js'),
-    copy('sub-store-frontend')
+    copy('sub-store.bundle.js', false, subStoreBackendPath()),
+    copy('sub-store-frontend', false, subStoreFrontendDir())
   ])
 }
 

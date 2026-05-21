@@ -1,6 +1,12 @@
 import { getAppConfig, getControledMihomoConfig } from '../config'
 import { Worker } from 'worker_threads'
-import { mihomoWorkDir, subStoreDir } from '../utils/dirs'
+import {
+  mihomoWorkDir,
+  subStoreBackendPath,
+  subStoreDir,
+  subStoreFrontendDir,
+  subStoreTempDir
+} from '../utils/dirs'
 import subStoreIcon from '../../../resources/subStoreIcon.png?asset'
 import { existsSync, mkdirSync } from 'fs'
 import { writeFile, rm, cp } from 'fs/promises'
@@ -87,7 +93,7 @@ export async function startSubStoreFrontendServer(): Promise<void> {
   await stopSubStoreFrontendServer()
   subStoreFrontendPort = await findAvailablePort(14122)
   const app = express()
-  const frontendDir = path.join(mihomoWorkDir(), 'sub-store-frontend')
+  const frontendDir = subStoreFrontendDir()
   app.use(express.static(frontendDir))
   app.use((_req, res) => {
     res.sendFile(path.join(frontendDir, 'index.html'))
@@ -141,7 +147,7 @@ export async function startSubStoreBackendServer(): Promise<void> {
       SUB_STORE_MMDB_COUNTRY_PATH: path.join(mihomoWorkDir(), 'country.mmdb'),
       SUB_STORE_MMDB_ASN_PATH: path.join(mihomoWorkDir(), 'ASN.mmdb')
     }
-    subStoreBackendWorker = new Worker(path.join(mihomoWorkDir(), 'sub-store.bundle.js'), {
+    subStoreBackendWorker = new Worker(subStoreBackendPath(), {
       env: useProxyInSubStore
         ? {
             ...env,
@@ -186,9 +192,9 @@ export async function downloadSubStore(): Promise<void> {
   const mihomoConfig = await getControledMihomoConfig()
   const mixedPort = mihomoConfig['mixed-port'] ?? 7890
   const tunEnabled = mihomoConfig.tun?.enable ?? false
-  const frontendDir = path.join(mihomoWorkDir(), 'sub-store-frontend')
-  const backendPath = path.join(mihomoWorkDir(), 'sub-store.bundle.js')
-  const tempDir = path.join(mihomoWorkDir(), 'temp')
+  const frontendDir = subStoreFrontendDir()
+  const backendPath = subStoreBackendPath()
+  const tempDir = subStoreTempDir()
 
   try {
     // 下载后端文件
@@ -197,13 +203,14 @@ export async function downloadSubStore(): Promise<void> {
       {
         responseType: 'arraybuffer',
         headers: { 'Content-Type': 'application/octet-stream' },
-        ...(!tunEnabled && mixedPort != 0 && {
-          proxy: {
-            protocol: 'http',
-            host: '127.0.0.1',
-            port: mixedPort
-          }
-        })
+        ...(!tunEnabled &&
+          mixedPort != 0 && {
+            proxy: {
+              protocol: 'http',
+              host: '127.0.0.1',
+              port: mixedPort
+            }
+          })
       }
     )
     await writeFile(backendPath, Buffer.from(backendRes.data))
@@ -214,13 +221,14 @@ export async function downloadSubStore(): Promise<void> {
       {
         responseType: 'arraybuffer',
         headers: { 'Content-Type': 'application/octet-stream' },
-        ...(!tunEnabled && mixedPort != 0 && {
-          proxy: {
-            protocol: 'http',
-            host: '127.0.0.1',
-            port: mixedPort
-          }
-        })
+        ...(!tunEnabled &&
+          mixedPort != 0 && {
+            proxy: {
+              protocol: 'http',
+              host: '127.0.0.1',
+              port: mixedPort
+            }
+          })
       }
     )
 
