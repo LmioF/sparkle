@@ -74,6 +74,13 @@ async function scheduleLightweightMode(): Promise<void> {
 
 const syncConfig = getAppConfigSync()
 
+function exitApp(): void {
+  if (process.platform === 'win32' && !sysProxyDisabled) {
+    disableSysProxySync()
+  }
+  app.exit()
+}
+
 if (
   process.platform === 'win32' &&
   !is.dev &&
@@ -108,7 +115,7 @@ if (
         `首次启动请以管理员权限运行\n${createErrorStr}\n${eStr}`
       )
     } finally {
-      app.exit()
+      exitApp()
     }
   }
 }
@@ -236,7 +243,7 @@ app.on('before-quit', async (e) => {
       await triggerSysProxy(false, false)
       sysProxyDisabled = true
       await stopCore()
-      app.exit()
+      exitApp()
       return
     }
     lastQuitAttempt = now
@@ -253,7 +260,7 @@ app.on('before-quit', async (e) => {
       await triggerSysProxy(false, false)
       sysProxyDisabled = true
       await stopCore()
-      app.exit()
+      exitApp()
     }
   } else if (notQuitDialog) {
     e.preventDefault()
@@ -266,7 +273,7 @@ app.on('before-quit', async (e) => {
     await triggerSysProxy(false, false)
     sysProxyDisabled = true
     await stopCore()
-    app.exit()
+    exitApp()
   }
 })
 
@@ -279,7 +286,7 @@ powerMonitor.on('shutdown', async () => {
   await triggerSysProxy(false, false)
   sysProxyDisabled = true
   await stopCore()
-  app.exit()
+  exitApp()
 })
 
 // Last resort to disable system proxy synchronously before quit

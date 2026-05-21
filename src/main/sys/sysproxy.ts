@@ -165,7 +165,7 @@ export function disableSysProxySync(): void {
     const useService = process.platform === 'darwin' && settingMode === 'service'
 
     if (!useService) {
-      execFileSync(servicePath(), ['disable'], { timeout: 5000 })
+      execFileSync(servicePath(), ['disable'], { stdio: 'ignore', timeout: 5000 })
     }
   } catch {
     // ignore errors during sync disable
