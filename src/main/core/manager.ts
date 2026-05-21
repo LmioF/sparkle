@@ -83,6 +83,14 @@ let serviceCoreStreamsStarting: Promise<void> | null = null
 let lastServiceCoreEventKey = ''
 let serviceCoreStartupActive = false
 let serviceCoreReconnectResumePromise: Promise<void> | null = null
+const serviceConnectionRetryTimeout = 10000
+const serviceConnectionRetryInterval = 500
+
+type ServiceCoreConnectionProbe = {
+  reachable: boolean
+  running: boolean
+  error: unknown
+}
 
 export function isCoreRestarting(): boolean {
   return isRestarting
@@ -131,6 +139,35 @@ async function waitForMihomoReady(): Promise<void> {
   }
 }
 
+async function waitForServiceCoreConnection(
+  initialError: unknown
+): Promise<ServiceCoreConnectionProbe> {
+  await appendAppLog(
+    `[Manager]: Service connection failed, waiting before fallback, ${initialError}\n`
+  )
+  const startedAt = Date.now()
+  let lastError = initialError
+
+  while (Date.now() - startedAt < serviceConnectionRetryTimeout) {
+    await new Promise((resolve) => setTimeout(resolve, serviceConnectionRetryInterval))
+
+    try {
+      await getCoreStatus()
+      return { reachable: true, running: true, error: lastError }
+    } catch (error) {
+      lastError = error
+      if (!isServiceConnectionError(error)) {
+        return { reachable: true, running: false, error }
+      }
+    }
+  }
+
+  await appendAppLog(
+    `[Manager]: Service still unavailable after ${serviceConnectionRetryTimeout}ms, ${lastError}\n`
+  )
+  return { reachable: false, running: false, error: lastError }
+}
+
 export async function startCore(detached = false): Promise<Promise<void>[]> {
   const {
     core = 'mihomo',
@@ -172,7 +209,11 @@ export async function startCore(detached = false): Promise<Promise<void>[]> {
       serviceCoreRunning = true
     } catch (error) {
       if (isServiceConnectionError(error)) {
-        return fallbackToElevatedCore(detached, error)
+        const probe = await waitForServiceCoreConnection(error)
+        if (!probe.reachable) {
+          return fallbackToElevatedCore(detached, probe.error)
+        }
+        serviceCoreRunning = probe.running
       }
     }
   }
@@ -238,9 +279,17 @@ export async function startCore(detached = false): Promise<Promise<void>[]> {
       }
     } catch (error) {
       if (isServiceConnectionError(error)) {
-        return fallbackToElevatedCore(detached, error)
+        const probe = await waitForServiceCoreConnection(error)
+        if (!probe.reachable) {
+          return fallbackToElevatedCore(detached, probe.error)
+        }
+        await startServiceCoreEventStream()
+        if (!probe.running) {
+          await startServiceCore(serviceProfile)
+        }
+      } else {
+        throw error
       }
-      throw error
     } finally {
       serviceCoreStartupActive = false
     }
