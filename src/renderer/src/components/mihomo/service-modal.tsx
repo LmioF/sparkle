@@ -235,12 +235,6 @@ const ServiceModal: React.FC<Props> = (props) => {
               <div className="flex items-start gap-2">
                 <span>{t('service.description2')}</span>
               </div>
-              <div className="flex items-start gap-2">
-                <span>{t('service.description3')}</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span>{t('service.description4')}</span>
-              </div>
             </div>
           </div>
         </ModalBody>
