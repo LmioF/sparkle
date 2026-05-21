@@ -221,7 +221,12 @@
         "diffMode": "Compare Current Config",
         "sideBySide": "Side by Side",
         "showOriginal": "Show Original Text",
-        "showOverride": "Show Override Text"
+        "showOverride": "Show Override Text",
+        "runtime": "Runtime Config",
+        "raw": "Raw Config",
+        "current": "Current Config",
+        "override": "Overridden Config",
+        "readFailed": "Failed to read some content: {{targets}}"
       }
     }
   },

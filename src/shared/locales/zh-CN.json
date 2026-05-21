@@ -221,7 +221,12 @@
         "diffMode": "对比当前配置",
         "sideBySide": "侧边显示",
         "showOriginal": "显示原始文本",
-        "showOverride": "显示覆写后文本"
+        "showOverride": "显示覆写后文本",
+        "runtime": "运行时配置",
+        "raw": "原始配置",
+        "current": "当前配置",
+        "override": "覆写后配置",
+        "readFailed": "部分内容读取失败：{{targets}}"
       }
     }
   },
