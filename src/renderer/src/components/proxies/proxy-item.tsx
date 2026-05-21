@@ -8,6 +8,7 @@ interface Props {
   mutateProxies: () => void
   onProxyDelay: (proxy: string, group?: ControllerMixedGroup) => Promise<ControllerProxiesDelay>
   proxyDisplayLayout: 'hidden' | 'single' | 'double'
+  showGroupSelectedProxy: boolean
   proxy: ControllerProxiesDetail | ControllerGroupDetail
   group: ControllerMixedGroup
   onSelect: (group: string, proxy: string) => void
@@ -21,9 +22,19 @@ const isGroup = (
 }
 
 const ProxyItem: React.FC<Props> = (props) => {
-  const { mutateProxies, proxyDisplayLayout, group, proxy, selected, onSelect, onProxyDelay } =
-    props
+  const {
+    mutateProxies,
+    proxyDisplayLayout,
+    showGroupSelectedProxy,
+    group,
+    proxy,
+    selected,
+    onSelect,
+    onProxyDelay
+  } = props
   const { t } = useTranslation('proxy')
+  const shouldShowGroupSelectedProxy =
+    showGroupSelectedProxy && isGroup(proxy) && Boolean(proxy.now)
 
   const delay = useMemo(() => {
     if (proxy.history.length > 0) {
@@ -80,12 +91,10 @@ const ProxyItem: React.FC<Props> = (props) => {
                 </div>
                 <div className="text-[12px] text-foreground-500 leading-none mt-0.5">
                   <span>{proxy.type}</span>
-                  {isGroup(proxy) && proxy.now && (
+                  {shouldShowGroupSelectedProxy && (
                     <>
                       <span className="mx-1">→</span>
-                      <span className="flag-emoji" title={proxy.now}>
-                        {proxy.now}
-                      </span>
+                      <span className="flag-emoji">{proxy.now}</span>
                     </>
                   )}
                 </div>
@@ -125,7 +134,7 @@ const ProxyItem: React.FC<Props> = (props) => {
                 {proxyDisplayLayout === 'single' && (
                   <>
                     <div className="inline ml-2 text-foreground-500">{proxy.type}</div>
-                    {isGroup(proxy) && proxy.now && (
+                    {shouldShowGroupSelectedProxy && (
                       <div className="inline ml-2 text-foreground-500 flag-emoji">
                         → {proxy.now}
                       </div>

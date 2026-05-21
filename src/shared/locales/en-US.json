@@ -529,6 +529,7 @@
     "proxyDisplayOrder": "Node Sort Order",
     "groupDisplayLayout": "Proxy Group Details",
     "proxyDisplayLayout": "Proxy Node Details",
+    "showGroupSelectedProxy": "Show Selected Node for Nested Groups",
     "autoCloseConnection": "Close Connection on Node Switch",
     "delayTestUrl": "Delay Test URL",
     "delayTestUrlPlaceholder": "Default https://www.gstatic.com/generate_204",

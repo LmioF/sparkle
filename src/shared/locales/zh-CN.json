@@ -529,6 +529,7 @@
     "proxyDisplayOrder": "节点排序方式",
     "groupDisplayLayout": "代理组详细信息",
     "proxyDisplayLayout": "代理节点详细信息",
+    "showGroupSelectedProxy": "显示二级分组选中节点",
     "autoCloseConnection": "切换节点时断开连接",
     "delayTestUrl": "延迟测试地址",
     "delayTestUrlPlaceholder": "默认 https://www.gstatic.com/generate_204",

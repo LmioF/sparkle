@@ -25,6 +25,7 @@ const ProxySettingModal: React.FC<Props> = (props) => {
     proxyDisplayOrder = 'default',
     groupDisplayLayout = 'single',
     proxyDisplayLayout = 'double',
+    showGroupSelectedProxy = true,
     autoCloseConnection = true,
     closeMode = 'all',
     delayTestUrl,
@@ -151,6 +152,19 @@ const ProxySettingModal: React.FC<Props> = (props) => {
                     })
                   }}
                 />
+              </SettingItem>
+              <SettingItem title={t('showGroupSelectedProxy')} {...settingItemProps} divider>
+                <Switch
+                  aria-label={t('showGroupSelectedProxy')}
+                  isSelected={showGroupSelectedProxy}
+                  onChange={(v) => {
+                    patchAppConfig({ showGroupSelectedProxy: v })
+                  }}
+                >
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch>
               </SettingItem>
               <SettingItem title={t('autoCloseConnection')} {...settingItemProps} divider>
                 <Switch
