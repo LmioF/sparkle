@@ -131,7 +131,9 @@ const MihomoCoreCard: React.FC<Props> = (props) => {
                   try {
                     setRestarting(true)
                     await restartCore()
-                    await new Promise((resolve) => setTimeout(resolve, 2000))
+                    await new Promise((resolve) => {
+                      setTimeout(resolve, 2000)
+                    })
                   } catch (e) {
                     notify(e, { variant: 'danger' })
                   } finally {

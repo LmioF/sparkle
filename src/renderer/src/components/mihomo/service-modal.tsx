@@ -35,7 +35,9 @@ function isUserCancelledError(error: unknown, userCancelledText: string): boolea
 }
 
 function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
 }
 
 async function readServiceStatus(): Promise<ServiceStatusType> {

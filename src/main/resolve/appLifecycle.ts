@@ -73,18 +73,23 @@ async function quit(context: AppQuitLifecycleContext): Promise<void> {
 async function cleanupBeforeExit(useRegistry: boolean): Promise<void> {
   stopSSIDCheck()
 
-  try {
-    await triggerSysProxy(false, false, useRegistry)
-    sysProxyDisabled = true
-  } catch (error) {
-    await appendAppLog(`[App]: disable sysproxy before exit failed after fallback, ${error}\n`)
-  }
-
-  try {
-    await stopCore()
-  } catch (error) {
-    await appendAppLog(`[App]: stop core before exit failed, ${error}\n`)
-  }
+  await Promise.all([
+    (async (): Promise<void> => {
+      try {
+        await triggerSysProxy(false, false, useRegistry)
+        sysProxyDisabled = true
+      } catch (error) {
+        await appendAppLog(`[App]: disable sysproxy before exit failed after fallback, ${error}\n`)
+      }
+    })(),
+    (async (): Promise<void> => {
+      try {
+        await stopCore()
+      } catch (error) {
+        await appendAppLog(`[App]: stop core before exit failed, ${error}\n`)
+      }
+    })()
+  ])
 }
 
 function showQuitConfirmDialog(context: AppQuitLifecycleContext): Promise<boolean> {
