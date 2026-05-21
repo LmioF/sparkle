@@ -1,5 +1,14 @@
-import { cn, Button, Input, Switch, Tooltip } from '@heroui/react'
-import { Dropdown, Label, Modal, Separator, Surface } from '@heroui-v3/react'
+import {
+  Button,
+  Dropdown,
+  Input,
+  Label,
+  Modal,
+  Separator,
+  Surface,
+  Switch,
+  Tooltip
+} from '@heroui-v3/react'
 import type { ReactNode } from 'react'
 import React, { useState } from 'react'
 import { useTranslation } from '@renderer/hooks/useTranslation'
@@ -56,21 +65,22 @@ const EditInfoModal: React.FC<Props> = (props) => {
 
     return (
       <Surface key={title} variant="transparent" className="flex flex-col">
-        <Surface
-          variant="transparent"
-          className={cn(
-            'grid grid-cols-[150px_minmax(0,1fr)] gap-x-3 gap-y-2 py-2',
-            align === 'start' ? 'items-start' : 'items-center'
-          )}
+        <div
+          className={`setting-item px-0 setting-item--content-end ${
+            align === 'start' ? 'setting-item--start' : 'setting-item--center'
+          }`}
+          style={{ gridTemplateColumns: '150px minmax(0, 1fr)' }}
         >
-          <Surface variant="transparent" className="flex min-h-9 items-center gap-2">
-            <Label className="text-sm leading-6 text-foreground-500">{title}</Label>
-          </Surface>
-          <Surface variant="transparent" className="flex min-w-0 justify-end">
-            {actions}
-            {content}
-          </Surface>
-        </Surface>
+          <div className="setting-item__title-wrap">
+            <Label className="setting-item__title">{title}</Label>
+          </div>
+          <div className="setting-item__content">
+            <div className="flex w-full min-w-0 items-center justify-end gap-2">
+              {actions}
+              {content}
+            </div>
+          </div>
+        </div>
         {divider ? <Separator variant="tertiary" className="bg-default-100/70" /> : null}
       </Surface>
     )
@@ -85,9 +95,9 @@ const EditInfoModal: React.FC<Props> = (props) => {
         className="flex items-center gap-1.5 px-1.5 py-0.75"
       >
         <Button
-          disabled
+          isDisabled
           fullWidth
-          variant="flat"
+          variant="secondary"
           size="sm"
           className="h-6.5 min-h-6.5 justify-start rounded-md px-2 text-[13px]"
         >
@@ -103,17 +113,16 @@ const EditInfoModal: React.FC<Props> = (props) => {
     return (
       <Surface key={id} variant="transparent" className="flex items-center gap-1.5 px-1.5 py-0.75">
         <Button
-          disabled
+          isDisabled
           fullWidth
-          variant="flat"
+          variant="secondary"
           size="sm"
           className="h-6.5 min-h-6.5 justify-start rounded-md px-2 text-[13px]"
         >
           {overrideItem.name}
         </Button>
         <Button
-          color="warning"
-          variant="flat"
+          variant="danger-soft"
           size="sm"
           className="h-6.5 min-h-6.5 min-w-6.5 rounded-md px-1.5"
           onPress={() => {
@@ -140,17 +149,11 @@ const EditInfoModal: React.FC<Props> = (props) => {
       <Surface variant="transparent" className="px-1.5 py-0.75">
         <Dropdown>
           <Dropdown.Trigger className="block rounded-md">
-            <Button
-              fullWidth
-              size="sm"
-              variant="flat"
-              color="default"
-              className="h-6.5 min-h-6.5 rounded-md"
-            >
+            <Button fullWidth size="sm" variant="secondary" className="h-6.5 min-h-6.5 rounded-md">
               <FaPlus className="text-[13px]" />
             </Button>
           </Dropdown.Trigger>
-          <Dropdown.Popover className="no-scrollbar overflow-y-auto rounded-lg">
+          <Dropdown.Popover placement="top" className="no-scrollbar overflow-y-auto rounded-lg">
             <Dropdown.Menu
               className="no-scrollbar p-1 text-sm"
               onAction={(key) => {
@@ -212,11 +215,12 @@ const EditInfoModal: React.FC<Props> = (props) => {
                 {renderField(
                   t('name'),
                   <Input
-                    size="sm"
-                    className="w-full"
+                    aria-label={t('name')}
+                    data-setting-input="edit-modal-name"
                     value={values.name}
-                    onValueChange={(v) => {
-                      setValues({ ...values, name: v })
+                    variant="secondary"
+                    onChange={(event) => {
+                      setValues({ ...values, name: event.target.value })
                     }}
                   />
                 )}
@@ -224,11 +228,12 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   renderField(
                     t('url'),
                     <Input
-                      size="sm"
-                      className="w-full"
+                      aria-label={t('url')}
+                      data-setting-input="edit-modal"
                       value={values.url}
-                      onValueChange={(v) => {
-                        setValues({ ...values, url: v })
+                      variant="secondary"
+                      onChange={(event) => {
+                        setValues({ ...values, url: event.target.value })
                       }}
                     />,
                     { align: 'start' }
@@ -237,10 +242,12 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   renderField(
                     t('fingerprint'),
                     <Input
-                      size="sm"
-                      className="w-full"
+                      aria-label={t('fingerprint')}
+                      data-setting-input="edit-modal"
                       value={values.fingerprint ?? ''}
-                      onValueChange={(v) => {
+                      variant="secondary"
+                      onChange={(event) => {
+                        const v = event.target.value
                         setValues({ ...values, fingerprint: v.trim() || undefined })
                       }}
                     />
@@ -249,10 +256,12 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   renderField(
                     t('userAgent'),
                     <Input
-                      size="sm"
-                      className="w-full"
+                      aria-label={t('userAgent')}
+                      data-setting-input="edit-modal"
                       value={values.ua ?? ''}
-                      onValueChange={(v) => {
+                      variant="secondary"
+                      onChange={(event) => {
+                        const v = event.target.value
                         setValues({ ...values, ua: v.trim() || undefined })
                       }}
                     />
@@ -261,55 +270,78 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   renderField(
                     t('verifyFormat'),
                     <Switch
+                      aria-label={t('verifyFormat')}
                       size="sm"
                       isSelected={values.verify ?? false}
-                      onValueChange={(v) => {
+                      onChange={(v) => {
                         setValues({ ...values, verify: v })
                       }}
-                    />
+                    >
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                    </Switch>
                   )}
                 {values.type === 'remote' &&
                   renderField(
                     t('useProxy'),
                     <Switch
+                      aria-label={t('useProxy')}
                       size="sm"
                       isSelected={values.useProxy ?? false}
-                      onValueChange={(v) => {
+                      onChange={(v) => {
                         setValues({ ...values, useProxy: v })
                       }}
-                    />
+                    >
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                    </Switch>
                   )}
                 {values.type === 'remote' &&
                   renderField(
                     t('autoUpdate'),
                     <Switch
+                      aria-label={t('autoUpdate')}
                       size="sm"
                       isSelected={values.autoUpdate ?? false}
-                      onValueChange={(v) => {
+                      onChange={(v) => {
                         setValues({ ...values, autoUpdate: v })
                       }}
-                    />
+                    >
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                    </Switch>
                   )}
                 {values.type === 'remote' &&
                   values.autoUpdate &&
                   renderField(
                     t('updateInterval'),
                     <Input
-                      size="sm"
+                      aria-label={t('updateInterval')}
                       type="number"
-                      className="w-40"
+                      data-setting-input="edit-modal-number"
                       value={values.interval?.toString() ?? ''}
-                      onValueChange={(v) => {
-                        setValues({ ...values, interval: parseInt(v) })
+                      variant="secondary"
+                      onChange={(event) => {
+                        setValues({ ...values, interval: parseInt(event.target.value) })
                       }}
-                      isDisabled={values.locked}
+                      disabled={values.locked}
                     />,
                     {
                       actions: values.locked ? (
-                        <Tooltip content={t('intervalLockedTip')}>
-                          <Button isIconOnly size="sm" variant="light">
-                            <IoIosHelpCircle className="text-lg" />
-                          </Button>
+                        <Tooltip delay={0}>
+                          <Tooltip.Trigger>
+                            <button
+                              type="button"
+                              aria-label={t('intervalLockedTip')}
+                              className="flex size-7 items-center justify-center rounded-full bg-transparent p-0 text-foreground outline-none ring-0 shadow-none hover:bg-transparent focus:bg-transparent focus:outline-none focus-visible:outline-none focus-visible:ring-0"
+                            >
+                              <IoIosHelpCircle className="text-lg" />
+                            </button>
+                          </Tooltip.Trigger>
+                          <Tooltip.Content>{t('intervalLockedTip')}</Tooltip.Content>
                         </Tooltip>
                       ) : undefined
                     }
@@ -321,10 +353,10 @@ const EditInfoModal: React.FC<Props> = (props) => {
               </Surface>
             </Modal.Body>
             <Modal.Footer className="justify-end pt-2">
-              <Button size="sm" variant="light" onPress={onClose}>
+              <Button size="sm" variant="secondary" onPress={onClose}>
                 {t('common:actions.cancel')}
               </Button>
-              <Button size="sm" color="primary" onPress={onSave}>
+              <Button size="sm" variant="primary" onPress={onSave}>
                 {item.id ? t('common:actions.save') : t('common:actions.import')}
               </Button>
             </Modal.Footer>

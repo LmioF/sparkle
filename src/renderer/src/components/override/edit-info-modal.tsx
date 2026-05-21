@@ -1,5 +1,14 @@
-import { cn, Button, Input, Switch, Select, SelectItem } from '@heroui/react'
-import { Label, Modal, Separator, Surface } from '@heroui-v3/react'
+import {
+  Button,
+  Input,
+  Label,
+  ListBox,
+  Modal,
+  Select,
+  Separator,
+  Surface,
+  Switch
+} from '@heroui-v3/react'
 import type { ReactNode } from 'react'
 import React, { useState } from 'react'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
@@ -17,7 +26,6 @@ const EditInfoModal: React.FC<Props> = (props) => {
   const { t } = useTranslation('override')
   useAppConfig()
   const [values, setValues] = useState(item)
-  const fieldWidth = 'w-full'
 
   const onSave = async (): Promise<void> => {
     try {
@@ -48,21 +56,18 @@ const EditInfoModal: React.FC<Props> = (props) => {
 
     return (
       <Surface key={title} variant="transparent" className="flex flex-col">
-        <Surface
-          variant="transparent"
-          className={cn(
-            'grid grid-cols-[88px_minmax(0,1fr)] gap-x-3 gap-y-2 py-2',
-            align === 'start' ? 'items-start' : 'items-center'
-          )}
+        <div
+          className={`setting-item px-0 setting-item--content-end ${
+            align === 'start' ? 'setting-item--start' : 'setting-item--center'
+          }`}
+          style={{ gridTemplateColumns: '88px minmax(0, 1fr)' }}
         >
-          <Surface variant="transparent" className="flex min-h-9 items-center gap-2">
-            <Label className="text-sm leading-6 text-foreground-500">{title}</Label>
+          <div className="setting-item__title-wrap">
+            <Label className="setting-item__title">{title}</Label>
             {actions}
-          </Surface>
-          <Surface variant="transparent" className="flex min-w-0 justify-end">
-            {content}
-          </Surface>
-        </Surface>
+          </div>
+          <div className="setting-item__content">{content}</div>
+        </div>
         {divider ? <Separator variant="tertiary" className="bg-default-100/70" /> : null}
       </Surface>
     )
@@ -86,11 +91,12 @@ const EditInfoModal: React.FC<Props> = (props) => {
                 {renderField(
                   t('name'),
                   <Input
-                    size="sm"
-                    className={cn(fieldWidth)}
+                    aria-label={t('name')}
+                    data-setting-input="edit-modal-name"
                     value={values.name}
-                    onValueChange={(v) => {
-                      setValues({ ...values, name: v })
+                    variant="secondary"
+                    onChange={(event) => {
+                      setValues({ ...values, name: event.target.value })
                     }}
                   />
                 )}
@@ -98,11 +104,12 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   renderField(
                     t('url'),
                     <Input
-                      size="sm"
-                      className={cn(fieldWidth)}
+                      aria-label={t('url')}
+                      data-setting-input="edit-modal"
                       value={values.url || ''}
-                      onValueChange={(v) => {
-                        setValues({ ...values, url: v })
+                      variant="secondary"
+                      onChange={(event) => {
+                        setValues({ ...values, url: event.target.value })
                       }}
                     />,
                     { align: 'start' }
@@ -111,10 +118,12 @@ const EditInfoModal: React.FC<Props> = (props) => {
                   renderField(
                     t('fingerprint'),
                     <Input
-                      size="sm"
-                      className={cn(fieldWidth)}
+                      aria-label={t('fingerprint')}
+                      data-setting-input="edit-modal"
                       value={values.fingerprint ?? ''}
-                      onValueChange={(v) => {
+                      variant="secondary"
+                      onChange={(event) => {
+                        const v = event.target.value
                         setValues({ ...values, fingerprint: v.trim() || undefined })
                       }}
                     />
@@ -122,37 +131,56 @@ const EditInfoModal: React.FC<Props> = (props) => {
                 {renderField(
                   t('fileType'),
                   <Select
-                    size="sm"
-                    className={cn(fieldWidth)}
-                    selectedKeys={[values.ext]}
-                    onSelectionChange={(keys) => {
-                      const key = Array.from(keys)[0] as 'js' | 'yaml' | undefined
-                      if (!key) return
-                      setValues({ ...values, ext: key })
+                    aria-label={t('fileType')}
+                    data-setting-input="edit-modal"
+                    value={values.ext}
+                    variant="secondary"
+                    onChange={(value) => {
+                      if (Array.isArray(value) || value == null) return
+                      setValues({ ...values, ext: value as 'js' | 'yaml' })
                     }}
                   >
-                    <SelectItem key="yaml">YAML</SelectItem>
-                    <SelectItem key="js">JavaScript</SelectItem>
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        <ListBox.Item id="yaml" textValue="YAML">
+                          YAML
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                        <ListBox.Item id="js" textValue="JavaScript">
+                          JavaScript
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                      </ListBox>
+                    </Select.Popover>
                   </Select>
                 )}
                 {renderField(
                   t('globalOverride'),
                   <Switch
+                    aria-label={t('globalOverride')}
                     size="sm"
                     isSelected={values.global ?? false}
-                    onValueChange={(v) => {
+                    onChange={(v) => {
                       setValues({ ...values, global: v })
                     }}
-                  />,
+                  >
+                    <Switch.Control>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                  </Switch>,
                   { divider: false }
                 )}
               </Surface>
             </Modal.Body>
             <Modal.Footer className="justify-end pt-2">
-              <Button size="sm" variant="light" onPress={onClose}>
+              <Button size="sm" variant="secondary" onPress={onClose}>
                 {t('common:actions.cancel')}
               </Button>
-              <Button size="sm" color="primary" onPress={onSave}>
+              <Button size="sm" variant="primary" onPress={onSave}>
                 {item.id ? t('common:actions.save') : t('import')}
               </Button>
             </Modal.Footer>
