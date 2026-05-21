@@ -171,6 +171,14 @@ const GroupHeader = memo(function GroupHeader({
   )
 })
 
+interface ProxyGroupPageCache {
+  scrollTop: number
+}
+
+const proxyGroupPageCache: ProxyGroupPageCache = {
+  scrollTop: 0
+}
+
 const Proxies: React.FC = () => {
   const { t } = useTranslation('proxy')
   const { controledMihomoConfig } = useControledMihomoConfig()
@@ -188,7 +196,8 @@ const Proxies: React.FC = () => {
     proxyCols = 'auto',
     delayTestUrlScope = 'group',
     delayTestUseGroupApi = false,
-    delayTestConcurrency
+    delayTestConcurrency,
+    rememberProxyGroupOpenState = false
   } = appConfig || {}
   const [cols, setCols] = useState(1)
   const [openContentMap, setOpenContentMap] = useState<Map<string, boolean>>(new Map())
@@ -196,6 +205,30 @@ const Proxies: React.FC = () => {
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false)
   const virtuosoRef = useRef<GroupedVirtuosoHandle>(null)
   const pendingScrollRef = useRef<number | null>(null)
+  const [initialScrollTop] = useState(() =>
+    rememberProxyGroupOpenState ? proxyGroupPageCache.scrollTop : 0
+  )
+  const scrollerElRef = useRef<HTMLElement | null>(null)
+  const rememberProxyGroupOpenStateRef = useRef(rememberProxyGroupOpenState)
+  rememberProxyGroupOpenStateRef.current = rememberProxyGroupOpenState
+
+  const scrollerRef = useCallback((el: Window | HTMLElement | null) => {
+    if (scrollerElRef.current) {
+      if (rememberProxyGroupOpenStateRef.current && scrollerElRef.current.isConnected) {
+        proxyGroupPageCache.scrollTop = scrollerElRef.current.scrollTop
+      }
+      scrollerElRef.current.onscroll = null
+    }
+    scrollerElRef.current = el instanceof HTMLElement ? el : null
+    if (scrollerElRef.current) {
+      const htmlEl = scrollerElRef.current
+      htmlEl.onscroll = () => {
+        if (rememberProxyGroupOpenStateRef.current) {
+          proxyGroupPageCache.scrollTop = htmlEl.scrollTop
+        }
+      }
+    }
+  }, [])
 
   const openContentRef = useRef(openContentMap)
   openContentRef.current = openContentMap
@@ -621,6 +654,8 @@ const Proxies: React.FC = () => {
         <div className="h-[calc(100vh-50px)]">
           <GroupedVirtuoso
             ref={virtuosoRef}
+            scrollerRef={scrollerRef}
+            initialScrollTop={initialScrollTop}
             groupCounts={groupCounts}
             groupContent={groupContent}
             itemContent={itemContent}

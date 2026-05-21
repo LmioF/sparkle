@@ -530,6 +530,7 @@
     "groupDisplayLayout": "Proxy Group Details",
     "proxyDisplayLayout": "Proxy Node Details",
     "showGroupSelectedProxy": "Show Selected Node for Nested Groups",
+    "rememberProxyGroupOpenState": "Remember Proxy Group State",
     "autoCloseConnection": "Close Connection on Node Switch",
     "delayTestUrl": "Delay Test URL",
     "delayTestUrlPlaceholder": "Default https://www.gstatic.com/generate_204",

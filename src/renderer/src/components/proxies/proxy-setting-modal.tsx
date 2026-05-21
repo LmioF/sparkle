@@ -32,7 +32,8 @@ const ProxySettingModal: React.FC<Props> = (props) => {
     delayTestUrlScope = 'group',
     delayTestUseGroupApi = false,
     delayTestConcurrency,
-    delayTestTimeout
+    delayTestTimeout,
+    rememberProxyGroupOpenState = false
   } = appConfig || {}
 
   const [url, setUrl] = useState(delayTestUrl ?? '')
@@ -159,6 +160,19 @@ const ProxySettingModal: React.FC<Props> = (props) => {
                   isSelected={showGroupSelectedProxy}
                   onChange={(v) => {
                     patchAppConfig({ showGroupSelectedProxy: v })
+                  }}
+                >
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch>
+              </SettingItem>
+              <SettingItem title={t('rememberProxyGroupOpenState')} {...settingItemProps} divider>
+                <Switch
+                  aria-label={t('rememberProxyGroupOpenState')}
+                  isSelected={rememberProxyGroupOpenState}
+                  onChange={(v) => {
+                    patchAppConfig({ rememberProxyGroupOpenState: v })
                   }}
                 >
                   <Switch.Control>
