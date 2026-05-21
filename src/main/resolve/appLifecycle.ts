@@ -3,6 +3,7 @@ import { stopCore } from '../core/manager'
 import { stopCacheCleanup } from '../i18n/handler'
 import { stopSSIDCheck } from '../sys/ssid'
 import { disableSysProxySync, triggerSysProxy } from '../sys/sysproxy'
+import { appendAppLog } from '../utils/log'
 
 interface AppQuitLifecycleContext {
   getMainWindow: () => BrowserWindow | null
@@ -49,10 +50,7 @@ export function initAppQuitLifecycle(context: AppQuitLifecycleContext): void {
 
   powerMonitor.on('shutdown', async () => {
     context.clearLightweightTimeout()
-    stopSSIDCheck()
-    await triggerSysProxy(false, false, true)
-    sysProxyDisabled = true
-    await stopCore()
+    await cleanupBeforeExit(true)
     context.exitApp()
   })
 
@@ -68,11 +66,25 @@ export function initAppQuitLifecycle(context: AppQuitLifecycleContext): void {
 async function quit(context: AppQuitLifecycleContext): Promise<void> {
   isQuitting = true
   context.clearLightweightTimeout()
-  stopSSIDCheck()
-  await triggerSysProxy(false, false)
-  sysProxyDisabled = true
-  await stopCore()
+  await cleanupBeforeExit(false)
   context.exitApp()
+}
+
+async function cleanupBeforeExit(useRegistry: boolean): Promise<void> {
+  stopSSIDCheck()
+
+  try {
+    await triggerSysProxy(false, false, useRegistry)
+    sysProxyDisabled = true
+  } catch (error) {
+    await appendAppLog(`[App]: disable sysproxy before exit failed after fallback, ${error}\n`)
+  }
+
+  try {
+    await stopCore()
+  } catch (error) {
+    await appendAppLog(`[App]: stop core before exit failed, ${error}\n`)
+  }
 }
 
 function showQuitConfirmDialog(context: AppQuitLifecycleContext): Promise<boolean> {

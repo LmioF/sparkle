@@ -33,6 +33,10 @@ let isCreatingWindow = false
 let windowShown = false
 let createWindowPromiseResolve: (() => void) | null = null
 let createWindowPromise: Promise<void> | null = null
+let initialWindowDisplayPromiseResolve: (() => void) | null = null
+const initialWindowDisplayPromise = new Promise<void>((resolve) => {
+  initialWindowDisplayPromiseResolve = resolve
+})
 
 async function scheduleLightweightMode(): Promise<void> {
   const {
@@ -188,6 +192,9 @@ app.whenReady().then(async () => {
 
   const coreStartPromise = (async (): Promise<void> => {
     try {
+      if (is.dev) {
+        await initialWindowDisplayPromise
+      }
       const [startPromise] = await startCore()
       startPromise.then(async () => {
         await initProfileUpdater()
@@ -288,8 +295,12 @@ export async function createWindow(appConfig?: AppConfig): Promise<void> {
         windowShown = true
         mainWindow?.show()
         mainWindow?.focusOnWebView()
+        initialWindowDisplayPromiseResolve?.()
+        initialWindowDisplayPromiseResolve = null
       } else {
         await scheduleLightweightMode()
+        initialWindowDisplayPromiseResolve?.()
+        initialWindowDisplayPromiseResolve = null
       }
     })
     mainWindow.webContents.on('did-fail-load', () => {
