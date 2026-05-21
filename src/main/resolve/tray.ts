@@ -57,6 +57,12 @@ function formatDelayText(delay: number): string {
   return ''
 }
 
+function createDarwinTrayIcon(): Electron.NativeImage {
+  const icon = nativeImage.createFromPath(templateIcon).resize({ height: 16 })
+  icon.setTemplateImage(true)
+  return icon
+}
+
 function positionCustomTrayWindow(win: BrowserWindow): void {
   if (!tray) return
   const trayBounds = tray.getBounds()
@@ -530,14 +536,15 @@ async function createWindowsTray(): Promise<boolean> {
 export async function createTray(): Promise<void> {
   const { useDockIcon = true } = await getAppConfig()
 
+  if (tray) {
+    return
+  }
   if (process.platform === 'linux') {
     tray = new Tray(pngIcon)
     const menu = await buildContextMenu()
     tray.setContextMenu(menu)
   } else if (process.platform === 'darwin') {
-    const icon = nativeImage.createFromPath(templateIcon).resize({ height: 16 })
-    icon.setTemplateImage(true)
-    tray = new Tray(icon)
+    tray = new Tray(createDarwinTrayIcon())
   } else if (process.platform === 'win32') {
     const success = await createWindowsTray()
 
@@ -558,12 +565,19 @@ export async function createTray(): Promise<void> {
       app.dock.hide()
     }
     if (!trayIconUpdateRegistered) {
-      trayIconUpdateRegistered = true
-      ipcMain.on('trayIconUpdate', async (_, png: string) => {
+      ipcMain.on('trayIconUpdate', async (_, png?: string) => {
+        if (!png) {
+          tray?.setImage(createDarwinTrayIcon())
+          return
+        }
         const image = nativeImage.createFromDataURL(png).resize({ height: 16 })
+        if (image.isEmpty()) {
+          return
+        }
         image.setTemplateImage(true)
         tray?.setImage(image)
       })
+      trayIconUpdateRegistered = true
     }
     tray?.addListener('right-click', async () => {
       await triggerMainWindow()
@@ -585,10 +599,10 @@ export async function createTray(): Promise<void> {
       await triggerMainWindow()
     })
     if (!updateTrayMenuRegistered) {
-      updateTrayMenuRegistered = true
       ipcMain.on('updateTrayMenu', async () => {
         await updateTrayMenu()
       })
+      updateTrayMenuRegistered = true
     }
   }
 }
