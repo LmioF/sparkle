@@ -266,10 +266,7 @@ export const initServiceAPI = (km: KeyManager): void => {
 
   attachServiceAuth(serviceAxios)
 
-  serviceAxios.interceptors.response.use(
-    (response) => response.data,
-    handleServiceAxiosError
-  )
+  serviceAxios.interceptors.response.use((response) => response.data, handleServiceAxiosError)
 }
 
 export const createSignedServiceAxios = (baseURL = 'http://localhost'): AxiosInstance => {
@@ -284,10 +281,7 @@ export const createSignedServiceAxios = (baseURL = 'http://localhost'): AxiosIns
 
   attachServiceAuth(instance)
 
-  instance.interceptors.response.use(
-    (response) => response.data,
-    handleServiceAxiosError
-  )
+  instance.interceptors.response.use((response) => response.data, handleServiceAxiosError)
 
   return instance
 }
