@@ -202,7 +202,7 @@ export async function startCore(detached = false): Promise<Promise<void>[]> {
   const {
     core = 'mihomo',
     coreStartupMode = 'post-up',
-    autoSetDNSMode = 'exec',
+    autoSetDNSMode = 'none',
     diffWorkDir = false,
     mihomoCpuPriority = 'PRIORITY_NORMAL',
     disableLoopbackDetector = false,

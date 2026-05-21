@@ -14,7 +14,7 @@ const Tun: React.FC = () => {
   const { t } = useTranslation('tun')
   const { controledMihomoConfig, patchControledMihomoConfig } = useControledMihomoConfig()
   const { appConfig, patchAppConfig } = useAppConfig()
-  const { autoSetDNSMode = 'exec' } = appConfig || {}
+  const { autoSetDNSMode = 'none' } = appConfig || {}
   const { tun } = controledMihomoConfig || {}
   const [loading, setLoading] = useState(false)
   const {
