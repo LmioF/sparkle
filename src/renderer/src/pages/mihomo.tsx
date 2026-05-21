@@ -37,7 +37,12 @@ import { useTranslation } from '@renderer/hooks/useTranslation'
 const Mihomo: React.FC = () => {
   const { t } = useTranslation('mihomo')
   const { appConfig, patchAppConfig } = useAppConfig()
-  const { core = 'mihomo', maxLogDays = 7, corePermissionMode = 'elevated' } = appConfig || {}
+  const {
+    core = 'mihomo',
+    maxLogDays = 7,
+    corePermissionMode = 'elevated',
+    coreStartupMode = 'post-up'
+  } = appConfig || {}
   const { controledMihomoConfig, patchControledMihomoConfig } = useControledMihomoConfig()
   const { ipv6, 'log-level': logLevel = 'info' } = controledMihomoConfig || {}
 
@@ -319,36 +324,46 @@ const Mihomo: React.FC = () => {
             )}
           </SettingItem>
         )}
-        {platform === 'darwin' && (
-          <SettingItem title={t('runMode')} divider>
-            <Tabs
-              size="sm"
-              color="primary"
-              selectedKey={corePermissionMode}
-              disabledKeys={['service']}
-              onSelectionChange={(key) => handlePermissionModeChange(key as string)}
-            >
-              <Tab
-                key="elevated"
-                //title={platform === 'win32' ? t('runModeElevated') : t('runModeAuth')}
-                title={t('runModeAuth')}
-              />
-              <Tab key="service" title={t('runModeService')} />
-            </Tabs>
-          </SettingItem>
-        )}
-        <SettingItem title={platform === 'win32' ? t('taskStatus') : t('authStatus')} divider>
+        <SettingItem compatKey="legacy" title={t('runMode')} divider>
+          <Tabs
+            size="sm"
+            color="primary"
+            selectedKey={corePermissionMode}
+            disabledKeys={['service']}
+            onSelectionChange={(key) => handlePermissionModeChange(key as string)}
+          >
+            <Tab
+              key="elevated"
+              title={platform === 'win32' ? t('runModeElevated') : t('runModeAuth')}
+            />
+            <Tab key="service" title={t('runModeService')} />
+          </Tabs>
+        </SettingItem>
+        <SettingItem compatKey="legacy" title={t('startupDetectionMode')} divider>
+          <Tabs
+            size="sm"
+            color="primary"
+            selectedKey={coreStartupMode}
+            onSelectionChange={(key) => handleConfigChangeWithRestart('coreStartupMode', key)}
+          >
+            <Tab key="post-up" title={t('startupDetectionPostUp')} />
+            <Tab key="log" title={t('startupDetectionLog')} />
+          </Tabs>
+        </SettingItem>
+        <SettingItem
+          compatKey="legacy"
+          title={platform === 'win32' ? t('taskStatus') : t('authStatus')}
+          divider
+        >
           <Button size="sm" color="primary" onPress={() => setShowPermissionModal(true)}>
             {t('manage')}
           </Button>
         </SettingItem>
-        {platform === 'darwin' && (
-          <SettingItem title={t('serviceStatus')} divider>
-            <Button size="sm" color="primary" onPress={() => setShowServiceModal(true)}>
-              {t('manage')}
-            </Button>
-          </SettingItem>
-        )}
+        <SettingItem compatKey="legacy" title={t('serviceStatus')} divider>
+          <Button size="sm" color="primary" onPress={() => setShowServiceModal(true)}>
+            {t('manage')}
+          </Button>
+        </SettingItem>
         <SettingItem title={t('ipv6')} divider>
           <Switch
             size="sm"
