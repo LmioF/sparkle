@@ -40,8 +40,9 @@ import { applyTheme } from './theme'
 
 export let tray: Tray | null = null
 let customTrayWindow: BrowserWindow | null = null
-let trayIconUpdateRegistered = false
-let updateTrayMenuRegistered = false
+let trayMenu: Menu | null = null
+let trayIconUpdateListenerRegistered = false
+let updateTrayMenuListenerRegistered = false
 
 const TRAY_RETRY_DELAYS = [200, 500, 1000, 2000, 3000]
 const TRAY_INITIAL_DELAY = 100
@@ -541,9 +542,10 @@ export async function createTray(): Promise<void> {
   }
   if (process.platform === 'linux') {
     tray = new Tray(pngIcon)
-    const menu = await buildContextMenu()
-    tray.setContextMenu(menu)
-  } else if (process.platform === 'darwin') {
+    trayMenu = await buildContextMenu()
+    tray.setContextMenu(trayMenu)
+  }
+  if (process.platform === 'darwin') {
     tray = new Tray(createDarwinTrayIcon())
   } else if (process.platform === 'win32') {
     const success = await createWindowsTray()
@@ -564,7 +566,7 @@ export async function createTray(): Promise<void> {
     if (!useDockIcon && app.dock) {
       app.dock.hide()
     }
-    if (!trayIconUpdateRegistered) {
+    if (!trayIconUpdateListenerRegistered) {
       ipcMain.on('trayIconUpdate', async (_, png?: string) => {
         if (!png) {
           tray?.setImage(createDarwinTrayIcon())
@@ -577,7 +579,7 @@ export async function createTray(): Promise<void> {
         image.setTemplateImage(true)
         tray?.setImage(image)
       })
-      trayIconUpdateRegistered = true
+      trayIconUpdateListenerRegistered = true
     }
     tray?.addListener('right-click', async () => {
       await triggerMainWindow()
@@ -598,17 +600,18 @@ export async function createTray(): Promise<void> {
     tray?.addListener('click', async () => {
       await triggerMainWindow()
     })
-    if (!updateTrayMenuRegistered) {
+    if (!updateTrayMenuListenerRegistered) {
       ipcMain.on('updateTrayMenu', async () => {
         await updateTrayMenu()
       })
-      updateTrayMenuRegistered = true
+      updateTrayMenuListenerRegistered = true
     }
   }
 }
 
 async function updateTrayMenu(): Promise<void> {
   const menu = await buildContextMenu()
+  trayMenu = menu
   tray?.popUpContextMenu(menu) // 弹出菜单
   if (process.platform === 'linux') {
     tray?.setContextMenu(menu)
@@ -671,12 +674,11 @@ export async function closeTrayIcon(): Promise<void> {
     tray.destroy()
   }
   tray = null
+  trayMenu = null
   if (customTrayWindow) {
     customTrayWindow.destroy()
   }
   customTrayWindow = null
-  trayIconUpdateRegistered = false
-  updateTrayMenuRegistered = false
 }
 
 export function setDockVisible(visible: boolean): void {
