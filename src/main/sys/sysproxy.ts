@@ -115,6 +115,7 @@ async function setSysProxy(onlyActiveDevice: boolean, useRegistry = false): Prom
   const { sysProxy } = await getAppConfig()
   const { mode, host, bypass = defaultBypass, settingMode = 'exec' } = sysProxy
   const guard = settingMode === 'service' && !!sysProxy.guard
+  const guardNotify = guard && !!sysProxy.guardNotify
   const { 'mixed-port': port = 7890 } = await getControledMihomoConfig()
   const execFilePromise = promisify(execFile)
 
@@ -129,7 +130,7 @@ async function setSysProxy(onlyActiveDevice: boolean, useRegistry = false): Prom
             useRegistry,
             guard
           )
-          updateSysproxyGuardEventStream(guard)
+          updateSysproxyGuardEventStream(guardNotify)
         } catch {
           throw new Error(t('main.errors.serviceMayNotInstalled'))
         }
@@ -157,7 +158,7 @@ async function setSysProxy(onlyActiveDevice: boolean, useRegistry = false): Prom
               useRegistry,
               guard
             )
-            updateSysproxyGuardEventStream(guard)
+            updateSysproxyGuardEventStream(guardNotify)
           } catch {
             throw new Error(t('main.errors.serviceMayNotInstalled'))
           }
@@ -218,7 +219,7 @@ function updateSysproxyGuardEventStream(enabled: boolean): void {
 }
 
 async function handleSysproxyGuardEvent(event: ServiceSysproxyEvent): Promise<void> {
-  if (!shouldNotifySysproxyGuardEvent(event)) return
+  if (!(await shouldNotifySysproxyGuardEvent(event))) return
 
   if (event.type === 'guard_restored') {
     new Notification({ title: t('main.notifications.sysproxyGuardRestored') }).show()
@@ -231,11 +232,14 @@ async function handleSysproxyGuardEvent(event: ServiceSysproxyEvent): Promise<vo
   }).show()
 }
 
-function shouldNotifySysproxyGuardEvent(event: ServiceSysproxyEvent): boolean {
+async function shouldNotifySysproxyGuardEvent(event: ServiceSysproxyEvent): Promise<boolean> {
   if (event.type !== 'guard_restored' && event.type !== 'guard_restore_failed') return false
 
   const eventTime = Date.parse(event.time)
   if (Number.isFinite(eventTime) && eventTime < sysproxyGuardEventsStartedAt) return false
+
+  const { sysProxy } = await getAppConfig()
+  if (!sysProxy.guardNotify) return false
 
   const key = `${event.type}:${event.seq ?? ''}:${event.time}`
   if (key === lastSysproxyGuardNotificationKey) return false
