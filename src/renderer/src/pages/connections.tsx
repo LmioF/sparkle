@@ -402,17 +402,24 @@ const Connections: React.FC = () => {
     const otherPaths = new Set<string>()
     let loadOtherPathsTimer: ReturnType<typeof setTimeout> | null = null
 
+    let noProcessSeen = false
     const visibleConnections = filteredConnectionsRef.current.slice(0, 20)
     visibleConnections.forEach((c) => {
       const path = c.metadata.processPath || ''
-      if (!path) return
+      if (!path) {
+        noProcessSeen = true
+        return
+      }
       visiblePaths.add(path)
     })
 
     const collectPaths = (connections: ControllerConnectionDetail[]) => {
       for (const c of connections) {
         const path = c.metadata.processPath || ''
-        if (!path) continue
+        if (!path) {
+          noProcessSeen = true
+          continue
+        }
         if (!visiblePaths.has(path)) {
           otherPaths.add(path)
         }
@@ -423,7 +430,6 @@ const Connections: React.FC = () => {
     collectPaths(closedConnections)
 
     const loadIcon = (path: string, isVisible: boolean = false): void => {
-      if (!path) return
       if (iconMapRef.current[path] || processingIcons.current.has(path)) return
       if (iconRequestQueue.current.size >= MAX_QUEUE_SIZE) return
 
@@ -445,6 +451,8 @@ const Connections: React.FC = () => {
       if (appNameRequestQueue.current.size >= MAX_QUEUE_SIZE) return
       appNameRequestQueue.current.add(path)
     }
+
+    if (noProcessSeen) loadIcon('', true)
 
     visiblePaths.forEach((path) => {
       loadIcon(path, true)
