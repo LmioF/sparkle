@@ -12,12 +12,13 @@ import { notify } from '@renderer/utils/notification'
 
 interface Props {
   onClose: () => void
+  reopenSignal?: number
 }
 
 const DRAWER_CLOSE_ANIMATION_MS = 700
 
-const ProfileSettingModal: React.FC<Props> = (props) => {
-  const { onClose } = props
+const ProfileSettingDrawer: React.FC<Props> = (props) => {
+  const { onClose, reopenSignal } = props
   const { t } = useTranslation('profile')
   const { appConfig, patchAppConfig } = useAppConfig()
 
@@ -63,11 +64,20 @@ const ProfileSettingModal: React.FC<Props> = (props) => {
     }
   }, [])
 
+  useEffect(() => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current)
+      closeTimer.current = null
+    }
+    setIsOpen(true)
+  }, [reopenSignal])
+
   const closeWithAnimation = (): void => {
     if (closeTimer.current) return
 
     setIsOpen(false)
     closeTimer.current = setTimeout(() => {
+      closeTimer.current = null
       onClose()
     }, DRAWER_CLOSE_ANIMATION_MS)
   }
@@ -224,4 +234,4 @@ const ProfileSettingModal: React.FC<Props> = (props) => {
   )
 }
 
-export default ProfileSettingModal
+export default ProfileSettingDrawer

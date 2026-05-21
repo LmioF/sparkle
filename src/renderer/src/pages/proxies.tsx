@@ -13,7 +13,7 @@ import { FaLocationCrosshairs } from 'react-icons/fa6'
 import { memo, useEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react'
 import { GroupedVirtuoso, GroupedVirtuosoHandle } from 'react-virtuoso'
 import ProxyItem from '@renderer/components/proxies/proxy-item'
-import ProxySettingModal from '@renderer/components/proxies/proxy-setting-modal'
+import ProxySettingDrawer from '@renderer/components/proxies/proxy-setting-drawer'
 import { IoIosArrowBack } from 'react-icons/io'
 import { MdDoubleArrow, MdOutlineSpeed, MdTune } from 'react-icons/md'
 import { useGroups } from '@renderer/hooks/use-groups'
@@ -190,7 +190,7 @@ const Proxies: React.FC = () => {
   const {
     proxyDisplayLayout = 'double',
     groupDisplayLayout = 'double',
-    showGroupSelectedProxy = false,
+    showGroupSelectedProxy = true,
     showProxyDetailTooltip = false,
     proxyDisplayOrder = 'default',
     autoCloseConnection = true,
@@ -204,7 +204,8 @@ const Proxies: React.FC = () => {
   const [cols, setCols] = useState(1)
   const [openContentMap, setOpenContentMap] = useState<Map<string, boolean>>(new Map())
   const [delaying, setDelaying] = useState<Map<string, boolean>>(new Map())
-  const [isSettingModalOpen, setIsSettingModalOpen] = useState(false)
+  const [isSettingDrawerOpen, setIsSettingDrawerOpen] = useState(false)
+  const [settingDrawerReopenSignal, setSettingDrawerReopenSignal] = useState(0)
   const virtuosoRef = useRef<GroupedVirtuosoHandle>(null)
   const pendingScrollRef = useRef<number | null>(null)
   const [initialScrollTop] = useState(() =>
@@ -642,13 +643,21 @@ const Proxies: React.FC = () => {
           variant="light"
           className="app-nodrag"
           aria-label={t('settings')}
-          onPress={() => setIsSettingModalOpen(true)}
+          onPress={() => {
+            setIsSettingDrawerOpen(true)
+            setSettingDrawerReopenSignal((signal) => signal + 1)
+          }}
         >
           <MdTune className="text-lg" />
         </Button>
       }
     >
-      {isSettingModalOpen && <ProxySettingModal onClose={() => setIsSettingModalOpen(false)} />}
+      {isSettingDrawerOpen && (
+        <ProxySettingDrawer
+          reopenSignal={settingDrawerReopenSignal}
+          onClose={() => setIsSettingDrawerOpen(false)}
+        />
+      )}
       {mode === 'direct' ? (
         <div className="h-full w-full flex justify-center items-center">
           <div className="flex flex-col items-center">
