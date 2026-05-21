@@ -170,6 +170,7 @@ const LogSetting: React.FC = () => {
       </SettingItem>
       <SettingItem compatKey="legacy" title={t('logLevel')}>
         <Select
+          aria-label="日志等级"
           classNames={{ trigger: 'data-[hover=true]:bg-default-200' }}
           className="w-25"
           size="sm"

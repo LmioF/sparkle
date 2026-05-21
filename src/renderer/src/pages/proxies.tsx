@@ -64,6 +64,7 @@ const Proxies: React.FC = () => {
   const [delaying, setDelaying] = useState<Map<string, boolean>>(new Map())
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false)
   const virtuosoRef = useRef<GroupedVirtuosoHandle>(null)
+  const pendingScrollRef = useRef<number | null>(null)
 
   useEffect(() => {
     syncGroups(groups.map((g) => g.name))
@@ -206,17 +207,19 @@ const Proxies: React.FC = () => {
   const updateSearchValue = useCallback(
     (index: number, value: string) => {
       const group = groups[index]
+      if (!group) return
       setSearchValue(group.name, value)
-    },
-    [groups, setSearchValue]
-  )
-
-  const scrollToCurrentProxy = useCallback(
-    (index: number) => {
-      const group = groups[index]
-      if (!(isOpenMap.get(group.name) ?? false)) {
+      if (value) {
         setIsOpen(group.name, true)
       }
+    },
+    [groups, setSearchValue, setIsOpen]
+  )
+
+  const doScrollToCurrentProxy = useCallback(
+    (index: number) => {
+      const group = groups[index]
+      if (!group) return
       let i = 0
       for (let j = 0; j < index; j++) {
         i += groupCounts[j]
@@ -225,10 +228,36 @@ const Proxies: React.FC = () => {
       i += Math.floor(proxies.findIndex((proxy) => proxy.name === group.now) / cols)
       virtuosoRef.current?.scrollToIndex({
         index: Math.floor(i),
-        align: 'start'
+        align: 'start',
+        behavior: 'smooth'
       })
     },
-    [groups, isOpenMap, setIsOpen, groupCounts, allProxies, cols]
+    [groupCounts, allProxies, groups, cols]
+  )
+
+  useEffect(() => {
+    if (pendingScrollRef.current !== null) {
+      const index = pendingScrollRef.current
+      const group = groups[index]
+      if (group && (isOpenMap.get(group.name) ?? false)) {
+        pendingScrollRef.current = null
+        setTimeout(() => doScrollToCurrentProxy(index), 150)
+      }
+    }
+  }, [groups, isOpenMap, doScrollToCurrentProxy])
+
+  const scrollToCurrentProxy = useCallback(
+    (index: number) => {
+      const group = groups[index]
+      if (!group) return
+      if (!(isOpenMap.get(group.name) ?? false)) {
+        pendingScrollRef.current = index
+        setIsOpen(group.name, true)
+      } else {
+        doScrollToCurrentProxy(index)
+      }
+    },
+    [groups, isOpenMap, setIsOpen, doScrollToCurrentProxy]
   )
 
   useEffect(() => {
@@ -331,6 +360,7 @@ const Proxies: React.FC = () => {
                     />
                     <Button
                       title={t('locateCurrentNode')}
+                      aria-label={t('locateCurrentNode')}
                       variant="light"
                       size="sm"
                       isIconOnly
@@ -340,6 +370,7 @@ const Proxies: React.FC = () => {
                     </Button>
                     <Button
                       title={t('delayTest')}
+                      aria-label={t('delayTest')}
                       variant="light"
                       isLoading={isGroupDelaying}
                       size="sm"
@@ -442,6 +473,7 @@ const Proxies: React.FC = () => {
           variant="light"
           className="app-nodrag"
           title={t('settings')}
+          aria-label={t('settings')}
           onPress={() => setIsSettingModalOpen(true)}
         >
           <MdTune className="text-lg" />

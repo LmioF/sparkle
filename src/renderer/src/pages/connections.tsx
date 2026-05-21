@@ -724,6 +724,7 @@ const Connections: React.FC = () => {
                 isIconOnly
                 size="sm"
                 variant="light"
+                aria-label={tab === 'active' ? t('closeAll') : t('clearClosed')}
                 onPress={() => {
                   if (filter === '') {
                     closeAllConnections()
@@ -748,6 +749,7 @@ const Connections: React.FC = () => {
             className="app-nodrag ml-2"
             variant="light"
             title={paused ? t('resume') : t('pause')}
+            aria-label={paused ? t('resume') : t('pause')}
             onPress={() =>
               setPaused((p) => {
                 pausedRef.current = !p
@@ -763,6 +765,7 @@ const Connections: React.FC = () => {
             className="app-nodrag"
             variant="light"
             title={t('settings')}
+            aria-label={t('settings')}
             onPress={() => setIsSettingModalOpen(true)}
           >
             <MdTune className="text-lg" />
@@ -882,6 +885,7 @@ const Connections: React.FC = () => {
           </Tooltip>
 
           <Select
+            aria-label={t('orderField')}
             classNames={{ trigger: 'data-[hover=true]:bg-default-200' }}
             size="sm"
             className="w-45 min-w-30 shrink-0"
@@ -896,7 +900,13 @@ const Connections: React.FC = () => {
             <SelectItem key="time">{t('orderBy.time')}</SelectItem>
             <SelectItem key="process">{t('orderBy.process')}</SelectItem>
           </Select>
-          <Button size="sm" isIconOnly className="bg-content2" onPress={handleDirectionToggle}>
+          <Button
+            size="sm"
+            isIconOnly
+            className="bg-content2"
+            aria-label={connectionDirection === 'asc' ? t('ascending') : t('descending')}
+            onPress={handleDirectionToggle}
+          >
             {connectionDirection === 'asc' ? (
               <HiSortAscending className="text-lg" />
             ) : (

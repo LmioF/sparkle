@@ -1,46 +1,22 @@
-import React, { useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Input, InputProps } from '@heroui/react'
 import { FaSearch } from 'react-icons/fa'
 
-interface CollapseInputProps extends Omit<InputProps, 'onValueChange'> {
+interface CollapseInputProps extends InputProps {
   title: string
-  onValueChange?: (value: string) => void
 }
 
 const CollapseInput: React.FC<CollapseInputProps> = (props) => {
-  const { title, value, onValueChange, ...inputProps } = props
+  const { title, value, onChange, onValueChange, ...inputProps } = props
   const inputRef = useRef<HTMLInputElement>(null)
-  const isComposingRef = useRef(false)
-  const [localValue, setLocalValue] = useState(value || '')
+  const composingRef = useRef(false)
+  const [internalValue, setInternalValue] = useState<string>((value as string) ?? '')
 
-  React.useEffect(() => {
-    if (!isComposingRef.current) {
-      setLocalValue(value || '')
+  useEffect(() => {
+    if (!composingRef.current) {
+      setInternalValue((value as string) ?? '')
     }
   }, [value])
-
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value
-      setLocalValue(newValue)
-      if (!isComposingRef.current) {
-        onValueChange?.(newValue)
-      }
-    },
-    [onValueChange]
-  )
-
-  const handleCompositionStart = useCallback(() => {
-    isComposingRef.current = true
-  }, [])
-
-  const handleCompositionEnd = useCallback(
-    (e: React.CompositionEvent<HTMLInputElement>) => {
-      isComposingRef.current = false
-      onValueChange?.(e.currentTarget.value)
-    },
-    [onValueChange]
-  )
 
   return (
     <div className="flex">
@@ -48,10 +24,25 @@ const CollapseInput: React.FC<CollapseInputProps> = (props) => {
         size="sm"
         ref={inputRef}
         {...inputProps}
-        value={localValue as string}
-        onChange={handleChange}
-        onCompositionStart={handleCompositionStart}
-        onCompositionEnd={handleCompositionEnd}
+        value={internalValue}
+        onCompositionStart={() => {
+          composingRef.current = true
+        }}
+        onCompositionEnd={(e) => {
+          composingRef.current = false
+          const val = (e.target as HTMLInputElement).value
+          setInternalValue(val)
+          onValueChange?.(val)
+          onChange?.(e as unknown as React.ChangeEvent<HTMLInputElement>)
+        }}
+        onChange={(e) => {
+          const val = e.target.value
+          setInternalValue(val)
+          if (!composingRef.current) {
+            onChange?.(e)
+            onValueChange?.(val)
+          }
+        }}
         style={{ paddingInlineEnd: 0 }}
         classNames={{
           inputWrapper: 'cursor-pointer bg-transparent p-0 data-[hover=true]:bg-content2',
