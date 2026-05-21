@@ -400,16 +400,19 @@ const Connections: React.FC = () => {
 
     const visiblePaths = new Set<string>()
     const otherPaths = new Set<string>()
+    let loadOtherPathsTimer: ReturnType<typeof setTimeout> | null = null
 
     const visibleConnections = filteredConnectionsRef.current.slice(0, 20)
     visibleConnections.forEach((c) => {
       const path = c.metadata.processPath || ''
+      if (!path) return
       visiblePaths.add(path)
     })
 
     const collectPaths = (connections: ControllerConnectionDetail[]) => {
       for (const c of connections) {
         const path = c.metadata.processPath || ''
+        if (!path) continue
         if (!visiblePaths.has(path)) {
           otherPaths.add(path)
         }
@@ -420,6 +423,7 @@ const Connections: React.FC = () => {
     collectPaths(closedConnections)
 
     const loadIcon = (path: string, isVisible: boolean = false): void => {
+      if (!path) return
       if (iconMapRef.current[path] || processingIcons.current.has(path)) return
       if (iconRequestQueue.current.size >= MAX_QUEUE_SIZE) return
 
@@ -436,6 +440,7 @@ const Connections: React.FC = () => {
     }
 
     const loadAppName = (path: string): void => {
+      if (!path) return
       if (appNameCacheRef.current[path] || processingAppNames.current.has(path)) return
       if (appNameRequestQueue.current.size >= MAX_QUEUE_SIZE) return
       appNameRequestQueue.current.add(path)
@@ -454,7 +459,7 @@ const Connections: React.FC = () => {
         })
       }
 
-      setTimeout(loadOtherPaths, 100)
+      loadOtherPathsTimer = setTimeout(loadOtherPaths, 100)
     }
 
     if (processIconTimer.current) clearTimeout(processIconTimer.current)
@@ -467,6 +472,7 @@ const Connections: React.FC = () => {
     }
 
     return (): void => {
+      if (loadOtherPathsTimer) clearTimeout(loadOtherPathsTimer)
       if (processIconTimer.current) clearTimeout(processIconTimer.current)
       if (processIconIdleCallback.current) cancelIdleCallback(processIconIdleCallback.current)
       if (processAppNameTimer.current) clearTimeout(processAppNameTimer.current)

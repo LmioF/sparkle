@@ -25,7 +25,6 @@ const AdvancedSettings: React.FC = () => {
     controlDns = true,
     controlSniff = true,
     pauseSSID,
-    mihomoCpuPriority = 'PRIORITY_NORMAL',
     autoLightweight = false,
     autoLightweightDelay = 60,
     autoLightweightMode = 'core',
@@ -143,39 +142,7 @@ const AdvancedSettings: React.FC = () => {
           <SelectItem key="nushell">NuShell</SelectItem>
         </Select>
       </SettingItem>
-      {platform === 'win32' && (
-        <SettingItem title={t('advanced.corePriority')} divider>
-          <Select
-            classNames={{ trigger: 'data-[hover=true]:bg-default-200' }}
-            className="w-37.5"
-            size="sm"
-            selectedKeys={new Set([mihomoCpuPriority])}
-            disallowEmptySelection={true}
-            onSelectionChange={async (v) => {
-              try {
-                await patchAppConfig({
-                  mihomoCpuPriority: v.currentKey as Priority
-                })
-                await restartCore()
-              } catch (e) {
-                alert(e)
-              }
-            }}
-          >
-            <SelectItem key="PRIORITY_HIGHEST">{t('advanced.priority.realtime')}</SelectItem>
-            <SelectItem key="PRIORITY_HIGH">{t('advanced.priority.high')}</SelectItem>
-            <SelectItem key="PRIORITY_ABOVE_NORMAL">
-              {t('advanced.priority.aboveNormal')}
-            </SelectItem>
-            <SelectItem key="PRIORITY_NORMAL">{t('advanced.priority.normal')}</SelectItem>
-            <SelectItem key="PRIORITY_BELOW_NORMAL">
-              {t('advanced.priority.belowNormal')}
-            </SelectItem>
-            <SelectItem key="PRIORITY_LOW">{t('advanced.priority.low')}</SelectItem>
-          </Select>
-        </SettingItem>
-      )}
-      <SettingItem title={t('advanced.controlDns')} divider>
+      <SettingItem compatKey="legacy" title={t('advanced.controlDns')} divider>
         <Switch
           size="sm"
           isSelected={controlDns}
@@ -190,7 +157,7 @@ const AdvancedSettings: React.FC = () => {
           }}
         />
       </SettingItem>
-      <SettingItem title={t('advanced.controlSniff')} divider>
+      <SettingItem compatKey="legacy" title={t('advanced.controlSniff')} divider>
         <Switch
           size="sm"
           isSelected={controlSniff}

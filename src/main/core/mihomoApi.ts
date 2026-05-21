@@ -6,50 +6,91 @@ import { tray } from '../resolve/tray'
 import { calcTraffic } from '../utils/calc'
 import { getRuntimeConfig } from './factory'
 import { floatingWindow } from '../resolve/floatingWindow'
-import { mihomoIpcPath } from '../utils/dirs'
+import { mihomoIpcPath, serviceIpcPath } from '../utils/dirs'
 import { publishMihomoLog } from '../utils/log'
+import { createSignedServiceAxios, getServiceAuthHeaders } from '../service/api'
 
 let axiosIns: AxiosInstance = null!
 let mihomoTrafficWs: WebSocket | null = null
 let trafficRetry = 10
-let trafficRetryTimer: NodeJS.Timeout | null = null
+let trafficReconnectTimer: NodeJS.Timeout | null = null
 let mihomoMemoryWs: WebSocket | null = null
 let memoryRetry = 10
-let memoryRetryTimer: NodeJS.Timeout | null = null
+let memoryReconnectTimer: NodeJS.Timeout | null = null
 let mihomoLogsWs: WebSocket | null = null
 let logsRetry = 10
-let logsRetryTimer: NodeJS.Timeout | null = null
+let logsReconnectTimer: NodeJS.Timeout | null = null
 let mihomoConnectionsWs: WebSocket | null = null
 let connectionsRetry = 10
-let connectionsRetryTimer: NodeJS.Timeout | null = null
+let connectionsReconnectTimer: NodeJS.Timeout | null = null
+let axiosMode: 'direct' | 'service' | null = null
+const wsReconnectDelay = 1000
+
+function isWebSocketActive(ws: WebSocket | null): boolean {
+  return ws?.readyState === WebSocket.OPEN || ws?.readyState === WebSocket.CONNECTING
+}
+
+function closeWebSocket(ws: WebSocket): void {
+  ws.removeAllListeners()
+  ws.on('error', () => {})
+  if (isWebSocketActive(ws)) {
+    ws.close()
+  }
+}
 
 export const getAxios = async (force: boolean = false): Promise<AxiosInstance> => {
-  const currentSocketPath = mihomoIpcPath()
+  const { corePermissionMode = 'elevated' } = await getAppConfig()
+  const nextMode = corePermissionMode === 'service' ? 'service' : 'direct'
+  const currentSocketPath = nextMode === 'service' ? serviceIpcPath() : mihomoIpcPath()
+  const currentBaseURL =
+    nextMode === 'service' ? 'http://localhost/core/controller' : 'http://localhost'
 
-  if (axiosIns && axiosIns.defaults.socketPath !== currentSocketPath) {
+  if (
+    axiosIns &&
+    (axiosIns.defaults.socketPath !== currentSocketPath ||
+      axiosIns.defaults.baseURL !== currentBaseURL ||
+      axiosMode !== nextMode)
+  ) {
     force = true
   }
 
   if (axiosIns && !force) return axiosIns
 
-  axiosIns = axios.create({
-    baseURL: `http://localhost`,
-    socketPath: currentSocketPath,
-    timeout: 15000
-  })
+  axiosMode = nextMode
+  if (nextMode === 'service') {
+    axiosIns = createSignedServiceAxios(currentBaseURL)
+  } else {
+    axiosIns = axios.create({
+      baseURL: currentBaseURL,
+      socketPath: currentSocketPath,
+      timeout: 15000
+    })
 
-  axiosIns.interceptors.response.use(
-    (response) => {
-      return response.data
-    },
-    (error) => {
-      if (error.response && error.response.data) {
-        return Promise.reject(error.response.data)
+    axiosIns.interceptors.response.use(
+      (response) => {
+        return response.data
+      },
+      (error) => {
+        if (error.response && error.response.data) {
+          return Promise.reject(error.response.data)
+        }
+        return Promise.reject(error)
       }
-      return Promise.reject(error)
-    }
-  )
+    )
+  }
   return axiosIns
+}
+
+const mihomoWs = async (path: string): Promise<WebSocket> => {
+  const { corePermissionMode = 'elevated' } = await getAppConfig()
+  if (corePermissionMode !== 'service') {
+    return new WebSocket(`ws+unix:${mihomoIpcPath()}:${path}`)
+  }
+
+  const servicePath = `/core/controller${path}`
+  return new WebSocket(`ws+unix:${serviceIpcPath()}:${servicePath}`, {
+    headers: getServiceAuthHeaders('GET', servicePath)
+  })
 }
 
 export async function mihomoVersion(): Promise<ControllerVersion> {
@@ -237,34 +278,31 @@ export const mihomoUpgradeUI = async (): Promise<void> => {
 }
 
 export const startMihomoTraffic = async (): Promise<void> => {
+  if (isWebSocketActive(mihomoTrafficWs)) return
+  if (trafficReconnectTimer) {
+    clearTimeout(trafficReconnectTimer)
+    trafficReconnectTimer = null
+  }
   await mihomoTraffic()
 }
 
 export const stopMihomoTraffic = (): void => {
-  if (trafficRetryTimer) {
-    clearTimeout(trafficRetryTimer)
-    trafficRetryTimer = null
+  trafficRetry = 10
+  if (trafficReconnectTimer) {
+    clearTimeout(trafficReconnectTimer)
+    trafficReconnectTimer = null
   }
   if (mihomoTrafficWs) {
-    mihomoTrafficWs.removeAllListeners()
-    if (mihomoTrafficWs.readyState === WebSocket.OPEN) {
-      mihomoTrafficWs.close()
-    }
+    closeWebSocket(mihomoTrafficWs)
     mihomoTrafficWs = null
   }
 }
 
-// 指数退避: 1s, 2s, 4s, 8s, 16s, 后续保持 30s
-function getRetryDelay(retryCount: number, maxRetry: number): number {
-  const attempt = maxRetry - retryCount
-  return Math.min(1000 * Math.pow(2, attempt), 30000)
-}
-
 const mihomoTraffic = async (): Promise<void> => {
-  stopMihomoTraffic()
-  mihomoTrafficWs = new WebSocket(`ws+unix:${mihomoIpcPath()}:/traffic`)
+  const ws = await mihomoWs('/traffic')
+  mihomoTrafficWs = ws
 
-  mihomoTrafficWs.onmessage = async (e): Promise<void> => {
+  ws.onmessage = async (e): Promise<void> => {
     const data = e.data as string
     const json = JSON.parse(data) as ControllerTraffic
     trafficRetry = 10
@@ -284,46 +322,50 @@ const mihomoTraffic = async (): Promise<void> => {
     }
   }
 
-  mihomoTrafficWs.onclose = (): void => {
-    if (trafficRetry) {
-      const delay = getRetryDelay(trafficRetry, 10)
-      trafficRetry--
-      trafficRetryTimer = setTimeout(() => mihomoTraffic(), delay)
-    }
-  }
-
-  mihomoTrafficWs.onerror = (error): void => {
-    console.warn('[WebSocket] Traffic connection error:', error.message || 'Unknown error')
-    if (mihomoTrafficWs) {
-      mihomoTrafficWs.close()
+  ws.onclose = (): void => {
+    if (mihomoTrafficWs === ws) {
       mihomoTrafficWs = null
     }
+    if (mihomoTrafficWs !== null || !trafficRetry || trafficReconnectTimer) return
+
+    trafficRetry--
+    trafficReconnectTimer = setTimeout(() => {
+      trafficReconnectTimer = null
+      mihomoTraffic().catch(() => {})
+    }, wsReconnectDelay)
+  }
+
+  ws.onerror = (): void => {
+    ws.close()
   }
 }
 
 export const startMihomoMemory = async (): Promise<void> => {
+  if (isWebSocketActive(mihomoMemoryWs)) return
+  if (memoryReconnectTimer) {
+    clearTimeout(memoryReconnectTimer)
+    memoryReconnectTimer = null
+  }
   await mihomoMemory()
 }
 
 export const stopMihomoMemory = (): void => {
-  if (memoryRetryTimer) {
-    clearTimeout(memoryRetryTimer)
-    memoryRetryTimer = null
+  memoryRetry = 10
+  if (memoryReconnectTimer) {
+    clearTimeout(memoryReconnectTimer)
+    memoryReconnectTimer = null
   }
   if (mihomoMemoryWs) {
-    mihomoMemoryWs.removeAllListeners()
-    if (mihomoMemoryWs.readyState === WebSocket.OPEN) {
-      mihomoMemoryWs.close()
-    }
+    closeWebSocket(mihomoMemoryWs)
     mihomoMemoryWs = null
   }
 }
 
 const mihomoMemory = async (): Promise<void> => {
-  stopMihomoMemory()
-  mihomoMemoryWs = new WebSocket(`ws+unix:${mihomoIpcPath()}:/memory`)
+  const ws = await mihomoWs('/memory')
+  mihomoMemoryWs = ws
 
-  mihomoMemoryWs.onmessage = (e): void => {
+  ws.onmessage = (e): void => {
     const data = e.data as string
     memoryRetry = 10
     try {
@@ -333,37 +375,41 @@ const mihomoMemory = async (): Promise<void> => {
     }
   }
 
-  mihomoMemoryWs.onclose = (): void => {
-    if (memoryRetry) {
-      const delay = getRetryDelay(memoryRetry, 10)
-      memoryRetry--
-      memoryRetryTimer = setTimeout(() => mihomoMemory(), delay)
-    }
-  }
-
-  mihomoMemoryWs.onerror = (error): void => {
-    console.warn('[WebSocket] Memory connection error:', error.message || 'Unknown error')
-    if (mihomoMemoryWs) {
-      mihomoMemoryWs.close()
+  ws.onclose = (): void => {
+    if (mihomoMemoryWs === ws) {
       mihomoMemoryWs = null
     }
+    if (mihomoMemoryWs !== null || !memoryRetry || memoryReconnectTimer) return
+
+    memoryRetry--
+    memoryReconnectTimer = setTimeout(() => {
+      memoryReconnectTimer = null
+      mihomoMemory().catch(() => {})
+    }, wsReconnectDelay)
+  }
+
+  ws.onerror = (): void => {
+    ws.close()
   }
 }
 
 export const startMihomoLogs = async (): Promise<void> => {
+  if (isWebSocketActive(mihomoLogsWs)) return
+  if (logsReconnectTimer) {
+    clearTimeout(logsReconnectTimer)
+    logsReconnectTimer = null
+  }
   await mihomoLogs()
 }
 
 export const stopMihomoLogs = (): void => {
-  if (logsRetryTimer) {
-    clearTimeout(logsRetryTimer)
-    logsRetryTimer = null
+  logsRetry = 10
+  if (logsReconnectTimer) {
+    clearTimeout(logsReconnectTimer)
+    logsReconnectTimer = null
   }
   if (mihomoLogsWs) {
-    mihomoLogsWs.removeAllListeners()
-    if (mihomoLogsWs.readyState === WebSocket.OPEN) {
-      mihomoLogsWs.close()
-    }
+    closeWebSocket(mihomoLogsWs)
     mihomoLogsWs = null
   }
 }
@@ -374,14 +420,14 @@ export const restartMihomoLogs = async (): Promise<void> => {
 }
 
 const mihomoLogs = async (): Promise<void> => {
-  stopMihomoLogs()
   const { realtimeLogLevel } = await getAppConfig()
   const { 'log-level': logLevel = 'info' } = await getControledMihomoConfig()
   const activeLogLevel = realtimeLogLevel ?? logLevel
 
-  mihomoLogsWs = new WebSocket(`ws+unix:${mihomoIpcPath()}:/logs?level=${activeLogLevel}`)
+  const ws = await mihomoWs(`/logs?level=${activeLogLevel}`)
+  mihomoLogsWs = ws
 
-  mihomoLogsWs.onmessage = (e): void => {
+  ws.onmessage = (e): void => {
     const data = e.data as string
     logsRetry = 10
     try {
@@ -391,37 +437,41 @@ const mihomoLogs = async (): Promise<void> => {
     }
   }
 
-  mihomoLogsWs.onclose = (): void => {
-    if (logsRetry) {
-      const delay = getRetryDelay(logsRetry, 10)
-      logsRetry--
-      logsRetryTimer = setTimeout(() => mihomoLogs(), delay)
-    }
-  }
-
-  mihomoLogsWs.onerror = (error): void => {
-    console.warn('[WebSocket] Logs connection error:', error.message || 'Unknown error')
-    if (mihomoLogsWs) {
-      mihomoLogsWs.close()
+  ws.onclose = (): void => {
+    if (mihomoLogsWs === ws) {
       mihomoLogsWs = null
     }
+    if (mihomoLogsWs !== null || !logsRetry || logsReconnectTimer) return
+
+    logsRetry--
+    logsReconnectTimer = setTimeout(() => {
+      logsReconnectTimer = null
+      mihomoLogs().catch(() => {})
+    }, wsReconnectDelay)
+  }
+
+  ws.onerror = (): void => {
+    ws.close()
   }
 }
 
 export const startMihomoConnections = async (): Promise<void> => {
+  if (isWebSocketActive(mihomoConnectionsWs)) return
+  if (connectionsReconnectTimer) {
+    clearTimeout(connectionsReconnectTimer)
+    connectionsReconnectTimer = null
+  }
   await mihomoConnections()
 }
 
 export const stopMihomoConnections = (): void => {
-  if (connectionsRetryTimer) {
-    clearTimeout(connectionsRetryTimer)
-    connectionsRetryTimer = null
+  connectionsRetry = 10
+  if (connectionsReconnectTimer) {
+    clearTimeout(connectionsReconnectTimer)
+    connectionsReconnectTimer = null
   }
   if (mihomoConnectionsWs) {
-    mihomoConnectionsWs.removeAllListeners()
-    if (mihomoConnectionsWs.readyState === WebSocket.OPEN) {
-      mihomoConnectionsWs.close()
-    }
+    closeWebSocket(mihomoConnectionsWs)
     mihomoConnectionsWs = null
   }
 }
@@ -432,13 +482,11 @@ export const restartMihomoConnections = async (): Promise<void> => {
 }
 
 const mihomoConnections = async (): Promise<void> => {
-  stopMihomoConnections()
   const { connectionInterval = 500 } = await getAppConfig()
-  mihomoConnectionsWs = new WebSocket(
-    `ws+unix:${mihomoIpcPath()}:/connections?interval=${connectionInterval}`
-  )
+  const ws = await mihomoWs(`/connections?interval=${connectionInterval}`)
+  mihomoConnectionsWs = ws
 
-  mihomoConnectionsWs.onmessage = (e): void => {
+  ws.onmessage = (e): void => {
     const data = e.data as string
     connectionsRetry = 10
     try {
@@ -448,19 +496,20 @@ const mihomoConnections = async (): Promise<void> => {
     }
   }
 
-  mihomoConnectionsWs.onclose = (): void => {
-    if (connectionsRetry) {
-      const delay = getRetryDelay(connectionsRetry, 10)
-      connectionsRetry--
-      connectionsRetryTimer = setTimeout(() => mihomoConnections(), delay)
-    }
-  }
-
-  mihomoConnectionsWs.onerror = (error): void => {
-    console.warn('[WebSocket] Connections error:', error.message || 'Unknown error')
-    if (mihomoConnectionsWs) {
-      mihomoConnectionsWs.close()
+  ws.onclose = (): void => {
+    if (mihomoConnectionsWs === ws) {
       mihomoConnectionsWs = null
     }
+    if (mihomoConnectionsWs !== null || !connectionsRetry || connectionsReconnectTimer) return
+
+    connectionsRetry--
+    connectionsReconnectTimer = setTimeout(() => {
+      connectionsReconnectTimer = null
+      mihomoConnections().catch(() => {})
+    }, wsReconnectDelay)
+  }
+
+  ws.onerror = (): void => {
+    ws.close()
   }
 }

@@ -2,7 +2,6 @@ import { Button, Select, SelectItem, Switch, Tab, Tabs } from '@heroui/react'
 import BasePage from '@renderer/components/base/base-page'
 import SettingCard from '@renderer/components/base/base-setting-card'
 import SettingItem from '@renderer/components/base/base-setting-item'
-import ConfirmModal, { ConfirmButton } from '@renderer/components/base/base-confirm'
 import PermissionModal from '@renderer/components/mihomo/permission-modal'
 import ServiceModal from '@renderer/components/mihomo/service-modal'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
@@ -17,9 +16,6 @@ import {
   restartCore,
   revokeCorePermission,
   deleteElevateTask,
-  checkElevateTask,
-  relaunchApp,
-  notDialogQuit,
   installService,
   uninstallService,
   startService,
@@ -41,17 +37,15 @@ const Mihomo: React.FC = () => {
   const {
     core = 'mihomo',
     corePermissionMode = 'elevated',
-    coreStartupMode = 'post-up'
+    coreStartupMode = 'post-up',
+    mihomoCpuPriority = 'PRIORITY_NORMAL'
   } = appConfig || {}
   const { controledMihomoConfig, patchControledMihomoConfig } = useControledMihomoConfig()
   const { ipv6 } = controledMihomoConfig || {}
 
   const [upgrading, setUpgrading] = useState(false)
-  const [showGrantConfirm, setShowGrantConfirm] = useState(false)
-  const [showUnGrantConfirm, setShowUnGrantConfirm] = useState(false)
   const [showPermissionModal, setShowPermissionModal] = useState(false)
   const [showServiceModal, setShowServiceModal] = useState(false)
-  const [pendingPermissionMode, setPendingPermissionMode] = useState<string>('')
   const [systemCorePaths, setSystemCorePaths] = useState<string[]>(getSystemCorePathsCache() || [])
   const [loadingPaths, setLoadingPaths] = useState(false)
 
@@ -121,99 +115,16 @@ const Mihomo: React.FC = () => {
   const handlePermissionModeChange = async (key: string): Promise<void> => {
     if (key === corePermissionMode) return
 
-    if (platform === 'win32') {
-      if (key !== 'elevated') {
-        if (await checkElevateTask()) {
-          setPendingPermissionMode(key)
-          setShowUnGrantConfirm(true)
-        } else {
-          patchAppConfig({ corePermissionMode: key as 'elevated' | 'service' })
-        }
-      } else if (key === 'elevated') {
-        setPendingPermissionMode(key)
-        setShowGrantConfirm(true)
-      }
-    } else {
-      patchAppConfig({ corePermissionMode: key as 'elevated' | 'service' })
+    try {
+      await patchAppConfig({ corePermissionMode: key as 'elevated' | 'service' })
+      await restartCore()
+    } catch (e) {
+      alert(e)
     }
   }
 
-  const unGrantButtons: ConfirmButton[] = [
-    {
-      key: 'cancel',
-      text: t('common:actions.cancel'),
-      variant: 'light',
-      onPress: () => {}
-    },
-    {
-      key: 'confirm',
-      text: platform === 'win32' ? t('cancelWithoutRestart') : t('confirmRevoke'),
-      color: 'warning',
-      onPress: async () => {
-        try {
-          if (platform === 'win32') {
-            await deleteElevateTask()
-            new Notification(t('taskCanceled'))
-          } else {
-            await revokeCorePermission()
-            new Notification(t('permissionRevoked'))
-          }
-          await patchAppConfig({
-            corePermissionMode: pendingPermissionMode as 'elevated' | 'service'
-          })
-
-          await restartCore()
-        } catch (e) {
-          alert(e)
-        }
-      }
-    },
-    ...(platform === 'win32'
-      ? [
-          {
-            key: 'cancel-and-restart',
-            text: t('cancelAndRestart'),
-            color: 'danger' as const,
-            onPress: async () => {
-              try {
-                await deleteElevateTask()
-                new Notification(t('taskCanceled'))
-                await patchAppConfig({
-                  corePermissionMode: pendingPermissionMode as 'elevated' | 'service'
-                })
-                await relaunchApp()
-              } catch (e) {
-                alert(e)
-              }
-            }
-          }
-        ]
-      : [])
-  ]
-
   return (
     <BasePage title={t('title')} contentClassName="no-scrollbar">
-      {showGrantConfirm && (
-        <ConfirmModal
-          onChange={setShowGrantConfirm}
-          title={t('confirmTaskSchedule')}
-          description={t('confirmTaskScheduleDesc')}
-          onConfirm={async () => {
-            await patchAppConfig({
-              corePermissionMode: pendingPermissionMode as 'elevated' | 'service'
-            })
-            await notDialogQuit()
-          }}
-        />
-      )}
-      {showUnGrantConfirm && (
-        <ConfirmModal
-          onChange={setShowUnGrantConfirm}
-          title={t('confirmCancelTask')}
-          description={t('confirmCancelTaskDesc')}
-          buttons={unGrantButtons}
-        />
-      )}
       {showPermissionModal && (
         <PermissionModal
           onChange={setShowPermissionModal}
@@ -247,6 +158,10 @@ const Mihomo: React.FC = () => {
           }}
           onUninstall={async () => {
             await uninstallService()
+            if (corePermissionMode === 'service') {
+              await patchAppConfig({ corePermissionMode: 'elevated' })
+              await restartCore()
+            }
             new Notification(t('serviceUninstallSuccess'))
           }}
           onStart={async () => {
@@ -324,12 +239,43 @@ const Mihomo: React.FC = () => {
             )}
           </SettingItem>
         )}
+        <SettingItem compatKey="legacy" title={t('settings:advanced.corePriority')} divider>
+          <Select
+            classNames={{ trigger: 'data-[hover=true]:bg-default-200' }}
+            className="w-37.5"
+            size="sm"
+            selectedKeys={new Set([mihomoCpuPriority])}
+            disallowEmptySelection={true}
+            onSelectionChange={async (v) => {
+              try {
+                await patchAppConfig({
+                  mihomoCpuPriority: v.currentKey as Priority
+                })
+                await restartCore()
+              } catch (e) {
+                alert(e)
+              }
+            }}
+          >
+            <SelectItem key="PRIORITY_HIGHEST">
+              {t('settings:advanced.priority.realtime')}
+            </SelectItem>
+            <SelectItem key="PRIORITY_HIGH">{t('settings:advanced.priority.high')}</SelectItem>
+            <SelectItem key="PRIORITY_ABOVE_NORMAL">
+              {t('settings:advanced.priority.aboveNormal')}
+            </SelectItem>
+            <SelectItem key="PRIORITY_NORMAL">{t('settings:advanced.priority.normal')}</SelectItem>
+            <SelectItem key="PRIORITY_BELOW_NORMAL">
+              {t('settings:advanced.priority.belowNormal')}
+            </SelectItem>
+            <SelectItem key="PRIORITY_LOW">{t('settings:advanced.priority.low')}</SelectItem>
+          </Select>
+        </SettingItem>
         <SettingItem compatKey="legacy" title={t('runMode')} divider>
           <Tabs
             size="sm"
             color="primary"
             selectedKey={corePermissionMode}
-            disabledKeys={['service']}
             onSelectionChange={(key) => handlePermissionModeChange(key as string)}
           >
             <Tab
@@ -339,17 +285,20 @@ const Mihomo: React.FC = () => {
             <Tab key="service" title={t('runModeService')} />
           </Tabs>
         </SettingItem>
-        <SettingItem compatKey="legacy" title={t('startupDetectionMode')} divider>
-          <Tabs
-            size="sm"
-            color="primary"
-            selectedKey={coreStartupMode}
-            onSelectionChange={(key) => handleConfigChangeWithRestart('coreStartupMode', key)}
-          >
-            <Tab key="post-up" title={t('startupDetectionPostUp')} />
-            <Tab key="log" title={t('startupDetectionLog')} />
-          </Tabs>
-        </SettingItem>
+
+        {corePermissionMode !== 'service' && (
+          <SettingItem compatKey="legacy" title={t('startupDetectionMode')} divider>
+            <Tabs
+              size="sm"
+              color="primary"
+              selectedKey={coreStartupMode}
+              onSelectionChange={(key) => handleConfigChangeWithRestart('coreStartupMode', key)}
+            >
+              <Tab key="post-up" title={t('startupDetectionPostUp')} />
+              <Tab key="log" title={t('startupDetectionLog')} />
+            </Tabs>
+          </SettingItem>
+        )}
         <SettingItem
           compatKey="legacy"
           title={platform === 'win32' ? t('taskStatus') : t('authStatus')}
