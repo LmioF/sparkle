@@ -2,11 +2,13 @@ import crypto from 'crypto'
 import { t } from '../utils/i18n'
 
 export interface KeyPair {
+  keyId: string
   publicKey: string
   privateKey: string
 }
 
 export class KeyManager {
+  private keyId: string | null = null
   private publicKey: string | null = null
   private privateKey: string | null = null
 
@@ -31,18 +33,33 @@ export class KeyManager {
       .replace('-----END PUBLIC KEY-----', '')
       .replace(/[\n\r\s]/g, '')
 
+    const keyId = computeKeyId(publicKey)
+    this.keyId = keyId
     this.publicKey = publicKey
     this.privateKey = privKeyPem
 
-    return { publicKey, privateKey: privKeyPem }
+    return { keyId, publicKey, privateKey: privKeyPem }
   }
 
-  setKeyPair(publicKey: string, privateKey: string): void {
+  setKeyPair(publicKey: string, privateKey: string, keyId?: string): void {
     if (!publicKey || !privateKey || publicKey.trim() === '' || privateKey.trim() === '') {
       throw new Error(t('main.errors.keyCannotBeEmpty'))
     }
+    const computedKeyId = computeKeyId(publicKey)
+    const normalizedKeyId = keyId?.trim() || computedKeyId
+    if (normalizedKeyId !== computedKeyId) {
+      throw new Error('密钥 ID 与公钥不匹配')
+    }
+    this.keyId = normalizedKeyId
     this.publicKey = publicKey
     this.privateKey = privateKey
+  }
+
+  getKeyID(): string {
+    if (!this.keyId) {
+      throw new Error('密钥 ID 未初始化')
+    }
+    return this.keyId
   }
 
   getPublicKey(): string {
@@ -75,6 +92,7 @@ export class KeyManager {
 
   isInitialized(): boolean {
     return (
+      this.keyId !== null &&
       this.publicKey !== null &&
       this.privateKey !== null &&
       this.publicKey.trim() !== '' &&
@@ -83,9 +101,24 @@ export class KeyManager {
   }
 
   clear(): void {
+    this.keyId = null
     this.publicKey = null
     this.privateKey = null
   }
+}
+
+export function computeKeyId(publicKey: string): string {
+  const normalizedKey = publicKey.trim()
+  if (!normalizedKey) {
+    throw new Error('公钥不能为空')
+  }
+
+  const keyBytes = Buffer.from(normalizedKey, 'base64')
+  if (keyBytes.length === 0) {
+    throw new Error('公钥格式无效')
+  }
+
+  return crypto.createHash('sha256').update(keyBytes).digest('hex')
 }
 
 export function generateKeyPair(): KeyPair {
