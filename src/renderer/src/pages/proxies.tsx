@@ -27,6 +27,7 @@ import { runDelayTestsWithConcurrency } from '@renderer/utils/delay-test'
 type ProxyLike = ControllerProxiesDetail | ControllerGroupDetail
 
 const EMPTY_PROXIES: ProxyLike[] = []
+const EMPTY_GROUPS: ControllerMixedGroup[] = []
 
 function getProxyDelay(proxy: ProxyLike): number {
   return proxy.history.length > 0 ? proxy.history[proxy.history.length - 1].delay : -1
@@ -184,7 +185,8 @@ const Proxies: React.FC = () => {
   const { t } = useTranslation('proxy')
   const { controledMihomoConfig } = useControledMihomoConfig()
   const { mode = 'rule' } = controledMihomoConfig || {}
-  const { groups = [], mutate } = useGroups()
+  const { groups: fetchedGroups, mutate } = useGroups()
+  const groups = fetchedGroups ?? EMPTY_GROUPS
   const { isOpenMap, searchValueMap, setIsOpen, setSearchValue, syncGroups } = useProxiesState()
   const { appConfig } = useAppConfig()
   const {
