@@ -159,6 +159,61 @@ function isUserCancelledError(error: unknown): boolean {
   )
 }
 
+interface ServiceLogEntry {
+  msg?: string
+  message?: string
+  error?: string
+  status?: {
+    state?: string
+    error?: string
+  }
+}
+
+function parseServiceLog(output: string): ServiceLogEntry | null {
+  let last: ServiceLogEntry | null = null
+  let lines: string[] = []
+
+  for (const line of output.split(/\r?\n/)) {
+    if (line.trim() === '{') {
+      lines = [line]
+      continue
+    }
+    if (lines.length === 0) continue
+
+    lines.push(line)
+    if (line.trim() !== '}') continue
+
+    try {
+      last = JSON.parse(lines.join('\n')) as ServiceLogEntry
+    } catch {
+      // ignore non-service JSON fragments from command wrappers
+    }
+    lines = []
+  }
+
+  return last
+}
+
+function serviceCommandOutput(value: unknown): string {
+  if (typeof value === 'object' && value) {
+    const output = value as { stdout?: unknown; stderr?: unknown }
+    if (output.stdout != null || output.stderr != null) {
+      return [String(output.stdout ?? ''), String(output.stderr ?? '')].join('\n')
+    }
+  }
+  return value instanceof Error ? value.message : String(value)
+}
+
+function serviceCommandErrorMessage(error: unknown): string {
+  const entry = parseServiceLog(serviceCommandOutput(error))
+  const message = entry?.msg ?? entry?.message
+  const detail = entry?.status?.error ?? entry?.error
+  if (message && detail && message !== detail) {
+    return `${message}：${detail}`
+  }
+  return detail || message || (error instanceof Error ? error.message : String(error))
+}
+
 async function getAuthorizedPrincipalArgs(): Promise<string[]> {
   if (process.platform === 'win32') {
     const { stdout } = await execFilePromise(
@@ -236,7 +291,7 @@ export async function initService(): Promise<void> {
     }
     throw new Error(
       t('main.errors.serviceInitFailed', {
-        error: error instanceof Error ? error.message : String(error)
+        error: serviceCommandErrorMessage(error)
       })
     )
   }
@@ -255,7 +310,7 @@ export async function installService(): Promise<void> {
     }
     throw new Error(
       t('main.errors.serviceInstallFailed', {
-        error: error instanceof Error ? error.message : String(error)
+        error: serviceCommandErrorMessage(error)
       })
     )
   }
@@ -272,7 +327,7 @@ export async function uninstallService(): Promise<void> {
     }
     throw new Error(
       t('main.errors.serviceUninstallFailed', {
-        error: error instanceof Error ? error.message : String(error)
+        error: serviceCommandErrorMessage(error)
       })
     )
   }
@@ -289,7 +344,7 @@ export async function startService(): Promise<void> {
     }
     throw new Error(
       t('main.errors.serviceStartFailed', {
-        error: error instanceof Error ? error.message : String(error)
+        error: serviceCommandErrorMessage(error)
       })
     )
   }
@@ -306,7 +361,7 @@ export async function stopService(): Promise<void> {
     }
     throw new Error(
       t('main.errors.serviceStopFailed', {
-        error: error instanceof Error ? error.message : String(error)
+        error: serviceCommandErrorMessage(error)
       })
     )
   }
@@ -323,7 +378,7 @@ export async function restartService(): Promise<void> {
     }
     throw new Error(
       t('main.errors.serviceRestartFailed', {
-        error: error instanceof Error ? error.message : String(error)
+        error: serviceCommandErrorMessage(error)
       })
     )
   }
@@ -335,38 +390,40 @@ export async function serviceStatus(): Promise<
   const execPath = servicePath()
 
   try {
-    const { stderr } = await execFilePromise(execPath, ['service', 'status'])
-    if (stderr.includes('the service is not installed')) {
+    const { stdout, stderr } = await execFilePromise(execPath, ['service', 'status'])
+    if (parseServiceLog(`${stdout}\n${stderr}`)?.status?.state === 'not-installed') {
       return 'not-installed'
-    } else {
+    }
+    try {
+      await ping()
       try {
-        await ping()
-        try {
-          await test()
-          return 'running'
-        } catch (error) {
-          if (
-            error instanceof ServiceAPIError &&
-            error.status !== undefined &&
-            [401, 403, 409, 503].includes(error.status)
-          ) {
-            return 'need-init'
-          }
-          return 'unknown'
-        }
-      } catch (e) {
-        const errorMsg = e instanceof Error ? e.message : String(e)
+        await test()
+        return 'running'
+      } catch (error) {
         if (
-          errorMsg.includes('EACCES') ||
-          errorMsg.includes('permission denied') ||
-          errorMsg.includes('access is denied')
+          error instanceof ServiceAPIError &&
+          error.status !== undefined &&
+          [401, 403, 409, 503].includes(error.status)
         ) {
           return 'need-init'
         }
-        return 'stopped'
+        return 'unknown'
       }
+    } catch (e) {
+      const errorMsg = e instanceof Error ? e.message : String(e)
+      if (
+        errorMsg.includes('EACCES') ||
+        errorMsg.includes('permission denied') ||
+        errorMsg.includes('access is denied')
+      ) {
+        return 'need-init'
+      }
+      return 'stopped'
     }
   } catch (error) {
+    if (parseServiceLog(serviceCommandOutput(error))?.status?.state === 'not-installed') {
+      return 'not-installed'
+    }
     return 'unknown'
   }
 }
