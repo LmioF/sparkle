@@ -1,12 +1,26 @@
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from '@heroui/react'
+import {
+  Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Spinner
+} from '@heroui/react'
 import React, { useEffect, useState } from 'react'
 import { BaseEditor } from '../base/base-editor-lazy'
 import { useTranslation } from '@renderer/hooks/useTranslation'
-import { getFileStr, saveFileStrWithElevation, setFileStr } from '@renderer/utils/ipc'
+import {
+  getFilePreviewStr,
+  getFileStr,
+  saveFileStrWithElevation,
+  setFileStr
+} from '@renderer/utils/ipc'
 import yaml from 'js-yaml'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import ConfirmModal from '../base/base-confirm'
 import { notify } from '@renderer/utils/notification'
+
 type Language = 'yaml' | 'javascript' | 'css' | 'json' | 'text'
 const FILE_PERMISSION_ELEVATION_REQUIRED = 'FILE_PERMISSION_ELEVATION_REQUIRED'
 
@@ -15,7 +29,7 @@ interface Props {
   path: string
   type: string
   title: string
-  privderType: string
+  providerType: string
   format?: string
 }
 
@@ -23,7 +37,7 @@ function getDefaultLanguage(format?: string): Language {
   return !format || format === 'YamlRule' ? 'yaml' : 'text'
 }
 
-function getViewerContent(fileContent: string, privderType: string, title: string): string {
+function getViewerContent(fileContent: string, providerType: string, title: string): string {
   try {
     const parsedYaml = yaml.load(fileContent)
     if (!parsedYaml || typeof parsedYaml !== 'object') {
@@ -31,14 +45,14 @@ function getViewerContent(fileContent: string, privderType: string, title: strin
     }
 
     const yamlObj = parsedYaml as Record<string, unknown>
-    const payload = yamlObj[privderType]?.[title]?.payload
+    const payload = yamlObj[providerType]?.[title]?.payload
     if (payload) {
       return yaml.dump(
-        privderType === 'proxy-providers' ? { proxies: payload } : { rules: payload }
+        providerType === 'proxy-providers' ? { proxies: payload } : { rules: payload }
       )
     }
 
-    const targetObj = yamlObj[privderType]?.[title]
+    const targetObj = yamlObj[providerType]?.[title]
     return targetObj ? yaml.dump(targetObj) : fileContent
   } catch {
     return fileContent
@@ -46,13 +60,15 @@ function getViewerContent(fileContent: string, privderType: string, title: strin
 }
 
 const Viewer: React.FC<Props> = (props) => {
-  const { type, path, title, format, privderType, onClose } = props
+  const { type, path, title, format, providerType, onClose } = props
   const { t } = useTranslation('resource')
   const { appConfig: { disableAnimation = false } = {} } = useAppConfig()
   const [currData, setCurrData] = useState('')
   const [showPermissionConfirm, setShowPermissionConfirm] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const language = type === 'Inline' ? 'yaml' : getDefaultLanguage(format)
+  const editorLanguage = format === 'MrsRule' ? 'text' : language
 
   const save = async (elevated = false): Promise<void> => {
     setIsSaving(true)
@@ -70,14 +86,44 @@ const Viewer: React.FC<Props> = (props) => {
     }
   }
 
-  const getContent = async (): Promise<void> => {
-    const fileContent = await getFileStr(type === 'Inline' ? 'config.yaml' : path)
-    setCurrData(getViewerContent(fileContent, privderType, title))
-  }
-
   useEffect(() => {
-    getContent()
-  }, [format, path, privderType, title, type])
+    let canceled = false
+
+    if (type !== 'Inline' && !path) {
+      setIsLoading(true)
+      setCurrData('')
+      return () => {
+        canceled = true
+      }
+    }
+
+    const loadContent = async (): Promise<void> => {
+      setIsLoading(true)
+      try {
+        const fileContent = await (format === 'MrsRule'
+          ? getFilePreviewStr(path, format)
+          : getFileStr(type === 'Inline' ? 'config.yaml' : path))
+
+        if (canceled) return
+        setCurrData(
+          format === 'MrsRule' ? fileContent : getViewerContent(fileContent, providerType, title)
+        )
+      } catch (e) {
+        if (!canceled) {
+          notify(e, { variant: 'danger' })
+        }
+      } finally {
+        if (!canceled) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    loadContent()
+    return () => {
+      canceled = true
+    }
+  }, [format, path, providerType, title, type])
 
   return (
     <Modal
@@ -118,18 +164,24 @@ const Viewer: React.FC<Props> = (props) => {
       <ModalContent className="h-full w-[calc(100%-100px)]">
         <ModalHeader className="flex pb-0 app-drag">{title}</ModalHeader>
         <ModalBody className="h-full">
-          <BaseEditor
-            language={language}
-            value={currData}
-            readOnly={type != 'File'}
-            onChange={(value) => setCurrData(value)}
-          />
+          {isLoading ? (
+            <div className="flex h-full items-center justify-center">
+              <Spinner size="lg" />
+            </div>
+          ) : (
+            <BaseEditor
+              language={editorLanguage}
+              value={currData}
+              readOnly={type !== 'File'}
+              onChange={(value) => setCurrData(value)}
+            />
+          )}
         </ModalBody>
         <ModalFooter className="pt-0">
           <Button size="sm" variant="light" onPress={onClose}>
             {t('common:actions.close')}
           </Button>
-          {type == 'File' && (
+          {type === 'File' && !isLoading && (
             <Button size="sm" color="primary" isLoading={isSaving} onPress={() => save()}>
               {t('common:actions.save')}
             </Button>

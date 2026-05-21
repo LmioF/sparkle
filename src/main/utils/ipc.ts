@@ -38,6 +38,7 @@ import {
   changeCurrentProfile,
   getProfileStr,
   getFileStr,
+  getFilePreviewStr,
   setFileStr,
   saveFileStrWithElevation,
   setProfileStr,
@@ -279,6 +280,9 @@ export function registerIpcMainHandlers(): void {
   ipcMain.handle('getProfileItem', (_e, id) => ipcErrorWrapper(getProfileItem)(id))
   ipcMain.handle('getProfileStr', (_e, id) => ipcErrorWrapper(getProfileStr)(id))
   ipcMain.handle('getFileStr', (_e, path) => ipcErrorWrapper(getFileStr)(path))
+  ipcMain.handle('getFilePreviewStr', (_e, path, format) =>
+    ipcErrorWrapper(getFilePreviewStr)(path, format)
+  )
   ipcMain.handle('setFileStr', (_e, path, str) => ipcErrorWrapper(setFileStr)(path, str))
   ipcMain.handle('saveFileStrWithElevation', (_e, path, str) =>
     ipcErrorWrapper(saveFileStrWithElevation)(path, str)
@@ -422,7 +426,7 @@ export function registerIpcMainHandlers(): void {
     mainWindow?.webContents.openDevTools()
   })
   ipcMain.handle('createHeapSnapshot', () => {
-    v8.writeHeapSnapshot(path.join(logDir(), `${Date.now()}.heapsnapshot`))
+    return v8.writeHeapSnapshot(path.join(logDir(), `${Date.now()}.heapsnapshot`))
   })
   ipcMain.handle('getUserAgent', () => ipcErrorWrapper(getUserAgent)())
   ipcMain.handle('getAppName', (_e, appPath) => ipcErrorWrapper(getAppName)(appPath))

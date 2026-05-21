@@ -17,6 +17,8 @@ import { MdEditDocument } from 'react-icons/md'
 import dayjs from 'dayjs'
 import { notify } from '@renderer/utils/notification'
 
+const LARGE_RULE_PREVIEW_THRESHOLD = 10000
+
 const RuleProvider: React.FC = () => {
   const { t } = useTranslation('resource')
   const [showDetails, setShowDetails] = useState({
@@ -25,26 +27,34 @@ const RuleProvider: React.FC = () => {
     type: '',
     title: '',
     format: '',
-    privderType: ''
+    providerType: ''
   })
   useEffect(() => {
-    if (showDetails.title) {
-      const fetchProviderPath = async (name: string): Promise<void> => {
-        try {
-          const providers = await getRuntimeConfig()
-          const provider = providers?.['rule-providers']?.[name] as ProxyProviderConfig
-          if (provider) {
-            setShowDetails((prev) => ({
-              ...prev,
-              show: true,
-              path: provider?.path || `rules/${getHash(provider?.url || '')}`
-            }))
-          }
-        } catch {
-          setShowDetails((prev) => ({ ...prev, path: '' }))
+    if (!showDetails.title) return
+
+    let canceled = false
+    const fetchProviderPath = async (name: string): Promise<void> => {
+      try {
+        const providers = await getRuntimeConfig()
+        const provider = providers?.['rule-providers']?.[name] as ProxyProviderConfig
+        if (canceled) return
+        if (provider) {
+          setShowDetails((prev) => ({
+            ...prev,
+            show: true,
+            path: provider?.path || `rules/${getHash(provider?.url || '')}`
+          }))
+        } else {
+          setShowDetails((prev) => ({ ...prev, show: true, path: name }))
         }
+      } catch {
+        if (canceled) return
+        setShowDetails((prev) => ({ ...prev, show: true, path: name }))
       }
-      fetchProviderPath(showDetails.title)
+    }
+    fetchProviderPath(showDetails.title)
+    return () => {
+      canceled = true
     }
   }, [showDetails.title])
 
@@ -89,6 +99,36 @@ const RuleProvider: React.FC = () => {
     }
   }
 
+  const openProviderDetails = (provider: ControllerRuleProviderDetail): void => {
+    setShowDetails({
+      show: true,
+      providerType: 'rule-providers',
+      path: '',
+      type: provider.vehicleType,
+      title: provider.name,
+      format: provider.format
+    })
+  }
+
+  const onOpenProviderDetails = (provider: ControllerRuleProviderDetail): void => {
+    if (provider.ruleCount <= LARGE_RULE_PREVIEW_THRESHOLD) {
+      openProviderDetails(provider)
+      return
+    }
+
+    notify(t('largeRulePreviewTitle'), {
+      actionProps: {
+        children: t('continueOpen'),
+        onPress: () => openProviderDetails(provider),
+        variant: 'secondary'
+      },
+      body: t('largeRulePreviewBody', { name: provider.name, count: provider.ruleCount }),
+      forceToast: true,
+      timeout: 12000,
+      variant: 'warning'
+    })
+  }
+
   if (!providers.length) {
     return null
   }
@@ -101,7 +141,7 @@ const RuleProvider: React.FC = () => {
           type={showDetails.type}
           title={showDetails.title}
           format={showDetails.format}
-          privderType={showDetails.privderType}
+          providerType={showDetails.providerType}
           onClose={() =>
             setShowDetails({
               show: false,
@@ -109,7 +149,7 @@ const RuleProvider: React.FC = () => {
               type: '',
               title: '',
               format: '',
-              privderType: ''
+              providerType: ''
             })
           }
         />
@@ -139,22 +179,13 @@ const RuleProvider: React.FC = () => {
           >
             <div className="flex h-8 leading-8 text-foreground-500">
               <div>{dayjs(provider.updatedAt).fromNow()}</div>
-              {provider.format !== 'MrsRule' && provider.vehicleType !== 'Inline' && (
+              {provider.vehicleType !== 'Inline' && (
                 <Button
                   isIconOnly
                   title={provider.vehicleType == 'File' ? t('edit') : t('view')}
                   className="ml-2"
                   size="sm"
-                  onPress={() => {
-                    setShowDetails({
-                      show: false,
-                      privderType: 'rule-providers',
-                      path: provider.name,
-                      type: provider.vehicleType,
-                      title: provider.name,
-                      format: provider.format
-                    })
-                  }}
+                  onPress={() => onOpenProviderDetails(provider)}
                 >
                   {provider.vehicleType == 'File' ? (
                     <MdEditDocument className={`text-lg`} />

@@ -66,6 +66,15 @@ const Actions: React.FC = () => {
     setUpdateDrawerReopenSignal((signal) => signal + 1)
   }
 
+  const handleCreateHeapSnapshot = async (): Promise<void> => {
+    try {
+      const snapshotPath = await createHeapSnapshot()
+      notify(t('actions.createHeapSnapshotSuccess'), { body: snapshotPath, variant: 'success' })
+    } catch (e) {
+      notify(t('actions.createHeapSnapshotFailed'), { body: `${e}`, variant: 'danger' })
+    }
+  }
+
   return (
     <>
       {openUpdate && (
@@ -105,13 +114,13 @@ const Actions: React.FC = () => {
                 if (version) {
                   setNewVersion(version.version)
                   setChangelog(version.changelog)
-                  notify('发现新版本', {
+                  notify(t('actions.newVersionFound'), {
                     actionProps: {
-                      children: '查看内容',
+                      children: t('actions.viewUpdate'),
                       onPress: openUpdateDrawer,
                       variant: 'secondary'
                     },
-                    body: `${version.version} 版本就绪`,
+                    body: t('actions.versionReady', { version: version.version }),
                     forceToast: true,
                     timeout: 8000,
                     variant: 'accent'
@@ -170,7 +179,7 @@ const Actions: React.FC = () => {
           }
           divider
         >
-          <Button size="sm" onPress={createHeapSnapshot}>
+          <Button size="sm" onPress={handleCreateHeapSnapshot}>
             {t('actions.createHeapSnapshot')}
           </Button>
         </SettingItem>
