@@ -520,6 +520,20 @@
       "single": "单行",
       "double": "双行"
     },
+    "detail": {
+      "untested": "未测试",
+      "type": "类型",
+      "status": "状态",
+      "online": "在线",
+      "offline": "离线",
+      "enabled": "开启",
+      "disabled": "关闭",
+      "outboundInterface": "出站接口",
+      "currentSelection": "当前选择",
+      "fixedSelection": "固定选择",
+      "delayHistory": "历史延迟",
+      "noHistory": "暂无记录"
+    },
     "proxyCols": "代理节点展示列数",
     "proxyColsAuto": "自动",
     "proxyCols1": "一列",
@@ -530,6 +544,7 @@
     "groupDisplayLayout": "代理组详细信息",
     "proxyDisplayLayout": "代理节点详细信息",
     "showGroupSelectedProxy": "显示二级分组选中节点",
+    "showProxyDetailTooltip": "悬停显示节点详情",
     "rememberProxyGroupOpenState": "记住代理组展开状态",
     "autoCloseConnection": "切换节点时断开连接",
     "delayTestUrl": "延迟测试地址",

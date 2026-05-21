@@ -520,6 +520,20 @@
       "single": "單行",
       "double": "雙行"
     },
+    "detail": {
+      "untested": "未測試",
+      "type": "類型",
+      "status": "狀態",
+      "online": "在線",
+      "offline": "離線",
+      "enabled": "開啟",
+      "disabled": "關閉",
+      "outboundInterface": "出站介面",
+      "currentSelection": "目前選擇",
+      "fixedSelection": "固定選擇",
+      "delayHistory": "歷史延遲",
+      "noHistory": "暫無記錄"
+    },
     "proxyCols": "代理節點展示列數",
     "proxyColsAuto": "自動",
     "proxyCols1": "一列",
@@ -530,6 +544,7 @@
     "groupDisplayLayout": "代理組詳細資訊",
     "proxyDisplayLayout": "代理節點詳細資訊",
     "showGroupSelectedProxy": "顯示二級群組選中節點",
+    "showProxyDetailTooltip": "懸停顯示節點詳情",
     "rememberProxyGroupOpenState": "記住代理群組展開狀態",
     "autoCloseConnection": "切換節點時中斷連線",
     "delayTestUrl": "延遲測試位址",

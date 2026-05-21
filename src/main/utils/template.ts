@@ -53,6 +53,7 @@ export const defaultConfig: AppConfig = {
   proxyDisplayLayout: 'double',
   groupDisplayLayout: 'double',
   showGroupSelectedProxy: true,
+  showProxyDetailTooltip: false,
   autoLightweightMode: 'core',
   coreStartupMode: 'post-up',
   delayTestConcurrency: 50,

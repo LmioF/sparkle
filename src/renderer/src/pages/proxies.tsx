@@ -191,6 +191,7 @@ const Proxies: React.FC = () => {
     proxyDisplayLayout = 'double',
     groupDisplayLayout = 'double',
     showGroupSelectedProxy = true,
+    showProxyDetailTooltip = false,
     proxyDisplayOrder = 'default',
     autoCloseConnection = true,
     closeMode = 'all',
@@ -493,6 +494,8 @@ const Proxies: React.FC = () => {
   proxyDisplayLayoutRef.current = proxyDisplayLayout
   const showGroupSelectedProxyRef = useRef(showGroupSelectedProxy)
   showGroupSelectedProxyRef.current = showGroupSelectedProxy
+  const showProxyDetailTooltipRef = useRef(showProxyDetailTooltip)
+  showProxyDetailTooltipRef.current = showProxyDetailTooltip
   const proxyColsRef = useRef(proxyCols)
   proxyColsRef.current = proxyCols
   const toggleOpenRef = useRef(toggleOpen)
@@ -574,6 +577,7 @@ const Proxies: React.FC = () => {
       const currentProxyCols = proxyColsRef.current
       const currentProxyDisplayLayout = proxyDisplayLayoutRef.current
       const currentShowGroupSelectedProxy = showGroupSelectedProxyRef.current
+      const currentShowProxyDetailTooltip = showProxyDetailTooltipRef.current
       let innerIndex = index
       for (let i = 0; i < groupIndex; i++) {
         innerIndex -= groupCounts[i]
@@ -595,6 +599,7 @@ const Proxies: React.FC = () => {
             group={groups[groupIndex]}
             proxyDisplayLayout={currentProxyDisplayLayout}
             showGroupSelectedProxy={currentShowGroupSelectedProxy}
+            showProxyDetailTooltip={currentShowProxyDetailTooltip}
             selected={proxy.name === groups[groupIndex].now}
           />
         )

@@ -520,6 +520,20 @@
       "single": "Single",
       "double": "Double"
     },
+    "detail": {
+      "untested": "Untested",
+      "type": "Type",
+      "status": "Status",
+      "online": "Online",
+      "offline": "Offline",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "outboundInterface": "Outbound Interface",
+      "currentSelection": "Current Selection",
+      "fixedSelection": "Fixed Selection",
+      "delayHistory": "Delay History",
+      "noHistory": "No Records"
+    },
     "proxyCols": "Proxy Node Display Columns",
     "proxyColsAuto": "Auto",
     "proxyCols1": "One Column",
@@ -530,6 +544,7 @@
     "groupDisplayLayout": "Proxy Group Details",
     "proxyDisplayLayout": "Proxy Node Details",
     "showGroupSelectedProxy": "Show Selected Node for Nested Groups",
+    "showProxyDetailTooltip": "Show Node Details on Hover",
     "rememberProxyGroupOpenState": "Remember Proxy Group State",
     "autoCloseConnection": "Close Connection on Node Switch",
     "delayTestUrl": "Delay Test URL",
