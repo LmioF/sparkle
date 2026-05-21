@@ -292,7 +292,9 @@
       "tunStartFailed": "TUN 啟動失敗",
       "tunStartFailedDesc": "TUN 啟動失敗，已自動停用。如需使用請授予核心權限。",
       "coreRestarting": "核心正在重啟中",
-      "coreRestartingDesc": "請稍候再試"
+      "coreRestartingDesc": "請稍候再試",
+      "sysproxyGuardRestored": "系統代理已恢復",
+      "sysproxyGuardRestoreFailed": "系統代理恢復失敗"
     },
     "menu": {
       "about": "關於",
@@ -916,7 +918,9 @@
     "editBypassYaml": "編輯繞過清單 (YAML)",
     "bypassList": "代理繞過清單",
     "bypassInvalid": "代理繞過清單包含無效項",
-    "bypassPlaceholder": "例：*.baidu.com"
+    "bypassPlaceholder": "例：*.baidu.com",
+    "guard": "系統代理守護",
+    "guardTip": "偵測到系統代理被修改後自動恢復，僅服務模式下生效"
   },
   "sniffer": {
     "title": "網域嗅探設定",

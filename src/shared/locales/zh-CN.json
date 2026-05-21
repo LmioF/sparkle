@@ -292,7 +292,9 @@
       "tunStartFailed": "TUN 启动失败",
       "tunStartFailedDesc": "TUN 启动失败，已自动禁用。如需使用请授予内核权限。",
       "coreRestarting": "内核正在重启中",
-      "coreRestartingDesc": "请稍候再试"
+      "coreRestartingDesc": "请稍候再试",
+      "sysproxyGuardRestored": "系统代理已恢复",
+      "sysproxyGuardRestoreFailed": "系统代理恢复失败"
     },
     "menu": {
       "about": "关于",
@@ -916,7 +918,9 @@
     "editBypassYaml": "编辑绕过列表 (YAML)",
     "bypassList": "代理绕过列表",
     "bypassInvalid": "代理绕过列表包含无效项",
-    "bypassPlaceholder": "例：*.baidu.com"
+    "bypassPlaceholder": "例：*.baidu.com",
+    "guard": "系统代理守护",
+    "guardTip": "检测到系统代理被修改后自动恢复，仅服务模式下生效"
   },
   "sniffer": {
     "title": "域名嗅探设置",

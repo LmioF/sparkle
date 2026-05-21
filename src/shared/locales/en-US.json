@@ -292,7 +292,9 @@
       "tunStartFailed": "TUN Start Failed",
       "tunStartFailedDesc": "TUN failed to start and has been automatically disabled. Please grant core permissions to use TUN mode.",
       "coreRestarting": "Core is Restarting",
-      "coreRestartingDesc": "Please try again later"
+      "coreRestartingDesc": "Please try again later",
+      "sysproxyGuardRestored": "System Proxy Restored",
+      "sysproxyGuardRestoreFailed": "Failed to Restore System Proxy"
     },
     "menu": {
       "about": "About",
@@ -916,7 +918,9 @@
     "editBypassYaml": "Edit Bypass List (YAML)",
     "bypassList": "Proxy Bypass List",
     "bypassInvalid": "Proxy bypass list contains invalid items",
-    "bypassPlaceholder": "e.g.: *.baidu.com"
+    "bypassPlaceholder": "e.g.: *.baidu.com",
+    "guard": "System Proxy Guard",
+    "guardTip": "Automatically restores system proxy after detecting external changes. Only works in service mode."
   },
   "sniffer": {
     "title": "Sniffer Settings",
