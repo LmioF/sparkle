@@ -784,7 +784,8 @@
       "restart": "Restart",
       "start": "Start",
       "stop": "Stop",
-      "uninstall": "Uninstall"
+      "uninstall": "Uninstall",
+      "statusPaused": "Paused"
     },
     "port": {
       "title": "Port Settings",
@@ -874,7 +875,8 @@
     "maxLogEntries": "Live Log Cache Size",
     "maxLogEntriesTip": "Only affects entries kept on the in-app live log page, not local log files",
     "days": "days",
-    "entries": "entries"
+    "entries": "entries",
+    "serviceUnavailableSwitched": "Service unavailable. Switched to non-service mode."
   },
   "tun": {
     "title": "TUN Settings",
@@ -920,7 +922,9 @@
     "bypassInvalid": "Proxy bypass list contains invalid items",
     "bypassPlaceholder": "e.g.: *.baidu.com",
     "guard": "System Proxy Guard",
-    "guardTip": "Automatically restores system proxy after detecting external changes. Only works in service mode."
+    "guardTip": "Automatically restores system proxy after detecting external changes. Only works in service mode.",
+    "guardNotify": "Guard Notifications",
+    "guardNotifyTip": "Send notifications when system proxy restore succeeds or fails."
   },
   "sniffer": {
     "title": "Sniffer Settings",

@@ -784,7 +784,8 @@
       "restart": "重启",
       "start": "启动",
       "stop": "停止",
-      "uninstall": "卸载"
+      "uninstall": "卸载",
+      "statusPaused": "已暂停"
     },
     "port": {
       "title": "端口设置",
@@ -874,7 +875,8 @@
     "maxLogEntries": "实时日志缓存数",
     "maxLogEntriesTip": "仅影响应用内实时日志页面保留的条数，不影响本地日志文件",
     "days": "天",
-    "entries": "条"
+    "entries": "条",
+    "serviceUnavailableSwitched": "服务不可用，已切换到非服务模式"
   },
   "tun": {
     "title": "虚拟网卡设置",
@@ -920,7 +922,9 @@
     "bypassInvalid": "代理绕过列表包含无效项",
     "bypassPlaceholder": "例：*.baidu.com",
     "guard": "系统代理守护",
-    "guardTip": "检测到系统代理被修改后自动恢复，仅服务模式下生效"
+    "guardTip": "检测到系统代理被修改后自动恢复，仅服务模式下生效",
+    "guardNotify": "守护通知",
+    "guardNotifyTip": "系统代理恢复成功或失败时发送通知"
   },
   "sniffer": {
     "title": "域名嗅探设置",

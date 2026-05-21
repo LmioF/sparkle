@@ -306,9 +306,9 @@ const Sysproxy: React.FC = () => {
         {values.settingMode === 'service' && values.guard && (
           <SettingItem
             compatKey="legacy"
-            title="守护通知"
+            title={t('guardNotify')}
             actions={
-              <Tooltip content={<div>系统代理恢复成功或失败时发送通知</div>}>
+              <Tooltip content={<div>{t('guardNotifyTip')}</div>}>
                 <Button isIconOnly size="sm" variant="light">
                   <IoIosHelpCircle className="text-lg" />
                 </Button>

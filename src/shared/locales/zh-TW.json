@@ -784,7 +784,8 @@
       "restart": "重啟",
       "start": "啟動",
       "stop": "停止",
-      "uninstall": "解除安裝"
+      "uninstall": "解除安裝",
+      "statusPaused": "已暫停"
     },
     "port": {
       "title": "連接埠設定",
@@ -874,7 +875,8 @@
     "maxLogEntries": "即時日誌快取數",
     "maxLogEntriesTip": "僅影響應用內即時日誌頁面保留的條數，不影響本機日誌檔",
     "days": "天",
-    "entries": "條"
+    "entries": "條",
+    "serviceUnavailableSwitched": "服務不可用，已切換到非服務模式"
   },
   "tun": {
     "title": "虛擬網路卡設定",
@@ -920,7 +922,9 @@
     "bypassInvalid": "代理繞過清單包含無效項",
     "bypassPlaceholder": "例：*.baidu.com",
     "guard": "系統代理守護",
-    "guardTip": "偵測到系統代理被修改後自動恢復，僅服務模式下生效"
+    "guardTip": "偵測到系統代理被修改後自動恢復，僅服務模式下生效",
+    "guardNotify": "守護通知",
+    "guardNotifyTip": "系統代理恢復成功或失敗時傳送通知"
   },
   "sniffer": {
     "title": "網域嗅探設定",

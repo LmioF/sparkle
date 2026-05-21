@@ -14,6 +14,7 @@ import {
   manualGrantCorePermition,
   mihomoUpgrade,
   restartCore,
+  stopCore,
   revokeCorePermission,
   deleteElevateTask,
   installService,
@@ -123,6 +124,42 @@ const Mihomo: React.FC = () => {
     }
   }
 
+  const switchUnavailableServiceModes = async (): Promise<void> => {
+    const sysProxy = appConfig?.sysProxy
+    const useServiceCore = corePermissionMode === 'service'
+    const useServiceSysProxy = sysProxy?.settingMode === 'service'
+    const useServiceDNS = appConfig?.autoSetDNSMode === 'service'
+
+    if (!useServiceCore && !useServiceSysProxy && !useServiceDNS) {
+      return
+    }
+
+    if (useServiceCore) {
+      await stopCore()
+    }
+
+    await patchAppConfig({
+      ...(useServiceCore ? { corePermissionMode: 'elevated' as const } : {}),
+      ...(useServiceSysProxy && sysProxy
+        ? {
+            sysProxy: {
+              ...sysProxy,
+              settingMode: 'exec' as const,
+              guard: false,
+              guardNotify: false
+            }
+          }
+        : {}),
+      ...(useServiceDNS ? { autoSetDNSMode: 'exec' as const } : {})
+    })
+
+    if (useServiceCore) {
+      await restartCore()
+    }
+
+    new Notification(t('serviceUnavailableSwitched'))
+  }
+
   return (
     <BasePage title={t('title')} contentClassName="no-scrollbar">
       {showPermissionModal && (
@@ -158,10 +195,6 @@ const Mihomo: React.FC = () => {
           }}
           onUninstall={async () => {
             await uninstallService()
-            if (corePermissionMode === 'service') {
-              await patchAppConfig({ corePermissionMode: 'elevated' })
-              await restartCore()
-            }
             new Notification(t('serviceUninstallSuccess'))
           }}
           onStart={async () => {
@@ -176,6 +209,7 @@ const Mihomo: React.FC = () => {
             await stopService()
             new Notification(t('serviceStopSuccess'))
           }}
+          onServiceUnavailable={switchUnavailableServiceModes}
         />
       )}
       <SettingCard>
