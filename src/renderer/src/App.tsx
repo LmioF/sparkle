@@ -81,6 +81,7 @@ const App: React.FC = () => {
     siderOrder,
     autoCheckUpdate,
     updateChannel = 'stable',
+    showUpdateButtonAfterNotification = true,
     disableAnimation = false
   } = appConfig || {}
   const siderOrderArray = siderOrder ?? defaultSiderOrder
@@ -447,7 +448,13 @@ const App: React.FC = () => {
             </div>
           </div>
           <div className="p-2 flex flex-col items-center space-y-2">
-            {latest && latest.version && <UpdaterButton latest={latest} />}
+            {latest && latest.version && (
+              <UpdaterButton
+                iconOnly={true}
+                latest={latest}
+                showButtonAfterNotification={showUpdateButtonAfterNotification}
+              />
+            )}
             <OutboundModeSwitcher iconOnly />
             <Button
               size="sm"
@@ -475,7 +482,12 @@ const App: React.FC = () => {
               <div className="flex ml-1">
                 <h3 className="text-lg font-bold leading-8">Sparkle</h3>
               </div>
-              {latest && latest.version && <UpdaterButton latest={latest} />}
+              {latest && latest.version && (
+                <UpdaterButton
+                  latest={latest}
+                  showButtonAfterNotification={showUpdateButtonAfterNotification}
+                />
+              )}
               <Button
                 size="sm"
                 className="app-nodrag"

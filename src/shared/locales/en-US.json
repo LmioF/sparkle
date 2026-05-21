@@ -346,6 +346,7 @@
       "title": "Appearance",
       "language": "Language",
       "openCustomLocalesDir": "Open Custom Locales Folder",
+      "showUpdateButtonAfterNotification": "Show Update Button",
       "theme": "Theme",
       "themeLight": "Light",
       "themeDark": "Dark",

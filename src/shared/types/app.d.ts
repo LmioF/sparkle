@@ -32,6 +32,7 @@ interface AppConfig {
   language?: string
   updateChannel: 'stable' | 'beta'
   notificationMode?: AppNotificationMode
+  showUpdateButtonAfterNotification?: boolean
   core: 'mihomo' | 'mihomo-alpha' | 'system'
   systemCorePath?: string
   corePermissionMode?: 'elevated' | 'service'

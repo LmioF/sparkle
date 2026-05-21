@@ -51,6 +51,7 @@ const AppearanceConfig: React.FC = () => {
     showFloatingWindow: showFloating = false,
     spinFloatingIcon = true,
     useWindowFrame = false,
+    showUpdateButtonAfterNotification = true,
     customTheme = 'default.css',
     appTheme = 'system'
   } = appConfig || {}
@@ -315,6 +316,15 @@ const AppearanceConfig: React.FC = () => {
             onValueChange={async (v) => {
               await patchAppConfig({ useWindowFrame: v })
               await relaunchApp()
+            }}
+          />
+        </SettingItem>
+        <SettingItem title={t('appearance.showUpdateButtonAfterNotification')} divider>
+          <Switch
+            size="sm"
+            isSelected={showUpdateButtonAfterNotification}
+            onValueChange={(v) => {
+              patchAppConfig({ showUpdateButtonAfterNotification: v })
             }}
           />
         </SettingItem>

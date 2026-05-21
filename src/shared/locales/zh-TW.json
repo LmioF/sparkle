@@ -346,6 +346,7 @@
       "title": "外觀設定",
       "language": "語言",
       "openCustomLocalesDir": "開啟自訂語言目錄",
+      "showUpdateButtonAfterNotification": "顯示更新按鈕",
       "theme": "背景色",
       "themeLight": "淺色",
       "themeDark": "深色",
