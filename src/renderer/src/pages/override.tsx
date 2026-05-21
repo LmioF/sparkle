@@ -21,6 +21,7 @@ import { HiOutlineDocumentText } from 'react-icons/hi'
 import { RiArchiveLine } from 'react-icons/ri'
 import { useTranslation } from '@renderer/hooks/useTranslation'
 import { useCardDndSensors } from '@renderer/hooks/use-card-dnd-sensors'
+import { notify } from '@renderer/utils/notification'
 
 const emptyItems: OverrideItem[] = []
 
@@ -116,10 +117,10 @@ const Override: React.FC = () => {
               ext: file.name.endsWith('.js') ? 'js' : 'yaml'
             })
           } catch (e) {
-            alert(t('fileImportFailed') + e)
+            notify(t('fileImportFailed') + e, { variant: 'danger' })
           }
         } else {
-          alert(t('unsupportedFileType'))
+          notify(t('unsupportedFileType'), { variant: 'danger' })
         }
       }
       isProcessingDrop.current = false
@@ -226,7 +227,7 @@ const Override: React.FC = () => {
                       })
                     }
                   } catch (e) {
-                    alert(e)
+                    notify(e, { variant: 'danger' })
                   }
                 } else if (key === 'new-yaml') {
                   await addOverrideItem({

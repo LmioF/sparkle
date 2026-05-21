@@ -6,6 +6,7 @@ import { useTranslation } from '@renderer/hooks/useTranslation'
 import { mihomoUpgradeGeo } from '@renderer/utils/ipc'
 import { useState, useEffect, useMemo } from 'react'
 import { IoMdRefresh } from 'react-icons/io'
+import { notify } from '@renderer/utils/notification'
 
 const defaultGeoxUrl = {
   geoip: 'https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip-lite.dat',
@@ -133,9 +134,9 @@ const GeoData: React.FC = () => {
               setUpdating(true)
               try {
                 await mihomoUpgradeGeo()
-                new Notification(t('geoUpdateSuccess'))
+                notify(t('geoUpdateSuccess'), { variant: 'success' })
               } catch (e) {
-                alert(e)
+                notify(e, { variant: 'danger' })
               } finally {
                 setUpdating(false)
               }

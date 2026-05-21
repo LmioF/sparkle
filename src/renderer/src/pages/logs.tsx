@@ -18,6 +18,7 @@ import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
 import { CgTrash } from 'react-icons/cg'
 import { IoLocationSharp } from 'react-icons/io5'
 import { Virtuoso } from 'react-virtuoso'
+import { notify } from '@renderer/utils/notification'
 
 const logLevelOrder: Record<LogLevel, number> = {
   silent: 0,
@@ -162,7 +163,7 @@ const Logs: React.FC = () => {
                   await patchAppConfig({ realtimeLogLevel: value as LogLevel })
                   await restartMihomoLogs()
                 } catch (error) {
-                  alert(error)
+                  notify(error, { variant: 'danger' })
                 }
               }}
             >

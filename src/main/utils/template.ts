@@ -3,6 +3,7 @@ import os from 'os'
 export const defaultConfig: AppConfig = {
   core: 'mihomo',
   updateChannel: 'stable',
+  notificationMode: 'system',
   silentStart: false,
   appTheme: 'system',
   useWindowFrame: false,

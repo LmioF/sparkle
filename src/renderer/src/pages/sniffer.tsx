@@ -7,6 +7,7 @@ import { useControledMihomoConfig } from '@renderer/hooks/use-controled-mihomo-c
 import { restartCore } from '@renderer/utils/ipc'
 import React, { useState } from 'react'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { notify } from '@renderer/utils/notification'
 
 const Sniffer: React.FC = () => {
   const { t } = useTranslation('sniffer')
@@ -61,7 +62,7 @@ const Sniffer: React.FC = () => {
       await patchControledMihomoConfig(patch)
       await restartCore()
     } catch (e) {
-      alert(e)
+      notify(e, { variant: 'danger' })
     }
   }
 

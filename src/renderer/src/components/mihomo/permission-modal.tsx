@@ -10,6 +10,7 @@ import {
   revokeCorePermission
 } from '@renderer/utils/ipc'
 import { platform } from '@renderer/utils/init'
+import { notify } from '@renderer/utils/notification'
 
 interface Props {
   onChange: (open: boolean) => void
@@ -57,7 +58,7 @@ const PermissionModal: React.FC<Props> = (props) => {
         await checkPermissions()
         return
       }
-      alert(e)
+      notify(e, { variant: 'danger' })
     } finally {
       setLoading({})
     }
@@ -86,7 +87,7 @@ const PermissionModal: React.FC<Props> = (props) => {
         await checkPermissions()
         return
       }
-      alert(e)
+      notify(e, { variant: 'danger' })
     } finally {
       setLoading({ ...loading, [coreName]: false })
     }

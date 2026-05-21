@@ -17,6 +17,7 @@ import { ProfileConfigProvider } from './hooks/use-profile-config'
 import { RulesProvider } from './hooks/use-rules'
 import { GroupsProvider } from './hooks/use-groups'
 import { ProxiesStateProvider } from './hooks/use-proxies-state'
+import AppNotificationProvider from './components/base/app-notification-provider'
 
 import { I18nProvider, DefaultLoadingFallback, DefaultErrorFallback } from './i18n/provider'
 import { I18nErrorBoundary } from './i18n/error-boundary'
@@ -31,6 +32,7 @@ async function bootstrap(): Promise<void> {
         <SWRConfig value={swrConfig}>
           <HeroUIProvider>
             <NextThemesProvider attribute="class" enableSystem defaultTheme="dark">
+              <AppNotificationProvider />
               <BaseErrorBoundary>
                 <GlobalKeyboardHandler />
 

@@ -959,7 +959,8 @@
     "guard": "系統代理守護",
     "guardTip": "偵測到系統代理被修改後自動恢復，僅服務模式下生效",
     "guardNotify": "守護通知",
-    "guardNotifyTip": "系統代理恢復成功或失敗時傳送通知"
+    "guardNotifyTip": "系統代理恢復成功或失敗時傳送通知",
+    "serviceUnavailableFallback": "服務不可用，已切換到執行命令模式"
   },
   "sniffer": {
     "title": "網域嗅探設定",

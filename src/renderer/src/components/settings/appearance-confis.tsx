@@ -29,6 +29,7 @@ import { MdEditDocument } from 'react-icons/md'
 import CSSEditorModal from './css-editor-modal'
 import { LanguageSwitcher } from './language-switcher'
 import TrayIconCropModal from './tray-icon-crop-modal'
+import { notify } from '@renderer/utils/notification'
 
 const rasterTrayIconPattern = /\.(png|jpe?g|webp)$/i
 
@@ -348,7 +349,7 @@ const AppearanceConfig: React.FC = () => {
                     await fetchThemes()
                     setCustomThemes(await resolveThemes())
                   } catch (e) {
-                    alert(e)
+                    notify(e, { variant: 'danger' })
                   } finally {
                     setFetching(false)
                   }
@@ -368,7 +369,7 @@ const AppearanceConfig: React.FC = () => {
                     await importThemes(files)
                     setCustomThemes(await resolveThemes())
                   } catch (e) {
-                    alert(e)
+                    notify(e, { variant: 'danger' })
                   }
                 }}
               >
@@ -400,7 +401,7 @@ const AppearanceConfig: React.FC = () => {
                 try {
                   await patchAppConfig({ customTheme: v.currentKey as string })
                 } catch (e) {
-                  alert(e)
+                  notify(e, { variant: 'danger' })
                 }
               }}
             >

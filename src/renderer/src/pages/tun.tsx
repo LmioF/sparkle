@@ -9,6 +9,7 @@ import { platform } from '@renderer/utils/init'
 import React, { Key, useState } from 'react'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { notify } from '@renderer/utils/notification'
 
 const Tun: React.FC = () => {
   const { t } = useTranslation('tun')
@@ -97,10 +98,10 @@ const Tun: React.FC = () => {
                   setLoading(true)
                   try {
                     await setupFirewall()
-                    new Notification(t('common:notifications.firewallResetSuccess'))
+                    notify(t('common:notifications.firewallResetSuccess'), { variant: 'success' })
                     await restartCore()
                   } catch (e) {
-                    alert(e)
+                    notify(e, { variant: 'danger' })
                   } finally {
                     setLoading(false)
                   }

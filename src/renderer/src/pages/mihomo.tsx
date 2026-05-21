@@ -29,6 +29,7 @@ import AdvancedSetting from '@renderer/components/mihomo/advanced-settings'
 import LogSetting from '@renderer/components/mihomo/log-setting'
 import { getSystemCorePaths, getSystemCorePathsCache } from '@renderer/utils/system-core'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { notify } from '@renderer/utils/notification'
 
 const Mihomo: React.FC = () => {
   const { t } = useTranslation('mihomo')
@@ -73,7 +74,7 @@ const Mihomo: React.FC = () => {
       await restartCore()
       PubSub.publish('mihomo-core-changed')
     } catch (e) {
-      alert(e)
+      notify(e, { variant: 'danger' })
     }
   }
 
@@ -84,9 +85,9 @@ const Mihomo: React.FC = () => {
       setTimeout(() => PubSub.publish('mihomo-core-changed'), 2000)
     } catch (e) {
       if (typeof e === 'string' && e.includes('already using latest version')) {
-        new Notification(t('alreadyLatest'))
+        notify(t('alreadyLatest'))
       } else {
-        alert(e)
+        notify(e, { variant: 'danger' })
       }
     } finally {
       setUpgrading(false)
@@ -98,7 +99,7 @@ const Mihomo: React.FC = () => {
       const paths = await getSystemCorePaths()
 
       if (paths.length === 0) {
-        new Notification(t('coreNotFound'), {
+        notify(t('coreNotFound'), {
           body: t('coreNotFoundDesc')
         })
         return
@@ -118,7 +119,7 @@ const Mihomo: React.FC = () => {
       await patchAppConfig({ corePermissionMode: key as 'elevated' | 'service' })
       await restartCore()
     } catch (e) {
-      alert(e)
+      notify(e, { variant: 'danger' })
     }
   }
 
@@ -130,16 +131,16 @@ const Mihomo: React.FC = () => {
           onRevoke={async () => {
             if (platform === 'win32') {
               await deleteElevateTask()
-              new Notification(t('taskCanceled'))
+              notify(t('taskCanceled'))
             } else {
               await revokeCorePermission()
-              new Notification(t('permissionRevoked'))
+              notify(t('permissionRevoked'))
             }
             await restartCore()
           }}
           onGrant={async () => {
             await manualGrantCorePermition()
-            new Notification(t('permissionGranted'))
+            notify(t('permissionGranted'))
             await restartCore()
           }}
         />
@@ -149,23 +150,23 @@ const Mihomo: React.FC = () => {
           onChange={setShowServiceModal}
           onInit={async () => {
             await initService()
-            new Notification(t('serviceInitSuccess'))
+            notify(t('serviceInitSuccess'))
           }}
           onInstall={async () => {
             await installService()
-            new Notification(t('serviceInstallSuccess'))
+            notify(t('serviceInstallSuccess'))
           }}
           onUninstall={async () => {
             await uninstallService()
-            new Notification(t('serviceUninstallSuccess'))
+            notify(t('serviceUninstallSuccess'))
           }}
           onStart={async () => {
             await startService()
-            new Notification(t('serviceStartSuccess'))
+            notify(t('serviceStartSuccess'))
           }}
           onRestart={async () => {
             await restartService()
-            new Notification(t('serviceRestartSuccess'))
+            notify(t('serviceRestartSuccess'))
           }}
         />
       )}
@@ -247,7 +248,7 @@ const Mihomo: React.FC = () => {
                 })
                 await restartCore()
               } catch (e) {
-                alert(e)
+                notify(e, { variant: 'danger' })
               }
             }}
           >

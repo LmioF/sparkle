@@ -18,6 +18,7 @@ import dayjs from 'dayjs'
 import { calcTraffic } from '@renderer/utils/calc'
 import { getHash } from '@renderer/utils/hash'
 import { Meter } from '@heroui-v3/react'
+import { notify } from '@renderer/utils/notification'
 
 const ProxyProvider: React.FC = () => {
   const { t } = useTranslation('resource')
@@ -84,7 +85,7 @@ const ProxyProvider: React.FC = () => {
       await mihomoUpdateProxyProviders(name)
       mutate()
     } catch (e) {
-      new Notification(`${name} ${t('updateFailed')}\n${e}`)
+      notify(`${name} ${t('updateFailed')}\n${e}`, { variant: 'danger' })
     } finally {
       setUpdating((prev) => {
         prev[index] = false

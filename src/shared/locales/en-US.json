@@ -959,7 +959,8 @@
     "guard": "System Proxy Guard",
     "guardTip": "Automatically restores system proxy after detecting external changes. Only works in service mode.",
     "guardNotify": "Guard Notifications",
-    "guardNotifyTip": "Send notifications when system proxy restore succeeds or fails."
+    "guardNotifyTip": "Send notifications when system proxy restore succeeds or fails.",
+    "serviceUnavailableFallback": "Service unavailable. Switched to command execution mode."
   },
   "sniffer": {
     "title": "Sniffer Settings",

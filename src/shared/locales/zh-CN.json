@@ -959,7 +959,8 @@
     "guard": "系统代理守护",
     "guardTip": "检测到系统代理被修改后自动恢复，仅服务模式下生效",
     "guardNotify": "守护通知",
-    "guardNotifyTip": "系统代理恢复成功或失败时发送通知"
+    "guardNotifyTip": "系统代理恢复成功或失败时发送通知",
+    "serviceUnavailableFallback": "服务不可用，已切换到执行命令模式"
   },
   "sniffer": {
     "title": "域名嗅探设置",

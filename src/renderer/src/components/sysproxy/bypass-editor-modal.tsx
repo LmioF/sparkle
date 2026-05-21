@@ -5,6 +5,7 @@ import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from
 import { BaseEditor } from '../base/base-editor-lazy'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { notify } from '@renderer/utils/notification'
 
 interface Props {
   bypass: string[]
@@ -30,10 +31,10 @@ const ByPassEditorModal: React.FC<Props> = (props) => {
       if (parsed && Array.isArray(parsed.bypass)) {
         onConfirm(parsed.bypass)
       } else {
-        alert(t('common:notifications.yamlFormatError'))
+        notify(t('common:notifications.yamlFormatError'), { variant: 'danger' })
       }
     } catch (e) {
-      alert(t('common:notifications.yamlParseFailed') + ': ' + e)
+      notify(t('common:notifications.yamlParseFailed') + ': ' + e, { variant: 'danger' })
     }
   }
 

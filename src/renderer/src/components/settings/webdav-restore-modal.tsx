@@ -3,7 +3,7 @@ import { relaunchApp, webdavDelete, webdavRestore } from '@renderer/utils/ipc'
 import React, { useState } from 'react'
 import { MdDeleteForever } from 'react-icons/md'
 import { useTranslation } from '@renderer/hooks/useTranslation'
-
+import { notify } from '@renderer/utils/notification'
 interface Props {
   filenames: string[]
   onClose: () => void
@@ -46,7 +46,7 @@ const WebdavRestoreModal: React.FC<Props> = (props) => {
                           await webdavRestore(filename)
                           await relaunchApp()
                         } catch (e) {
-                          alert(`${t('backup.webdav.restoreFailed')}：${e}`)
+                          notify(`${t('backup.webdav.restoreFailed')}：${e}`, { variant: 'danger' })
                         } finally {
                           setRestoring(false)
                         }
@@ -63,7 +63,7 @@ const WebdavRestoreModal: React.FC<Props> = (props) => {
                           await webdavDelete(filename)
                           setFilenames(filenames.filter((name) => name !== filename))
                         } catch (e) {
-                          alert(`${t('backup.webdav.deleteFailed')}：${e}`)
+                          notify(`${t('backup.webdav.deleteFailed')}：${e}`, { variant: 'danger' })
                         }
                       }}
                     >

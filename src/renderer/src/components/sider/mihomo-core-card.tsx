@@ -11,6 +11,7 @@ import useSWR from 'swr'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { LuCpu } from 'react-icons/lu'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { notify } from '@renderer/utils/notification'
 
 interface Props {
   iconOnly?: boolean
@@ -132,7 +133,7 @@ const MihomoCoreCard: React.FC<Props> = (props) => {
                     await restartCore()
                     await new Promise((resolve) => setTimeout(resolve, 2000))
                   } catch (e) {
-                    alert(e)
+                    notify(e, { variant: 'danger' })
                   } finally {
                     setRestarting(false)
                     try {

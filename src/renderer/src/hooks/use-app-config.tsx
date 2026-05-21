@@ -6,11 +6,12 @@ import {
   getSystemCorePathsCache,
   isSystemCorePathsLoading
 } from '@renderer/utils/system-core'
+import { notify } from '@renderer/utils/notification'
 
 interface AppConfigContextType {
   appConfig: AppConfig | undefined
   mutateAppConfig: () => void
-  patchAppConfig: (value: Partial<AppConfig>) => Promise<void>
+  patchAppConfig: (value: Partial<AppConfig>) => Promise<AppConfig | undefined>
 }
 
 const AppConfigContext = createContext<AppConfigContextType | undefined>(undefined)
@@ -31,11 +32,14 @@ export const AppConfigProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
   }, [appConfig?.core])
 
-  const patchAppConfig = async (value: Partial<AppConfig>): Promise<void> => {
+  const patchAppConfig = async (value: Partial<AppConfig>): Promise<AppConfig | undefined> => {
     try {
-      await patch(value)
+      const nextConfig = await patch(value)
+      mutateAppConfig(nextConfig, false)
+      return nextConfig
     } catch (e) {
-      alert(e)
+      notify(e, { variant: 'danger' })
+      return undefined
     } finally {
       mutateAppConfig()
     }

@@ -12,6 +12,7 @@ import { useAppConfig } from '@renderer/hooks/use-app-config'
 import debounce from '@renderer/utils/debounce'
 import { isValidCron } from 'cron-validator'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { notify } from '@renderer/utils/notification'
 
 const SubStoreConfig: React.FC = () => {
   const { t } = useTranslation('settings')
@@ -74,7 +75,7 @@ const SubStoreConfig: React.FC = () => {
                 await stopSubStoreBackendServer()
               }
             } catch (e) {
-              alert(e)
+              notify(e, { variant: 'danger' })
             }
           }}
         />
@@ -95,7 +96,7 @@ const SubStoreConfig: React.FC = () => {
                   await startSubStoreFrontendServer()
                   await startSubStoreBackendServer()
                 } catch (e) {
-                  alert(e)
+                  notify(e, { variant: 'danger' })
                 }
               }}
             />
@@ -113,7 +114,7 @@ const SubStoreConfig: React.FC = () => {
                     await startSubStoreBackendServer()
                   }
                 } catch (e) {
-                  alert(e)
+                  notify(e, { variant: 'danger' })
                 }
               }}
             />
@@ -142,7 +143,7 @@ const SubStoreConfig: React.FC = () => {
                       await patchAppConfig({ useProxyInSubStore: v })
                       await startSubStoreBackendServer()
                     } catch (e) {
-                      alert(e)
+                      notify(e, { variant: 'danger' })
                     }
                   }}
                 />
@@ -161,9 +162,9 @@ const SubStoreConfig: React.FC = () => {
                           await patchAppConfig({
                             subStoreBackendSyncCron: subStoreBackendSyncCronValue
                           })
-                          new Notification(t('substore.restartRequired'))
+                          notify(t('substore.restartRequired'))
                         } else {
-                          alert(t('substore.cronInvalid'))
+                          notify(t('substore.cronInvalid'), { variant: 'danger' })
                         }
                       }}
                     >
@@ -194,9 +195,9 @@ const SubStoreConfig: React.FC = () => {
                           await patchAppConfig({
                             subStoreBackendDownloadCron: subStoreBackendDownloadCronValue
                           })
-                          new Notification(t('substore.restartRequired'))
+                          notify(t('substore.restartRequired'))
                         } else {
-                          alert(t('substore.cronInvalid'))
+                          notify(t('substore.cronInvalid'), { variant: 'danger' })
                         }
                       }}
                     >
@@ -227,9 +228,9 @@ const SubStoreConfig: React.FC = () => {
                           await patchAppConfig({
                             subStoreBackendUploadCron: subStoreBackendUploadCronValue
                           })
-                          new Notification(t('substore.restartRequired'))
+                          notify(t('substore.restartRequired'))
                         } else {
-                          alert(t('substore.cronInvalid'))
+                          notify(t('substore.cronInvalid'), { variant: 'danger' })
                         }
                       }}
                     >

@@ -15,6 +15,7 @@ import {
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { useTranslation } from '@renderer/hooks/useTranslation'
 import { serviceStatus, testServiceConnection } from '@renderer/utils/ipc'
+import { notify } from '@renderer/utils/notification'
 
 interface Props {
   onChange: (open: boolean) => void
@@ -93,7 +94,8 @@ const ServiceModal: React.FC<Props> = (props) => {
       await refreshServiceStatus(result)
     } catch (e) {
       await refreshServiceStatus()
-      if (!isUserCancelledError(e, tCommon('errors.userCancelled'))) alert(e)
+      if (!isUserCancelledError(e, tCommon('errors.userCancelled')))
+        notify(e, { variant: 'danger' })
     } finally {
       setLoading(false)
     }

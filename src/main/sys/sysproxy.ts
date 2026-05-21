@@ -4,7 +4,7 @@ import { pacPort, startPacServer, stopPacServer } from '../resolve/server'
 import { promisify } from 'util'
 import { execFile, execFileSync } from 'child_process'
 import { servicePath } from '../utils/dirs'
-import { net, Notification } from 'electron'
+import { net } from 'electron'
 import {
   disableProxy,
   setPac,
@@ -16,6 +16,7 @@ import {
 import type { ServiceSysproxyEvent } from '../service/api'
 import { t } from '../utils/i18n'
 import { appendAppLog } from '../utils/log'
+import { showNotification } from '../utils/notification'
 
 let defaultBypass: string[] = []
 let triggerSysProxyTimer: NodeJS.Timeout | null = null
@@ -227,14 +228,18 @@ async function handleSysproxyGuardEvent(event: ServiceSysproxyEvent): Promise<vo
   if (!(await shouldNotifySysproxyGuardEvent(event))) return
 
   if (event.type === 'guard_restored') {
-    new Notification({ title: t('main.notifications.sysproxyGuardRestored') }).show()
+    void showNotification({
+      title: t('main.notifications.sysproxyGuardRestored'),
+      variant: 'success'
+    })
     return
   }
 
-  new Notification({
+  void showNotification({
     title: t('main.notifications.sysproxyGuardRestoreFailed'),
-    body: event.error || event.message
-  }).show()
+    body: event.error || event.message,
+    variant: 'danger'
+  })
 }
 
 async function shouldNotifySysproxyGuardEvent(event: ServiceSysproxyEvent): Promise<boolean> {

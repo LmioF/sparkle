@@ -6,11 +6,12 @@ import EditableList from '@renderer/components/base/base-list-editor'
 import PacEditorModal from '@renderer/components/sysproxy/pac-editor-modal'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { platform } from '@renderer/utils/init'
-import { openUWPTool, triggerSysProxy } from '@renderer/utils/ipc'
+import { getAppConfig, openUWPTool, serviceStatus, triggerSysProxy } from '@renderer/utils/ipc'
 import React, { Key, useEffect, useState } from 'react'
 import ByPassEditorModal from '@renderer/components/sysproxy/bypass-editor-modal'
 import { IoIosHelpCircle } from 'react-icons/io'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { notify } from '@renderer/utils/notification'
 
 const defaultPacScript = `
 function FindProxyForURL(url, host) {
@@ -66,7 +67,7 @@ const Sysproxy: React.FC = () => {
             '<local>'
           ]
 
-  const { appConfig, patchAppConfig } = useAppConfig()
+  const { appConfig, patchAppConfig, mutateAppConfig } = useAppConfig()
   const { sysProxy, onlyActiveDevice = false } =
     appConfig || ({ sysProxy: { enable: false } } as AppConfig)
   const [changed, setChanged] = useState(false)
@@ -80,12 +81,22 @@ const Sysproxy: React.FC = () => {
     guard: sysProxy.guard ?? false,
     guardNotify: sysProxy.guardNotify ?? false
   })
-  useEffect(() => {
+  const syncValuesFromSysProxy = (nextSysProxy: AppConfig['sysProxy']): void => {
     originSetValues((prev) => ({
       ...prev,
-      enable: sysProxy.enable
+      enable: nextSysProxy.enable,
+      host: nextSysProxy.host ?? '',
+      bypass: nextSysProxy.bypass ?? defaultBypass,
+      mode: nextSysProxy.mode ?? 'manual',
+      pacScript: nextSysProxy.pacScript ?? defaultPacScript,
+      settingMode: nextSysProxy.settingMode ?? 'exec',
+      guard: nextSysProxy.guard ?? false,
+      guardNotify: nextSysProxy.guardNotify ?? false
     }))
-  }, [sysProxy.enable])
+  }
+  useEffect(() => {
+    syncValuesFromSysProxy(sysProxy)
+  }, [sysProxy])
   const [openEditor, setOpenEditor] = useState(false)
   const [openPacEditor, setOpenPacEditor] = useState(false)
 
@@ -109,11 +120,6 @@ const Sysproxy: React.FC = () => {
 
   const validateBypass = (bypass: string[]): boolean => {
     if (!bypass || bypass.length === 0) return true
-    // 支持的格式：
-    // - 域名: localhost, example.com, *.example.com, .local
-    // - IP: 192.168.1.1, 127.0.0.1/8
-    // - 通配符: 127.*, 192.168.*, 10.*
-    // - 特殊: <local>, ::1
     const bypassRegex =
       /^(\*\.)?[a-zA-Z0-9*.-]+(\.\*)?$|^\.[a-zA-Z0-9-]+$|^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$|^\d{1,3}\.\*$|^(\d{1,3}\.){2}\*$|^(\d{1,3}\.){3}\*$|^<[a-z]+>$|^::1$/
     return bypass.every(
@@ -126,39 +132,60 @@ const Sysproxy: React.FC = () => {
     return /function\s+FindProxyForURL\s*\(/.test(script)
   }
 
+  const normalizeServiceModeValues = async (): Promise<typeof values> => {
+    if (values.settingMode !== 'service') {
+      return values
+    }
+
+    const status = await serviceStatus().catch(() => 'unknown' as const)
+    if (status === 'running') {
+      return values
+    }
+
+    notify(t('serviceUnavailableFallback'))
+    const nextValues = {
+      ...values,
+      settingMode: 'exec' as const,
+      guard: false,
+      guardNotify: false
+    }
+    originSetValues(nextValues)
+    return nextValues
+  }
+
   const onSave = async (): Promise<void> => {
     if (!validateHost(values.host)) {
-      alert(t('hostInvalid'))
+      notify(t('hostInvalid'), { variant: 'danger' })
       return
     }
 
     if (!validateBypass(values.bypass)) {
-      alert(t('bypassInvalid'))
+      notify(t('bypassInvalid'), { variant: 'danger' })
       return
     }
 
     if (values.mode === 'auto' && !validatePacScript(values.pacScript)) {
-      alert(t('pacInvalid'))
+      notify(t('pacInvalid'), { variant: 'danger' })
       return
     }
 
+    const normalizedValues = await normalizeServiceModeValues()
     const saveValues = {
-      ...values,
-      host: values.host || '127.0.0.1',
-      bypass: values.bypass.map((item) => item.trim())
+      ...normalizedValues,
+      host: normalizedValues.host || '127.0.0.1',
+      bypass: normalizedValues.bypass.map((item) => item.trim())
     }
-    try {
-      await patchAppConfig({ sysProxy: saveValues })
-      setChanged(false)
-    } catch (e) {
-      alert(e)
-      return
-    }
-    if (saveValues.enable) {
+
+    const nextConfig =
+      (await patchAppConfig({ sysProxy: saveValues })) ?? (await getAppConfig(true))
+    syncValuesFromSysProxy(nextConfig.sysProxy)
+    mutateAppConfig()
+    setChanged(false)
+    if (nextConfig.sysProxy.enable) {
       try {
-        await triggerSysProxy(saveValues.enable, onlyActiveDevice)
+        await triggerSysProxy(nextConfig.sysProxy.enable, onlyActiveDevice)
       } catch (e) {
-        alert(e)
+        notify(e, { variant: 'danger' })
         await patchAppConfig({ sysProxy: { enable: false } })
       }
     }

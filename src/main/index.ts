@@ -2,7 +2,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcMainHandlers } from './utils/ipc'
 import { registerI18nHandlers } from './i18n/handler'
 import { initMainI18n, t } from './utils/i18n'
-import { app, shell, BrowserWindow, Menu, dialog } from 'electron'
+import { app, shell, BrowserWindow, Menu } from 'electron'
 import { getAppConfig, patchControledMihomoConfig } from './config'
 import { quitWithoutCore, startCore, stopCore } from './core/manager'
 import { disableSysProxySync, triggerSysProxy } from './sys/sysproxy'
@@ -24,6 +24,7 @@ import {
 } from './sys/startup'
 import { handleDeepLink } from './resolve/deepLink'
 import { initAppQuitLifecycle } from './resolve/appLifecycle'
+import { showNotification } from './utils/notification'
 
 export { setNotQuitDialog } from './resolve/appLifecycle'
 
@@ -169,7 +170,7 @@ app.whenReady().then(async () => {
       await patchControledMihomoConfig({ tun: { enable: false } })
     }
   } catch (e) {
-    dialog.showErrorBox(t('common.errors.appCrashed'), `${e}`)
+    void showNotification({ title: t('common.errors.appCrashed'), body: `${e}`, variant: 'danger' })
     app.quit()
     return
   }
@@ -201,7 +202,7 @@ app.whenReady().then(async () => {
       })
       coreStarted = true
     } catch (e) {
-      dialog.showErrorBox('内核启动出错', `${e}`)
+      void showNotification({ title: '内核启动出错', body: `${e}`, variant: 'danger' })
     }
   })()
 

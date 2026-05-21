@@ -6,6 +6,7 @@ import React, { KeyboardEvent, useState, useEffect } from 'react'
 import { platform } from '@renderer/utils/init'
 import { registerShortcut } from '@renderer/utils/ipc'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { notify } from '@renderer/utils/notification'
 
 const keyMap = {
   Backquote: '`',
@@ -145,7 +146,7 @@ const ShortcutConfig: React.FC = () => {
 const ShortcutInput: React.FC<{
   value: string
   action: string
-  patchAppConfig: (value: Partial<AppConfig>) => Promise<void>
+  patchAppConfig: (value: Partial<AppConfig>) => Promise<unknown>
 }> = (props) => {
   const { t } = useTranslation('settings')
   const { value, action, patchAppConfig } = props
@@ -217,10 +218,10 @@ const ShortcutInput: React.FC<{
                 await patchAppConfig({ [action]: inputValue })
                 window.electron.ipcRenderer.send('updateTrayMenu')
               } else {
-                alert(t('shortcut.registerFailed'))
+                notify(t('shortcut.registerFailed'), { variant: 'danger' })
               }
             } catch (e) {
-              alert(`${t('shortcut.registerFailed')}：${e}`)
+              notify(`${t('shortcut.registerFailed')}：${e}`, { variant: 'danger' })
             }
           }}
         >

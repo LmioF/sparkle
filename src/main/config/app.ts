@@ -116,7 +116,7 @@ export async function getAppConfig(force = false): Promise<AppConfig> {
   return appConfig
 }
 
-export async function patchAppConfig(patch: Partial<AppConfig>): Promise<void> {
+export async function patchAppConfig(patch: Partial<AppConfig>): Promise<AppConfig> {
   const previousPromise = writePromise
   writePromise = (async () => {
     await previousPromise
@@ -124,6 +124,7 @@ export async function patchAppConfig(patch: Partial<AppConfig>): Promise<void> {
     await safeWriteConfig(stringifyYaml(appConfig))
   })()
   await writePromise
+  return appConfig
 }
 
 export function getAppConfigSync(): AppConfig {

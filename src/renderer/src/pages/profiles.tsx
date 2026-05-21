@@ -29,6 +29,7 @@ import useSWR from 'swr'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from '@renderer/hooks/useTranslation'
 import { useCardDndSensors } from '@renderer/hooks/use-card-dnd-sensors'
+import { notify } from '@renderer/utils/notification'
 
 const emptyItems: ProfileItem[] = []
 
@@ -190,10 +191,10 @@ const Profiles: React.FC = () => {
             const content = await readTextFile(path)
             await addProfileItem({ name: file.name, type: 'local', file: content })
           } catch (e) {
-            alert(t('fileImportFailed') + e)
+            notify(t('fileImportFailed') + e, { variant: 'danger' })
           }
         } else {
-          alert(t('unsupportedFileType'))
+          notify(t('unsupportedFileType'), { variant: 'danger' })
         }
       }
       setFileOver(false)
@@ -352,7 +353,7 @@ const Profiles: React.FC = () => {
                         useProxy
                       })
                     } catch (e) {
-                      alert(e)
+                      notify(e, { variant: 'danger' })
                     } finally {
                       setSubStoreImporting(false)
                     }
@@ -373,7 +374,7 @@ const Profiles: React.FC = () => {
                         useProxy
                       })
                     } catch (e) {
-                      alert(e)
+                      notify(e, { variant: 'danger' })
                     } finally {
                       setSubStoreImporting(false)
                     }
@@ -406,7 +407,7 @@ const Profiles: React.FC = () => {
                         await addProfileItem({ name: fileName, type: 'local', file: content })
                       }
                     } catch (e) {
-                      alert(e)
+                      notify(e, { variant: 'danger' })
                     }
                     break
                   }

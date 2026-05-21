@@ -7,6 +7,7 @@ import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { restartCore } from '@renderer/utils/ipc'
 import EditableList from '../base/base-list-editor'
 import { platform } from '@renderer/utils/init'
+import { notify } from '@renderer/utils/notification'
 
 const EnvSetting: React.FC = () => {
   const { t } = useTranslation('mihomo')
@@ -23,7 +24,7 @@ const EnvSetting: React.FC = () => {
       await patchAppConfig({ [key]: value })
       await restartCore()
     } catch (e) {
-      alert(e)
+      notify(e, { variant: 'danger' })
     } finally {
       PubSub.publish('mihomo-core-changed')
     }

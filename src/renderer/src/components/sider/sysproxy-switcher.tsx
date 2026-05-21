@@ -9,6 +9,7 @@ import React from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { notify } from '@renderer/utils/notification'
 
 interface Props {
   iconOnly?: boolean
@@ -51,7 +52,7 @@ const SysproxySwitcher: React.FC<Props> = (props) => {
       window.electron.ipcRenderer.send('updateFloatingWindow')
       window.electron.ipcRenderer.send('updateTrayMenu')
     } catch (e) {
-      alert(e)
+      notify(e, { variant: 'danger' })
     }
   }
 

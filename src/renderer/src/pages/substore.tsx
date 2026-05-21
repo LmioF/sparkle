@@ -14,6 +14,7 @@ import React, { useEffect, useState } from 'react'
 import { HiExternalLink } from 'react-icons/hi'
 import { IoMdCloudDownload } from 'react-icons/io'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { notify } from '@renderer/utils/notification'
 
 const SubStore: React.FC = () => {
   const { t } = useTranslation('substore')
@@ -47,7 +48,7 @@ const SubStore: React.FC = () => {
               isLoading={isUpdating}
               onPress={async () => {
                 try {
-                  new Notification(t('updating'))
+                  notify(t('updating'))
                   setIsUpdating(true)
                   await downloadSubStore()
                   await stopSubStoreBackendServer()
@@ -57,9 +58,9 @@ const SubStore: React.FC = () => {
                   await stopSubStoreFrontendServer()
                   await startSubStoreFrontendServer()
                   await getPort()
-                  new Notification(t('updateSuccess'))
+                  notify(t('updateSuccess'), { variant: 'success' })
                 } catch (e) {
-                  new Notification(`${t('updateFailed')}：${e}`)
+                  notify(`${t('updateFailed')}：${e}`, { variant: 'danger' })
                 } finally {
                   setIsUpdating(false)
                 }

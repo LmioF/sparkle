@@ -14,6 +14,7 @@ import React, { useState } from 'react'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { restartCore } from '@renderer/utils/ipc'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { notify } from '@renderer/utils/notification'
 
 interface Props {
   item: OverrideItem
@@ -39,7 +40,7 @@ const EditInfoModal: React.FC<Props> = (props) => {
       }
       onClose()
     } catch (e) {
-      alert(e)
+      notify(e, { variant: 'danger' })
     }
   }
 

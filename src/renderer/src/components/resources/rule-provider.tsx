@@ -15,6 +15,7 @@ import { IoMdRefresh } from 'react-icons/io'
 import { CgLoadbarDoc } from 'react-icons/cg'
 import { MdEditDocument } from 'react-icons/md'
 import dayjs from 'dayjs'
+import { notify } from '@renderer/utils/notification'
 
 const RuleProvider: React.FC = () => {
   const { t } = useTranslation('resource')
@@ -79,7 +80,7 @@ const RuleProvider: React.FC = () => {
       await mihomoUpdateRuleProviders(name)
       mutate()
     } catch (e) {
-      new Notification(`${name} ${t('updateFailed')}\n${e}`)
+      notify(`${name} ${t('updateFailed')}\n${e}`, { variant: 'danger' })
     } finally {
       setUpdating((prev) => {
         prev[index] = false

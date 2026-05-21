@@ -10,6 +10,7 @@ import { IoMdCloudDownload, IoMdRefresh } from 'react-icons/io'
 import { HiExternalLink } from 'react-icons/hi'
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'
 import { isValidListenAddress } from '@renderer/utils/validate'
+import { notify } from '@renderer/utils/notification'
 
 const ControllerSetting: React.FC = () => {
   const { t } = useTranslation('mihomo')
@@ -43,9 +44,9 @@ const ControllerSetting: React.FC = () => {
     try {
       setUpgrading(true)
       await mihomoUpgradeUI()
-      new Notification(t('controller.panelUpdateSuccess'))
+      notify(t('controller.panelUpdateSuccess'), { variant: 'success' })
     } catch (e) {
-      alert(e)
+      notify(e, { variant: 'danger' })
     } finally {
       setUpgrading(false)
     }

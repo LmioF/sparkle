@@ -7,6 +7,7 @@ import WebdavRestoreModal from './webdav-restore-modal'
 import debounce from '@renderer/utils/debounce'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { notify } from '@renderer/utils/notification'
 
 const WebdavConfig: React.FC = () => {
   const { t } = useTranslation('settings')
@@ -25,11 +26,12 @@ const WebdavConfig: React.FC = () => {
     setBackuping(true)
     try {
       await webdavBackup()
-      new window.Notification(t('backup.webdav.backupSuccess'), {
-        body: t('backup.webdav.backupSuccessDesc')
+      notify(t('backup.webdav.backupSuccess'), {
+        body: t('backup.webdav.backupSuccessDesc'),
+        variant: 'success'
       })
     } catch (e) {
-      alert(e)
+      notify(e, { variant: 'danger' })
     } finally {
       setBackuping(false)
     }
@@ -42,7 +44,7 @@ const WebdavConfig: React.FC = () => {
       setFilenames(filenames)
       setRestoreOpen(true)
     } catch (e) {
-      alert(`${t('backup.webdav.fetchListFailed')}：${e}`)
+      notify(`${t('backup.webdav.fetchListFailed')}：${e}`, { variant: 'danger' })
     } finally {
       setRestoring(false)
     }
