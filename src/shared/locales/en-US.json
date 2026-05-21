@@ -648,7 +648,10 @@
     "geoDataMode": "GeoIP Data Mode",
     "autoUpdateGeo": "Auto Update Geo Database",
     "geoUpdateSuccess": "Geo database updated successfully",
-    "updateInterval": "Update Interval (Hours)"
+    "updateInterval": "Update Interval (Hours)",
+    "permissionSaveTitle": "Saving requires elevation",
+    "permissionSaveDesc": "The current file or directory is not writable. You can cancel this save, or elevate permissions to repair access and continue saving.",
+    "permissionSaveElevate": "Save with elevation"
   },
   "override": {
     "title": "Override",
