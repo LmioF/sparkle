@@ -9,6 +9,7 @@ import {
 } from '@heroui/react'
 import React, { useEffect, useState } from 'react'
 import { BaseEditor } from '../base/base-editor-lazy'
+import { TextViewer } from '../base/text-viewer'
 import { useTranslation } from '@renderer/hooks/useTranslation'
 import {
   getFilePreviewStr,
@@ -23,6 +24,7 @@ import { notify } from '@renderer/utils/notification'
 
 type Language = 'yaml' | 'javascript' | 'css' | 'json' | 'text'
 const FILE_PERMISSION_ELEVATION_REQUIRED = 'FILE_PERMISSION_ELEVATION_REQUIRED'
+const TEXT_VIEWER_LINE_LIMIT = 20000
 
 interface Props {
   onClose: () => void
@@ -59,6 +61,19 @@ function getViewerContent(fileContent: string, providerType: string, title: stri
   }
 }
 
+function hasManyLines(value: string, limit: number): boolean {
+  let lines = 1
+  for (let index = 0; index < value.length; index++) {
+    if (value.charCodeAt(index) === 10) {
+      lines++
+      if (lines > limit) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
 const Viewer: React.FC<Props> = (props) => {
   const { type, path, title, format, providerType, onClose } = props
   const { t } = useTranslation('resource')
@@ -69,6 +84,7 @@ const Viewer: React.FC<Props> = (props) => {
   const [isLoading, setIsLoading] = useState(true)
   const language = type === 'Inline' ? 'yaml' : getDefaultLanguage(format)
   const editorLanguage = format === 'MrsRule' ? 'text' : language
+  const useTextViewer = type !== 'File' && hasManyLines(currData, TEXT_VIEWER_LINE_LIMIT)
 
   const save = async (elevated = false): Promise<void> => {
     setIsSaving(true)
@@ -168,6 +184,8 @@ const Viewer: React.FC<Props> = (props) => {
             <div className="flex h-full items-center justify-center">
               <Spinner size="lg" />
             </div>
+          ) : useTextViewer ? (
+            <TextViewer value={currData} />
           ) : (
             <BaseEditor
               language={editorLanguage}
