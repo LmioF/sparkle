@@ -12,6 +12,10 @@ import { createHash } from 'crypto'
 import { setNotQuitDialog, mainWindow } from '..'
 import { triggerSysProxy } from '../sys/sysproxy'
 import { serviceStatus, stopService } from '../service/manager'
+import {
+  clearAppUpdateServiceFallbackPause,
+  pauseServiceFallbackForAppUpdate
+} from '../service/fallback'
 import { appendAppLog } from '../utils/log'
 
 let downloadCancelToken: CancelTokenSource | null = null
@@ -23,7 +27,7 @@ async function fetchBetaChangelog(
 ): Promise<string | undefined> {
   try {
     const proxyConfig =
-    (!tunEnabled && mixedPort != 0) // 如果 TUN 开启，则不使用 proxy 字段
+      !tunEnabled && mixedPort != 0 // 如果 TUN 开启，则不使用 proxy 字段
         ? {
             proxy: {
               protocol: 'http' as const,
@@ -137,10 +141,10 @@ async function stopServiceForPortableUpdate(): Promise<void> {
 }
 
 export async function downloadAndInstallUpdate(version: string): Promise<void> {
+  let appUpdateInstalling = false
   const mihomoConfig = await getControledMihomoConfig()
   const mixedPort = mihomoConfig['mixed-port'] ?? 7890
   const tunEnabled = mihomoConfig.tun?.enable ?? false
-  
   let releaseTag = version
   if (version.includes('beta')) {
     releaseTag = 'pre-release'
@@ -166,12 +170,12 @@ export async function downloadAndInstallUpdate(version: string): Promise<void> {
     headers: { Accept: 'application/vnd.github.v3+json' },
     ...(!tunEnabled &&
       mixedPort != 0 && {
-      proxy: {
-        protocol: 'http',
-        host: '127.0.0.1',
-        port: mixedPort
-      }
-    }),
+        proxy: {
+          protocol: 'http',
+          host: '127.0.0.1',
+          port: mixedPort
+        }
+      }),
     cancelToken: downloadCancelToken.token
   }
 
@@ -198,12 +202,12 @@ export async function downloadAndInstallUpdate(version: string): Promise<void> {
         responseType: 'arraybuffer',
         ...(!tunEnabled &&
           mixedPort != 0 && {
-          proxy: {
-            protocol: 'http',
-            host: '127.0.0.1',
-            port: mixedPort
-          }
-        }),
+            proxy: {
+              protocol: 'http',
+              host: '127.0.0.1',
+              port: mixedPort
+            }
+          }),
         headers: {
           'User-Agent': 'Sparkle-Updater'
         },
@@ -237,14 +241,17 @@ export async function downloadAndInstallUpdate(version: string): Promise<void> {
 
     await triggerSysProxy(false, false)
     if (file.endsWith('.exe')) {
+      await pauseServiceFallbackForAppUpdate()
       spawn(path.join(dataDir(), file), ['/S', '--updated', '--force-run'], {
         detached: true,
         stdio: 'ignore'
       }).unref()
+      appUpdateInstalling = true
       setNotQuitDialog()
       app.quit()
     }
     if (file.endsWith('.7z')) {
+      await pauseServiceFallbackForAppUpdate()
       await stopServiceForPortableUpdate()
       await copyFile(path.join(resourcesFilesDir(), '7za.exe'), path.join(dataDir(), '7za.exe'))
       spawn(
@@ -258,24 +265,31 @@ export async function downloadAndInstallUpdate(version: string): Promise<void> {
           detached: true
         }
       ).unref()
+      appUpdateInstalling = true
       setNotQuitDialog()
       app.quit()
     }
     if (file.endsWith('.pkg')) {
       try {
+        await pauseServiceFallbackForAppUpdate()
         const execPromise = promisify(exec)
         const escapedPath = path.join(dataDir(), file).replace(/'/g, "'\\''")
         const shell = `installer -pkg '${escapedPath}' -target /`
         const command = `do shell script "${shell}" with administrator privileges`
         await execPromise(`osascript -e '${command}'`)
+        appUpdateInstalling = true
         app.relaunch()
         setNotQuitDialog()
         app.quit()
       } catch {
+        await clearAppUpdateServiceFallbackPause()
         shell.openPath(path.join(dataDir(), file))
       }
     }
   } catch (e) {
+    if (!appUpdateInstalling) {
+      await clearAppUpdateServiceFallbackPause()
+    }
     await rm(path.join(dataDir(), file), { force: true })
     if (axios.isCancel(e)) {
       mainWindow?.webContents.send('update-status', {

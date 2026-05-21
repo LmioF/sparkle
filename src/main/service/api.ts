@@ -5,6 +5,7 @@ import { KeyManager } from './key'
 import { serviceIpcPath } from '../utils/dirs'
 import { t } from '../utils/i18n'
 import { appendAppLog } from '../utils/log'
+import { shouldSkipServiceUnavailableFallback } from './fallback'
 
 let serviceAxios: AxiosInstance | null = null
 let keyManager: KeyManager | null = null
@@ -191,6 +192,7 @@ export function isServiceUnavailableError(error: unknown): boolean {
 }
 
 function scheduleServiceUnavailableFallback(reason: unknown): void {
+  if (shouldSkipServiceUnavailableFallback()) return
   if (serviceUnavailableFallbackTimer || serviceUnavailableFallbackPromise) return
 
   serviceUnavailableFallbackTimer = setTimeout(() => {
@@ -202,6 +204,7 @@ function scheduleServiceUnavailableFallback(reason: unknown): void {
 }
 
 async function runServiceUnavailableFallback(reason: unknown): Promise<void> {
+  if (shouldSkipServiceUnavailableFallback()) return
   if (await isServiceUsable()) return
 
   if (!serviceUnavailableFallbackHandler) {
