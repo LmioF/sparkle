@@ -579,7 +579,9 @@
     "autoUpdate": "自動更新",
     "updateInterval": "更新間隔（分鐘）",
     "intervalLockedTip": "目前更新間隔由遠端管理",
-    "noAvailableOverride": "沒有可用的覆寫"
+    "noAvailableOverride": "沒有可用的覆寫",
+    "showGithubToken": "顯示 GitHub Token",
+    "hideGithubToken": "隱藏 GitHub Token"
   },
   "connection": {
     "title": "連線",

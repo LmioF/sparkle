@@ -579,7 +579,9 @@
     "autoUpdate": "Auto Update",
     "updateInterval": "Update Interval (Minutes)",
     "intervalLockedTip": "Current update interval is managed remotely",
-    "noAvailableOverride": "No available override"
+    "noAvailableOverride": "No available override",
+    "showGithubToken": "Show GitHub Token",
+    "hideGithubToken": "Hide GitHub Token"
   },
   "connection": {
     "title": "Connections",

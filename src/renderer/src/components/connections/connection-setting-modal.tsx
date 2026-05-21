@@ -1,15 +1,7 @@
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  Button,
-  Switch,
-  ModalBody,
-  Input
-} from '@heroui/react'
+import { Button, InputGroup, Modal, Switch } from '@heroui-v3/react'
 import React, { useState } from 'react'
 import SettingItem from '../base/base-setting-item'
+import { settingItemProps } from '../base/base-controls'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { useTranslation } from '@renderer/hooks/useTranslation'
 import { restartMihomoConnections } from '@renderer/utils/ipc'
@@ -27,75 +19,81 @@ const ConnectionSettingModal: React.FC<Props> = (props) => {
   const [intervalInput, setIntervalInput] = useState(connectionInterval)
 
   return (
-    <Modal
-      backdrop="blur"
-      classNames={{ backdrop: 'top-[48px]' }}
-      size="md"
-      hideCloseButton
-      isOpen={true}
-      onOpenChange={onClose}
-      scrollBehavior="inside"
-    >
-      <ModalContent className="flag-emoji">
-        <ModalHeader className="flex">{t('settings')}</ModalHeader>
-        <ModalBody className="py-2 gap-1">
-          <SettingItem title={t('displayIcon')} divider>
-            <Switch
-              size="sm"
-              isSelected={displayIcon}
-              onValueChange={(v) => {
-                patchAppConfig({ displayIcon: v })
-              }}
-            />
-          </SettingItem>
-          <SettingItem title={t('displayAppName')} divider>
-            <Switch
-              size="sm"
-              isSelected={displayAppName}
-              onValueChange={(v) => {
-                patchAppConfig({ displayAppName: v })
-              }}
-            />
-          </SettingItem>
-          <SettingItem title={t('refreshInterval')}>
-            <div className="flex">
-              {intervalInput !== connectionInterval && (
-                <Button
-                  size="sm"
-                  color="primary"
-                  className="mr-2"
-                  onPress={() => {
-                    const actualValue = intervalInput < 100 ? 100 : intervalInput
-                    setIntervalInput(actualValue)
-                    patchAppConfig({ connectionInterval: actualValue })
-                    restartMihomoConnections()
+    <Modal>
+      <Modal.Backdrop
+        isOpen={true}
+        onOpenChange={onClose}
+        variant="blur"
+        className="top-12 h-[calc(100%-48px)]"
+      >
+        <Modal.Container>
+          <Modal.Dialog className="max-w-md flag-emoji">
+            <Modal.Header>
+              <Modal.Heading>{t('settings')}</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body className="py-2 gap-1">
+              <SettingItem title={t('displayIcon')} {...settingItemProps} divider>
+                <Switch
+                  aria-label={t('displayIcon')}
+                  isSelected={displayIcon}
+                  onChange={(v) => {
+                    patchAppConfig({ displayIcon: v })
                   }}
                 >
-                  {t('common:actions.confirm')}
-                </Button>
-              )}
-              <Input
-                size="sm"
-                type="number"
-                className="w-37.5"
-                endContent="ms"
-                placeholder={t('refreshIntervalPlaceholder')}
-                value={intervalInput.toString()}
-                max={65535}
-                min={0}
-                onValueChange={(v) => {
-                  setIntervalInput(parseInt(v) || 0)
-                }}
-              />
-            </div>
-          </SettingItem>
-        </ModalBody>
-        <ModalFooter>
-          <Button size="sm" variant="light" onPress={onClose}>
-            {t('common:actions.close')}
-          </Button>
-        </ModalFooter>
-      </ModalContent>
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch>
+              </SettingItem>
+              <SettingItem title={t('displayAppName')} {...settingItemProps} divider>
+                <Switch
+                  aria-label={t('displayAppName')}
+                  isSelected={displayAppName}
+                  onChange={(v) => {
+                    patchAppConfig({ displayAppName: v })
+                  }}
+                >
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch>
+              </SettingItem>
+              <SettingItem title={t('refreshInterval')} {...settingItemProps}>
+                <div className="setting-item__inline-controls">
+                  {intervalInput !== connectionInterval && (
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      onPress={() => {
+                        const actualValue = Math.min(10000, Math.max(100, intervalInput))
+                        setIntervalInput(actualValue)
+                        patchAppConfig({ connectionInterval: actualValue })
+                        restartMihomoConnections()
+                      }}
+                    >
+                      {t('common:actions.confirm')}
+                    </Button>
+                  )}
+                  <InputGroup variant="secondary">
+                    <InputGroup.Input
+                      aria-label={t('refreshInterval')}
+                      type="number"
+                      value={intervalInput.toString()}
+                      max={10000}
+                      min={100}
+                      onChange={(event) => {
+                        setIntervalInput(parseInt(event.target.value) || 100)
+                      }}
+                    />
+                    <InputGroup.Suffix>ms</InputGroup.Suffix>
+                  </InputGroup>
+                </div>
+              </SettingItem>
+            </Modal.Body>
+            <Modal.CloseTrigger className="app-nodrag" />
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </Modal>
   )
 }

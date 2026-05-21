@@ -1,24 +1,11 @@
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Switch,
-  Input,
-  Select,
-  SelectItem,
-  Tab,
-  Tabs
-} from '@heroui/react'
+import { Input, InputGroup, ListBox, Modal, Select, Switch } from '@heroui-v3/react'
 import React, { useState, useEffect, useRef } from 'react'
 import SettingItem from '../base/base-setting-item'
+import { SettingTabs, settingItemProps } from '../base/base-controls'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { useTranslation } from '@renderer/hooks/useTranslation'
 import debounce from '@renderer/utils/debounce'
 import {
-  DEFAULT_DELAY_TEST_CONCURRENCY,
   MAX_DELAY_TEST_CONCURRENCY,
   MIN_DELAY_TEST_CONCURRENCY,
   normalizeDelayTestConcurrency
@@ -60,185 +47,223 @@ const ProxySettingModal: React.FC<Props> = (props) => {
   }, [delayTestUrl])
 
   return (
-    <Modal
-      backdrop="blur"
-      classNames={{ backdrop: 'top-[48px]' }}
-      size="xl"
-      hideCloseButton
-      isOpen={true}
-      onOpenChange={onClose}
-      scrollBehavior="inside"
-    >
-      <ModalContent className="flag-emoji">
-        <ModalHeader className="flex pb-0">{t('settings')}</ModalHeader>
-        <ModalBody className="py-2 gap-1">
-          <SettingItem title={t('proxyCols')} divider>
-            <Select
-              classNames={{ trigger: 'data-[hover=true]:bg-default-200' }}
-              className="w-37.5"
-              size="sm"
-              selectedKeys={new Set([proxyCols])}
-              disallowEmptySelection={true}
-              onSelectionChange={async (v) => {
-                await patchAppConfig({ proxyCols: v.currentKey as 'auto' | '1' | '2' | '3' | '4' })
-              }}
-            >
-              <SelectItem key="auto">{t('proxyColsAuto')}</SelectItem>
-              <SelectItem key="1">{t('proxyCols1')}</SelectItem>
-              <SelectItem key="2">{t('proxyCols2')}</SelectItem>
-              <SelectItem key="3">{t('proxyCols3')}</SelectItem>
-              <SelectItem key="4">{t('proxyCols4')}</SelectItem>
-            </Select>
-          </SettingItem>
-          <SettingItem title={t('proxyDisplayOrder')} divider>
-            <Tabs
-              size="sm"
-              color="primary"
-              selectedKey={proxyDisplayOrder}
-              onSelectionChange={async (v) => {
-                await patchAppConfig({
-                  proxyDisplayOrder: v as 'default' | 'delay' | 'name'
-                })
-              }}
-            >
-              <Tab key="default" title={t('orderBy.default')} />
-              <Tab key="delay" title={t('orderBy.delay')} />
-              <Tab key="name" title={t('orderBy.name')} />
-            </Tabs>
-          </SettingItem>
-          <SettingItem title={t('groupDisplayLayout')} divider>
-            <Tabs
-              size="sm"
-              color="primary"
-              selectedKey={groupDisplayLayout}
-              onSelectionChange={async (v) => {
-                await patchAppConfig({
-                  groupDisplayLayout: v as 'hidden' | 'single' | 'double'
-                })
-              }}
-            >
-              <Tab key="hidden" title={t('displayLayout.hidden')} />
-              <Tab key="single" title={t('displayLayout.single')} />
-              <Tab key="double" title={t('displayLayout.double')} />
-            </Tabs>
-          </SettingItem>
-          <SettingItem title={t('proxyDisplayLayout')} divider>
-            <Tabs
-              size="sm"
-              color="primary"
-              selectedKey={proxyDisplayLayout}
-              onSelectionChange={async (v) => {
-                await patchAppConfig({
-                  proxyDisplayLayout: v as 'hidden' | 'single' | 'double'
-                })
-              }}
-            >
-              <Tab key="hidden" title={t('displayLayout.hidden')} />
-              <Tab key="single" title={t('displayLayout.single')} />
-              <Tab key="double" title={t('displayLayout.double')} />
-            </Tabs>
-          </SettingItem>
-          <SettingItem title={t('autoCloseConnection')} divider>
-            <Switch
-              size="sm"
-              isSelected={autoCloseConnection}
-              onValueChange={(v) => {
-                patchAppConfig({ autoCloseConnection: v })
-              }}
-            />
-          </SettingItem>
-          {autoCloseConnection && (
-            <SettingItem title={t('closeMode')} divider>
-              <Tabs
-                size="sm"
-                color="primary"
-                selectedKey={closeMode}
-                onSelectionChange={async (v) => {
-                  await patchAppConfig({
-                    closeMode: v as 'all' | 'group'
-                  })
-                }}
-              >
-                <Tab key="all" title={t('closeModeAll')} />
-                <Tab key="group" title={t('closeModeGroup')} />
-              </Tabs>
-            </SettingItem>
-          )}
-          <SettingItem title={t('delayTestUrl')} divider>
-            <Input
-              size="sm"
-              className="w-[60%]"
-              value={url}
-              placeholder={t('delayTestUrlPlaceholder')}
-              onValueChange={(v) => {
-                setUrl(v)
-                setUrlDebounce(v)
-              }}
-            />
-          </SettingItem>
-          <SettingItem title={t('delayTestUrlScope')} divider>
-            <Tabs
-              size="sm"
-              color="primary"
-              selectedKey={delayTestUrlScope}
-              onSelectionChange={async (v) => {
-                await patchAppConfig({
-                  delayTestUrlScope: v as 'group' | 'global'
-                })
-              }}
-            >
-              <Tab key="group" title={t('delayTestUrlScopeGroup')} />
-              <Tab key="global" title={t('delayTestUrlScopeGlobal')} />
-            </Tabs>
-          </SettingItem>
-          <SettingItem title={t('delayTestUseGroupApi')} divider>
-            <Switch
-              size="sm"
-              isSelected={delayTestUseGroupApi}
-              onValueChange={(v) => {
-                patchAppConfig({ delayTestUseGroupApi: v })
-              }}
-            />
-          </SettingItem>
-          {!delayTestUseGroupApi && (
-            <SettingItem title={t('delayTestConcurrency')} divider>
-              <Input
-                type="number"
-                size="sm"
-                className="w-25"
-                value={delayTestConcurrency?.toString()}
-                min={MIN_DELAY_TEST_CONCURRENCY}
-                max={MAX_DELAY_TEST_CONCURRENCY}
-                placeholder={t('delayTestConcurrencyPlaceholder', {
-                  defaultValue: `默认 ${DEFAULT_DELAY_TEST_CONCURRENCY}`
-                })}
-                onValueChange={(v) => {
-                  patchAppConfig({
-                    delayTestConcurrency: normalizeDelayTestConcurrency(parseInt(v))
-                  })
-                }}
-              />
-            </SettingItem>
-          )}
-          <SettingItem title={t('delayTestTimeout')}>
-            <Input
-              type="number"
-              size="sm"
-              className="w-25"
-              value={delayTestTimeout?.toString()}
-              placeholder={t('delayTestTimeoutPlaceholder')}
-              onValueChange={(v) => {
-                patchAppConfig({ delayTestTimeout: parseInt(v) })
-              }}
-            />
-          </SettingItem>
-        </ModalBody>
-        <ModalFooter>
-          <Button size="sm" variant="light" onPress={onClose}>
-            {t('common:actions.close')}
-          </Button>
-        </ModalFooter>
-      </ModalContent>
+    <Modal>
+      <Modal.Backdrop
+        isOpen={true}
+        onOpenChange={onClose}
+        variant="blur"
+        className="top-12 h-[calc(100%-48px)]"
+      >
+        <Modal.Container>
+          <Modal.Dialog className="max-w-xl flag-emoji">
+            <Modal.Header className="pb-0">
+              <Modal.Heading>{t('settings')}</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body className="no-scrollbar max-h-[70vh] overflow-y-auto py-2 gap-1">
+              <SettingItem title={t('proxyCols')} {...settingItemProps} divider>
+                <Select
+                  aria-label={t('proxyCols')}
+                  value={proxyCols}
+                  variant="secondary"
+                  onChange={async (value) => {
+                    if (Array.isArray(value) || value == null) return
+                    if (value === proxyCols) return
+
+                    await patchAppConfig({
+                      proxyCols: value as 'auto' | '1' | '2' | '3' | '4'
+                    })
+                  }}
+                >
+                  <Select.Trigger>
+                    <Select.Value />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <ListBox>
+                      <ListBox.Item id="auto" textValue={t('proxyColsAuto')}>
+                        {t('proxyColsAuto')}
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                      <ListBox.Item id="1" textValue={t('proxyCols1')}>
+                        {t('proxyCols1')}
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                      <ListBox.Item id="2" textValue={t('proxyCols2')}>
+                        {t('proxyCols2')}
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                      <ListBox.Item id="3" textValue={t('proxyCols3')}>
+                        {t('proxyCols3')}
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                      <ListBox.Item id="4" textValue={t('proxyCols4')}>
+                        {t('proxyCols4')}
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                    </ListBox>
+                  </Select.Popover>
+                </Select>
+              </SettingItem>
+              <SettingItem title={t('proxyDisplayOrder')} {...settingItemProps} divider>
+                <SettingTabs
+                  ariaLabel={t('proxyDisplayOrder')}
+                  selectedKey={proxyDisplayOrder}
+                  options={[
+                    { id: 'default', label: t('orderBy.default') },
+                    { id: 'delay', label: t('orderBy.delay') },
+                    { id: 'name', label: t('orderBy.name') }
+                  ]}
+                  onChange={async (v) => {
+                    await patchAppConfig({
+                      proxyDisplayOrder: v as 'default' | 'delay' | 'name'
+                    })
+                  }}
+                />
+              </SettingItem>
+              <SettingItem title={t('groupDisplayLayout')} {...settingItemProps} divider>
+                <SettingTabs
+                  ariaLabel={t('groupDisplayLayout')}
+                  selectedKey={groupDisplayLayout}
+                  options={[
+                    { id: 'hidden', label: t('displayLayout.hidden') },
+                    { id: 'single', label: t('displayLayout.single') },
+                    { id: 'double', label: t('displayLayout.double') }
+                  ]}
+                  onChange={async (v) => {
+                    await patchAppConfig({
+                      groupDisplayLayout: v as 'hidden' | 'single' | 'double'
+                    })
+                  }}
+                />
+              </SettingItem>
+              <SettingItem title={t('proxyDisplayLayout')} {...settingItemProps} divider>
+                <SettingTabs
+                  ariaLabel={t('proxyDisplayLayout')}
+                  selectedKey={proxyDisplayLayout}
+                  options={[
+                    { id: 'hidden', label: t('displayLayout.hidden') },
+                    { id: 'single', label: t('displayLayout.single') },
+                    { id: 'double', label: t('displayLayout.double') }
+                  ]}
+                  onChange={async (v) => {
+                    await patchAppConfig({
+                      proxyDisplayLayout: v as 'hidden' | 'single' | 'double'
+                    })
+                  }}
+                />
+              </SettingItem>
+              <SettingItem title={t('autoCloseConnection')} {...settingItemProps} divider>
+                <Switch
+                  aria-label={t('autoCloseConnection')}
+                  isSelected={autoCloseConnection}
+                  onChange={(v) => {
+                    patchAppConfig({ autoCloseConnection: v })
+                  }}
+                >
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch>
+              </SettingItem>
+              {autoCloseConnection && (
+                <SettingItem title={t('closeMode')} {...settingItemProps} divider>
+                  <SettingTabs
+                    ariaLabel={t('closeMode')}
+                    selectedKey={closeMode}
+                    options={[
+                      { id: 'all', label: t('closeModeAll') },
+                      { id: 'group', label: t('closeModeGroup') }
+                    ]}
+                    onChange={async (v) => {
+                      await patchAppConfig({
+                        closeMode: v as 'all' | 'group'
+                      })
+                    }}
+                  />
+                </SettingItem>
+              )}
+              <SettingItem title={t('delayTestUrl')} {...settingItemProps} divider>
+                <Input
+                  aria-label={t('delayTestUrl')}
+                  data-setting-input="url"
+                  value={url}
+                  placeholder={t('delayTestUrlPlaceholder')}
+                  variant="secondary"
+                  onChange={(event) => {
+                    const v = event.target.value
+                    setUrl(v)
+                    setUrlDebounce(v)
+                  }}
+                />
+              </SettingItem>
+              <SettingItem title={t('delayTestUrlScope')} {...settingItemProps} divider>
+                <SettingTabs
+                  ariaLabel={t('delayTestUrlScope')}
+                  selectedKey={delayTestUrlScope}
+                  options={[
+                    { id: 'group', label: t('delayTestUrlScopeGroup') },
+                    { id: 'global', label: t('delayTestUrlScopeGlobal') }
+                  ]}
+                  onChange={async (v) => {
+                    await patchAppConfig({
+                      delayTestUrlScope: v as 'group' | 'global'
+                    })
+                  }}
+                />
+              </SettingItem>
+              <SettingItem title={t('delayTestUseGroupApi')} {...settingItemProps} divider>
+                <Switch
+                  aria-label={t('delayTestUseGroupApi')}
+                  isSelected={delayTestUseGroupApi}
+                  onChange={(v) => {
+                    patchAppConfig({ delayTestUseGroupApi: v })
+                  }}
+                >
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch>
+              </SettingItem>
+              {!delayTestUseGroupApi && (
+                <SettingItem title={t('delayTestConcurrency')} {...settingItemProps} divider>
+                  <InputGroup data-setting-input="number" variant="secondary">
+                    <InputGroup.Input
+                      aria-label={t('delayTestConcurrency')}
+                      type="number"
+                      value={delayTestConcurrency?.toString()}
+                      min={MIN_DELAY_TEST_CONCURRENCY}
+                      max={MAX_DELAY_TEST_CONCURRENCY}
+                      placeholder={t('delayTestConcurrencyPlaceholder')}
+                      onChange={(event) => {
+                        const v = event.target.value
+                        patchAppConfig({
+                          delayTestConcurrency: normalizeDelayTestConcurrency(parseInt(v))
+                        })
+                      }}
+                    />
+                  </InputGroup>
+                </SettingItem>
+              )}
+              <SettingItem title={t('delayTestTimeout')} {...settingItemProps}>
+                <InputGroup data-setting-input="number" variant="secondary">
+                  <InputGroup.Input
+                    aria-label={t('delayTestTimeout')}
+                    type="number"
+                    value={delayTestTimeout?.toString()}
+                    placeholder={t('delayTestTimeoutPlaceholder')}
+                    onChange={(event) => {
+                      const v = event.target.value
+                      patchAppConfig({ delayTestTimeout: parseInt(v) })
+                    }}
+                  />
+                  <InputGroup.Suffix>ms</InputGroup.Suffix>
+                </InputGroup>
+              </SettingItem>
+            </Modal.Body>
+            <Modal.CloseTrigger className="app-nodrag" />
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </Modal>
   )
 }

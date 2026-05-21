@@ -122,7 +122,8 @@ async function updateGist(token: string, id: string, content: string): Promise<v
 }
 
 export async function getGistUrl(): Promise<string> {
-  const { githubToken } = await getAppConfig()
+  const { githubToken, gistSyncEnabled = Boolean(githubToken) } = await getAppConfig()
+  if (!gistSyncEnabled) return ''
   if (!githubToken) return ''
   try {
     const gists = await listGists(githubToken)
@@ -140,7 +141,8 @@ export async function getGistUrl(): Promise<string> {
 }
 
 export async function uploadRuntimeConfig(): Promise<void> {
-  const { githubToken } = await getAppConfig()
+  const { githubToken, gistSyncEnabled = Boolean(githubToken) } = await getAppConfig()
+  if (!gistSyncEnabled) return
   if (!githubToken) return
   try {
     const gists = await listGists(githubToken)
