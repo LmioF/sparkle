@@ -647,6 +647,8 @@
     "updateFailed": "更新失敗",
     "edit": "編輯",
     "view": "檢視",
+    "qrCode": "QR Code",
+    "trafficUsage": "流量使用",
     "longTerm": "長期有效",
     "mmdb": "MMDB 資料庫",
     "asn": "ASN 資料庫",

@@ -647,6 +647,8 @@
     "updateFailed": "更新失败",
     "edit": "编辑",
     "view": "查看",
+    "qrCode": "二维码",
+    "trafficUsage": "流量使用",
     "longTerm": "长期有效",
     "mmdb": "MMDB 数据库",
     "asn": "ASN 数据库",

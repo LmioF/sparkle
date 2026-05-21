@@ -647,6 +647,8 @@
     "updateFailed": "Update Failed",
     "edit": "Edit",
     "view": "View",
+    "qrCode": "QR Code",
+    "trafficUsage": "Traffic Usage",
     "longTerm": "Long Term",
     "mmdb": "MMDB Database",
     "asn": "ASN Database",
