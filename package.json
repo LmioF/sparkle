@@ -3,7 +3,10 @@
   "version": "1.7.0",
   "description": "Sparkle",
   "main": "./out/main/index.js",
-  "author": "INKCR0W",
+  "author": {
+    "name": "INKCR0W",
+    "email": "119268906+INKCR0W@users.noreply.github.com"
+  },
   "homepage": "https://github.com/INKCR0W/sparkle",
   "scripts": {
     "format": "prettier --write .",
