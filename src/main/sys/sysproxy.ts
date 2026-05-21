@@ -22,6 +22,7 @@ export async function triggerSysProxy(enable: boolean, onlyActiveDevice: boolean
   if (!enable) {
     try {
       await disableSysProxy(onlyActiveDevice)
+      sysProxyRetryCount = 0
     } catch (e) {
       console.warn('[SysProxy] Failed to disable system proxy:', e)
     }
@@ -92,11 +93,10 @@ async function setSysProxy(onlyActiveDevice: boolean): Promise<void> {
   const { mode, host, bypass = defaultBypass, settingMode = 'exec' } = sysProxy
   const { 'mixed-port': port = 7890 } = await getControledMihomoConfig()
   const execFilePromise = promisify(execFile)
-  const useService = process.platform === 'darwin' && settingMode === 'service'
 
   switch (mode || 'manual') {
     case 'auto': {
-      if (useService) {
+      if (settingMode === 'service') {
         try {
           await setPac(`http://${host || '127.0.0.1'}:${pacPort}/pac`, '', onlyActiveDevice)
         } catch {
@@ -114,7 +114,7 @@ async function setSysProxy(onlyActiveDevice: boolean): Promise<void> {
 
     case 'manual': {
       if (port != 0) {
-        if (useService) {
+        if (settingMode === 'service') {
           try {
             await setProxy(`${host || '127.0.0.1'}:${port}`, bypass.join(','), '', onlyActiveDevice)
           } catch {
@@ -140,9 +140,8 @@ export async function disableSysProxy(onlyActiveDevice: boolean): Promise<void> 
   const { sysProxy } = await getAppConfig()
   const { settingMode = 'exec' } = sysProxy
   const execFilePromise = promisify(execFile)
-  const useService = process.platform === 'darwin' && settingMode === 'service'
 
-  if (useService) {
+  if (settingMode === 'service') {
     try {
       await disableProxy('', onlyActiveDevice)
     } catch (e) {

@@ -231,48 +231,47 @@ const Sysproxy: React.FC = () => {
             </Button>
           </SettingItem>
         )}
-        {platform === 'darwin' && (
-          <>
-            <SettingItem title={t('setMethod')} divider>
-              <Tabs
-                size="sm"
-                color="primary"
-                selectedKey={values.settingMode}
-                onSelectionChange={(key) => {
-                  setValues({ ...values, settingMode: key as 'exec' | 'service' })
-                }}
+        <SettingItem title={t('setMethod')} divider>
+          <Tabs
+            size="sm"
+            color="primary"
+            selectedKey={values.settingMode}
+            onSelectionChange={(key) => {
+              setValues({ ...values, settingMode: key as 'exec' | 'service' })
+            }}
+          >
+            <Tab key="exec" title={t('setMethodExec')} />
+            <Tab key="service" title={t('setMethodService')} />
+          </Tabs>
+        </SettingItem>
+        {platform !== 'linux' && (
+          <SettingItem
+            title={t('activeInterfaceOnly')}
+            actions={
+              <Tooltip
+                content={
+                  <>
+                    <div>{t('activeInterfaceOnlyTip')}</div>
+                  </>
+                }
               >
-                <Tab key="exec" title={t('setMethodExec')} />
-                <Tab key="service" title={t('setMethodService')} />
-              </Tabs>
-            </SettingItem>
-            <SettingItem
-              title={t('activeInterfaceOnly')}
-              actions={
-                <Tooltip
-                  content={
-                    <>
-                      <div>{t('activeInterfaceOnlyTip')}</div>
-                    </>
-                  }
-                >
-                  <Button isIconOnly size="sm" variant="light">
-                    <IoIosHelpCircle className="text-lg" />
-                  </Button>
-                </Tooltip>
-              }
-              divider
-            >
-              <Switch
-                size="sm"
-                isSelected={onlyActiveDevice}
-                isDisabled={!values.settingMode || values.settingMode !== 'service'}
-                onValueChange={(v) => {
-                  patchAppConfig({ onlyActiveDevice: v })
-                }}
-              />
-            </SettingItem>
-          </>
+                <Button isIconOnly size="sm" variant="light">
+                  <IoIosHelpCircle className="text-lg" />
+                </Button>
+              </Tooltip>
+            }
+            divider
+          >
+            <Switch
+              size="sm"
+              isSelected={onlyActiveDevice}
+              isDisabled={!values.settingMode || values.settingMode !== 'service'}
+              onValueChange={(v) => {
+                patchAppConfig({ onlyActiveDevice: v })
+              }}
+            />
+          </SettingItem>
+        )}
         )}
         {values.mode === 'auto' && (
           <SettingItem title={t('mode')}>
