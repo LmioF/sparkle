@@ -14,10 +14,10 @@ import {
 } from '@renderer/utils/mihomo-log-store'
 import { Button, Divider, Input } from '@heroui/react'
 import { ListBox, Select } from '@heroui-v3/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
 import { CgTrash } from 'react-icons/cg'
 import { IoLocationSharp } from 'react-icons/io5'
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
+import { Virtuoso } from 'react-virtuoso'
 
 const logLevelOrder: Record<LogLevel, number> = {
   silent: 0,
@@ -26,6 +26,29 @@ const logLevelOrder: Record<LogLevel, number> = {
   info: 3,
   debug: 4
 }
+
+function isSameLogEntry(left: MihomoLogEntry, right: MihomoLogEntry): boolean {
+  return (
+    left.id === right.id &&
+    left.seq === right.seq &&
+    left.type === right.type &&
+    left.payload === right.payload &&
+    left.time === right.time
+  )
+}
+
+function areSameLogEntries(left: MihomoLogEntry[], right: MihomoLogEntry[]): boolean {
+  return (
+    left.length === right.length && left.every((log, index) => isSameLogEntry(log, right[index]))
+  )
+}
+
+function areSameIds(left: string[], right: string[]): boolean {
+  return left.length === right.length && left.every((id, index) => id === right[index])
+}
+
+const maxAnimatedFreshLogs = 24
+const freshLogAnimationDurationMs = 360
 
 const Logs: React.FC = () => {
   const { t } = useTranslation('log')
@@ -39,8 +62,7 @@ const Logs: React.FC = () => {
   const [trace, setTrace] = useState(true)
   const [freshLogIds, setFreshLogIds] = useState<string[]>([])
 
-  const virtuosoRef = useRef<VirtuosoHandle>(null)
-  const freshLogTimeoutsRef = useRef<Map<string, number>>(new Map())
+  const freshLogTimerRef = useRef<number | null>(null)
   const hasHydratedLogsRef = useRef(false)
   const previousLogIdsRef = useRef<string[]>([])
   const activeLogLevelFilter = realtimeLogLevel ?? logLevel
@@ -56,41 +78,23 @@ const Logs: React.FC = () => {
     })
   }, [logsByLevel, filter])
 
-  const clearFreshLogTimers = (logIds?: string[]): void => {
-    if (!logIds) {
-      freshLogTimeoutsRef.current.forEach((timeout) => {
-        window.clearTimeout(timeout)
-      })
-      freshLogTimeoutsRef.current.clear()
-      return
-    }
-
-    logIds.forEach((id) => {
-      const timeout = freshLogTimeoutsRef.current.get(id)
-      if (!timeout) return
-
-      window.clearTimeout(timeout)
-      freshLogTimeoutsRef.current.delete(id)
-    })
+  const clearFreshLogTimer = (): void => {
+    if (!freshLogTimerRef.current) return
+    window.clearTimeout(freshLogTimerRef.current)
+    freshLogTimerRef.current = null
   }
 
   useEffect(() => {
-    if (!trace || filteredLogs.length === 0) return
-    virtuosoRef.current?.scrollToIndex({
-      index: filteredLogs.length - 1,
-      behavior: 'smooth',
-      align: 'end',
-      offset: 0
+    return subscribeMihomoLogs((nextLogs) => {
+      startTransition(() => {
+        setLogs((prevLogs) => (areSameLogEntries(prevLogs, nextLogs) ? prevLogs : nextLogs))
+      })
     })
-  }, [filteredLogs, trace])
-
-  useEffect(() => {
-    return subscribeMihomoLogs(setLogs)
   }, [])
 
   useEffect(() => {
     return () => {
-      clearFreshLogTimers()
+      clearFreshLogTimer()
     }
   }, [])
 
@@ -105,8 +109,8 @@ const Logs: React.FC = () => {
 
     if (currentLogIds.length === 0) {
       previousLogIdsRef.current = []
-      clearFreshLogTimers()
-      setFreshLogIds([])
+      clearFreshLogTimer()
+      setFreshLogIds((prev) => (prev.length === 0 ? prev : []))
       return
     }
 
@@ -116,18 +120,16 @@ const Logs: React.FC = () => {
     previousLogIdsRef.current = currentLogIds
     if (addedLogIds.length === 0) return
 
-    setFreshLogIds((prev) => Array.from(new Set([...prev, ...addedLogIds])))
-
-    addedLogIds.forEach((id) => {
-      clearFreshLogTimers([id])
-
-      const timeout = window.setTimeout(() => {
-        freshLogTimeoutsRef.current.delete(id)
-        setFreshLogIds((prev) => prev.filter((currentId) => currentId !== id))
-      }, 360)
-
-      freshLogTimeoutsRef.current.set(id, timeout)
+    const nextFreshLogIds = addedLogIds.slice(-maxAnimatedFreshLogs)
+    setFreshLogIds((prev) => {
+      return areSameIds(prev, nextFreshLogIds) ? prev : nextFreshLogIds
     })
+
+    clearFreshLogTimer()
+    freshLogTimerRef.current = window.setTimeout(() => {
+      freshLogTimerRef.current = null
+      setFreshLogIds((prev) => (prev.length === 0 ? prev : []))
+    }, freshLogAnimationDurationMs)
   }, [logs])
 
   useEffect(() => {
@@ -241,7 +243,6 @@ const Logs: React.FC = () => {
         </div>
         <div className="min-h-0 flex-1 pt-2">
           <Virtuoso
-            ref={virtuosoRef}
             className="h-full pr-1"
             data={filteredLogs}
             initialTopMostItemIndex={filteredLogs.length > 0 ? filteredLogs.length - 1 : undefined}
