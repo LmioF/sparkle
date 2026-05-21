@@ -19,16 +19,29 @@ import { execWithElevation } from '../utils/elevation'
 
 const execFilePromise = promisify(execFile)
 
-export function getFilePath(ext: string[]): string[] | undefined {
+export function getFilePath(
+  ext: string[],
+  title = t('main.dialog.selectSubscriptionFile'),
+  filterName = `${ext} file`
+): string[] | undefined {
   return dialog.showOpenDialogSync({
-    title: t('main.dialog.selectSubscriptionFile'),
-    filters: [{ name: `${ext} file`, extensions: ext }],
+    title,
+    filters: [{ name: filterName, extensions: ext }],
     properties: ['openFile']
   })
 }
 
 export async function readTextFile(filePath: string): Promise<string> {
   return await readFile(filePath, 'utf8')
+}
+
+export async function readImageFileDataURL(filePath: string): Promise<string> {
+  const ext = path.extname(filePath).toLowerCase()
+  const mimeType =
+    ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : ext === '.webp' ? 'image/webp' : 'image/png'
+  const data = await readFile(filePath)
+
+  return `data:${mimeType};base64,${data.toString('base64')}`
 }
 
 export function openFile(type: 'profile' | 'override', id: string, ext?: 'yaml' | 'js'): void {
@@ -48,7 +61,7 @@ export async function openUWPTool(): Promise<void> {
 export async function setupFirewall(): Promise<void> {
   const execPromise = promisify(exec)
   const removeCommand = `
-  $rules = @("mihomo", "mihomo-alpha", "Sparkle")
+  $rules = @(\"mihomo\", \"mihomo-alpha\", \"Sparkle\")
   foreach ($rule in $rules) {
     if (Get-NetFirewallRule -DisplayName $rule -ErrorAction SilentlyContinue) {
       Remove-NetFirewallRule -DisplayName $rule -ErrorAction SilentlyContinue
@@ -59,9 +72,9 @@ export async function setupFirewall(): Promise<void> {
   const mihomoAlphaPath = mihomoCorePath('mihomo-alpha').replace(/'/g, "''")
   const sparklePath = exePath().replace(/'/g, "''")
   const createCommand = `
-  New-NetFirewallRule -DisplayName "mihomo" -Direction Inbound -Action Allow -Program '${mihomoPath}' -Enabled True -Profile Any -ErrorAction SilentlyContinue
-  New-NetFirewallRule -DisplayName "mihomo-alpha" -Direction Inbound -Action Allow -Program '${mihomoAlphaPath}' -Enabled True -Profile Any -ErrorAction SilentlyContinue
-  New-NetFirewallRule -DisplayName "Sparkle" -Direction Inbound -Action Allow -Program '${sparklePath}' -Enabled True -Profile Any -ErrorAction SilentlyContinue
+  New-NetFirewallRule -DisplayName \"mihomo\" -Direction Inbound -Action Allow -Program '${mihomoPath}' -Enabled True -Profile Any -ErrorAction SilentlyContinue
+  New-NetFirewallRule -DisplayName \"mihomo-alpha\" -Direction Inbound -Action Allow -Program '${mihomoAlphaPath}' -Enabled True -Profile Any -ErrorAction SilentlyContinue
+  New-NetFirewallRule -DisplayName \"Sparkle\" -Direction Inbound -Action Allow -Program '${sparklePath}' -Enabled True -Profile Any -ErrorAction SilentlyContinue
   `
 
   if (process.platform === 'win32') {
