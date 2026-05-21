@@ -283,7 +283,7 @@ powerMonitor.on('shutdown', async () => {
     quitTimeout = null
   }
   stopSSIDCheck()
-  await triggerSysProxy(false, false)
+  await triggerSysProxy(false, false, true)
   sysProxyDisabled = true
   await stopCore()
   exitApp()
@@ -649,7 +649,7 @@ export async function createWindow(appConfig?: AppConfig): Promise<void> {
     })
 
     mainWindow.on('session-end', async () => {
-      await triggerSysProxy(false, false)
+      await triggerSysProxy(false, false, true)
       await stopCore()
     })
 

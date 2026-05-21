@@ -39,7 +39,7 @@ import { createWriteStream, existsSync } from 'fs'
 import { uploadRuntimeConfig } from '../resolve/gistApi'
 import { startMonitor } from '../resolve/trafficMonitor'
 import { stopAllProfileUpdaters } from './profileUpdater'
-import { disableSysProxy, triggerSysProxy } from '../sys/sysproxy'
+import { triggerSysProxy } from '../sys/sysproxy'
 import { getAxios } from './mihomoApi'
 import { setSysDns } from '../service/api'
 
@@ -719,7 +719,7 @@ export async function startNetworkDetection(): Promise<void> {
         }
       } else {
         if (!networkDownHandled) {
-          if (sysProxy.enable) await disableSysProxy(onlyActiveDevice)
+          if (sysProxy.enable) await triggerSysProxy(false, onlyActiveDevice, true)
           await stopCore(false, true)
           networkDownHandled = true
         }

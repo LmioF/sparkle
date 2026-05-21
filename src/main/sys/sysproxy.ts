@@ -13,7 +13,15 @@ let triggerSysProxyTimer: NodeJS.Timeout | null = null
 const SYSPROXY_RETRY_MAX = 10
 let sysProxyRetryCount = 0
 
-export async function triggerSysProxy(enable: boolean, onlyActiveDevice: boolean): Promise<void> {
+function registryArgs(useRegistry: boolean): string[] {
+  return process.platform === 'win32' && useRegistry ? ['--use-registry'] : []
+}
+
+export async function triggerSysProxy(
+  enable: boolean,
+  onlyActiveDevice: boolean,
+  useRegistry = false
+): Promise<void> {
   if (triggerSysProxyTimer) {
     clearTimeout(triggerSysProxyTimer)
     triggerSysProxyTimer = null
@@ -21,7 +29,7 @@ export async function triggerSysProxy(enable: boolean, onlyActiveDevice: boolean
 
   if (!enable) {
     try {
-      await disableSysProxy(onlyActiveDevice)
+      await disableSysProxy(onlyActiveDevice, useRegistry)
       sysProxyRetryCount = 0
     } catch (e) {
       console.warn('[SysProxy] Failed to disable system proxy:', e)
@@ -31,18 +39,21 @@ export async function triggerSysProxy(enable: boolean, onlyActiveDevice: boolean
 
   if (net.isOnline()) {
     sysProxyRetryCount = 0
-    await setSysProxy(onlyActiveDevice)
+    await setSysProxy(onlyActiveDevice, useRegistry)
   } else {
     if (sysProxyRetryCount >= SYSPROXY_RETRY_MAX) {
       sysProxyRetryCount = 0
       return
     }
     sysProxyRetryCount++
-    triggerSysProxyTimer = setTimeout(() => triggerSysProxy(enable, onlyActiveDevice), 5000)
+    triggerSysProxyTimer = setTimeout(
+      () => triggerSysProxy(enable, onlyActiveDevice, useRegistry),
+      5000
+    )
   }
 }
 
-async function setSysProxy(onlyActiveDevice: boolean): Promise<void> {
+async function setSysProxy(onlyActiveDevice: boolean, useRegistry = false): Promise<void> {
   if (process.platform === 'linux')
     defaultBypass = [
       'localhost',
@@ -98,7 +109,12 @@ async function setSysProxy(onlyActiveDevice: boolean): Promise<void> {
     case 'auto': {
       if (settingMode === 'service') {
         try {
-          await setPac(`http://${host || '127.0.0.1'}:${pacPort}/pac`, '', onlyActiveDevice)
+          await setPac(
+            `http://${host || '127.0.0.1'}:${pacPort}/pac`,
+            '',
+            onlyActiveDevice,
+            useRegistry
+          )
         } catch {
           throw new Error(t('main.errors.serviceMayNotInstalled'))
         }
@@ -106,7 +122,8 @@ async function setSysProxy(onlyActiveDevice: boolean): Promise<void> {
         await execFilePromise(servicePath(), [
           'pac',
           '--url',
-          `http://${host || '127.0.0.1'}:${pacPort}/pac`
+          `http://${host || '127.0.0.1'}:${pacPort}/pac`,
+          ...registryArgs(useRegistry)
         ])
       }
       break
@@ -116,7 +133,13 @@ async function setSysProxy(onlyActiveDevice: boolean): Promise<void> {
       if (port != 0) {
         if (settingMode === 'service') {
           try {
-            await setProxy(`${host || '127.0.0.1'}:${port}`, bypass.join(','), '', onlyActiveDevice)
+            await setProxy(
+              `${host || '127.0.0.1'}:${port}`,
+              bypass.join(','),
+              '',
+              onlyActiveDevice,
+              useRegistry
+            )
           } catch {
             throw new Error(t('main.errors.serviceMayNotInstalled'))
           }
@@ -126,7 +149,8 @@ async function setSysProxy(onlyActiveDevice: boolean): Promise<void> {
             '--server',
             `${host || '127.0.0.1'}:${port}`,
             '--bypass',
-            process.platform === 'win32' ? bypass.join(';') : bypass.join(',')
+            process.platform === 'win32' ? bypass.join(';') : bypass.join(','),
+            ...registryArgs(useRegistry)
           ])
         }
       }
@@ -135,7 +159,7 @@ async function setSysProxy(onlyActiveDevice: boolean): Promise<void> {
   }
 }
 
-export async function disableSysProxy(onlyActiveDevice: boolean): Promise<void> {
+async function disableSysProxy(onlyActiveDevice: boolean, useRegistry = false): Promise<void> {
   await stopPacServer()
   const { sysProxy } = await getAppConfig()
   const { settingMode = 'exec' } = sysProxy
@@ -143,12 +167,12 @@ export async function disableSysProxy(onlyActiveDevice: boolean): Promise<void> 
 
   if (settingMode === 'service') {
     try {
-      await disableProxy('', onlyActiveDevice)
+      await disableProxy('', onlyActiveDevice, useRegistry)
     } catch (e) {
       throw new Error(t('main.errors.serviceMayNotInstalled'))
     }
   } else {
-    await execFilePromise(servicePath(), ['disable'])
+    await execFilePromise(servicePath(), ['disable', ...registryArgs(useRegistry)])
   }
 }
 
@@ -158,14 +182,17 @@ export async function disableSysProxy(onlyActiveDevice: boolean): Promise<void> 
  * 因为 service API 仅支持异步调用。此时依赖 before-quit/shutdown
  * 事件处理器中的异步 disableSysProxy() 调用。
  */
-export function disableSysProxySync(): void {
+export function disableSysProxySync(useRegistry = false): void {
   try {
     const { sysProxy } = getAppConfigSync()
     const { settingMode = 'exec' } = sysProxy
     const useService = process.platform === 'darwin' && settingMode === 'service'
 
     if (!useService) {
-      execFileSync(servicePath(), ['disable'], { stdio: 'ignore', timeout: 5000 })
+      execFileSync(servicePath(), ['disable', ...registryArgs(useRegistry)], {
+        stdio: 'ignore',
+        timeout: 5000
+      })
     }
   } catch {
     // ignore errors during sync disable
