@@ -57,6 +57,7 @@ const Tun: React.FC = () => {
     <>
       <BasePage
         title={t('title')}
+        contentClassName="no-scrollbar"
         header={
           changed && (
             <Button

@@ -165,6 +165,7 @@ const Sysproxy: React.FC = () => {
   return (
     <BasePage
       title={t('title')}
+      contentClassName="no-scrollbar"
       header={
         changed && (
           <Button color="primary" className="app-nodrag" size="sm" onPress={onSave}>
@@ -271,7 +272,6 @@ const Sysproxy: React.FC = () => {
               }}
             />
           </SettingItem>
-        )}
         )}
         {values.mode === 'auto' && (
           <SettingItem title={t('mode')}>

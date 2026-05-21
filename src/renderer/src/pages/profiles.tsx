@@ -226,6 +226,7 @@ const Profiles: React.FC = () => {
     <BasePage
       ref={pageRef}
       title={t('title')}
+      contentClassName="no-scrollbar"
       header={
         <>
           <Button

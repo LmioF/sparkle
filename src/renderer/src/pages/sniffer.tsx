@@ -81,6 +81,7 @@ const Sniffer: React.FC = () => {
   return (
     <BasePage
       title={t('title')}
+      contentClassName="no-scrollbar"
       header={
         changed && (
           <Button

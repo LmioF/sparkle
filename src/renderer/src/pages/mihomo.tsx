@@ -192,7 +192,7 @@ const Mihomo: React.FC = () => {
   ]
 
   return (
-    <BasePage title={t('title')}>
+    <BasePage title={t('title')} contentClassName="no-scrollbar">
       {showGrantConfirm && (
         <ConfirmModal
           onChange={setShowGrantConfirm}

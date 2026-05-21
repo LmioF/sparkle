@@ -153,6 +153,7 @@ const Override: React.FC = () => {
     <BasePage
       ref={pageRef}
       title={t('title')}
+      contentClassName="no-scrollbar"
       header={
         <>
           <Button
@@ -182,7 +183,7 @@ const Override: React.FC = () => {
         </>
       }
     >
-      <div className="sticky top-0 z-40 bg-background">
+      <div className="sticky top-0 z-40">
         <div className="flex p-2">
           <Input
             size="sm"
