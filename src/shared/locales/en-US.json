@@ -524,7 +524,14 @@
     "delayTestTimeoutPlaceholder": "Default 5000",
     "test": "Test",
     "timeout": "Timeout",
-    "unpin": "Unpin"
+    "unpin": "Unpin",
+    "closeMode": "Close Mode",
+    "closeModeAll": "All Connections",
+    "closeModeGroup": "Current Group Only",
+    "delayTestUrlScope": "Test URL Source",
+    "delayTestUrlScopeGroup": "Use Group Config",
+    "delayTestUrlScopeGlobal": "Use Unified URL",
+    "delayTestUseGroupApi": "Use Proxy Group API for Delay Test"
   },
   "profile": {
     "title": "Profiles",

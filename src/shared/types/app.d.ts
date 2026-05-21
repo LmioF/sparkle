@@ -91,6 +91,7 @@ interface AppConfig {
   realtimeLogLevel?: LogLevel
   userAgent?: string
   delayTestConcurrency?: number
+  delayTestUseGroupApi?: boolean
   delayTestUrl?: string
   delayTestUrlScope?: 'group' | 'global'
   delayTestTimeout?: number

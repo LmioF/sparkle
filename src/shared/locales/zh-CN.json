@@ -524,7 +524,14 @@
     "delayTestTimeoutPlaceholder": "默认 5000",
     "test": "测试",
     "timeout": "超时",
-    "unpin": "取消固定"
+    "unpin": "取消固定",
+    "closeMode": "打断模式",
+    "closeModeAll": "所有连接",
+    "closeModeGroup": "仅当前组",
+    "delayTestUrlScope": "测试地址来源",
+    "delayTestUrlScopeGroup": "使用组配置",
+    "delayTestUrlScopeGlobal": "使用统一地址",
+    "delayTestUseGroupApi": "使用策略组 API 测速"
   },
   "profile": {
     "title": "订阅管理",

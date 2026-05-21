@@ -17,6 +17,12 @@ import SettingItem from '../base/base-setting-item'
 import { useAppConfig } from '@renderer/hooks/use-app-config'
 import { useTranslation } from '@renderer/hooks/useTranslation'
 import debounce from '@renderer/utils/debounce'
+import {
+  DEFAULT_DELAY_TEST_CONCURRENCY,
+  MAX_DELAY_TEST_CONCURRENCY,
+  MIN_DELAY_TEST_CONCURRENCY,
+  normalizeDelayTestConcurrency
+} from '@renderer/utils/delay-test'
 
 interface Props {
   onClose: () => void
@@ -36,6 +42,7 @@ const ProxySettingModal: React.FC<Props> = (props) => {
     closeMode = 'all',
     delayTestUrl,
     delayTestUrlScope = 'group',
+    delayTestUseGroupApi = false,
     delayTestConcurrency,
     delayTestTimeout
   } = appConfig || {}
@@ -141,7 +148,7 @@ const ProxySettingModal: React.FC<Props> = (props) => {
             />
           </SettingItem>
           {autoCloseConnection && (
-            <SettingItem title="打断模式" divider>
+            <SettingItem title={t('closeMode')} divider>
               <Tabs
                 size="sm"
                 color="primary"
@@ -152,8 +159,8 @@ const ProxySettingModal: React.FC<Props> = (props) => {
                   })
                 }}
               >
-                <Tab key="all" title="所有连接" />
-                <Tab key="group" title="仅当前组" />
+                <Tab key="all" title={t('closeModeAll')} />
+                <Tab key="group" title={t('closeModeGroup')} />
               </Tabs>
             </SettingItem>
           )}
@@ -169,7 +176,7 @@ const ProxySettingModal: React.FC<Props> = (props) => {
               }}
             />
           </SettingItem>
-          <SettingItem title="测试地址来源" divider>
+          <SettingItem title={t('delayTestUrlScope')} divider>
             <Tabs
               size="sm"
               color="primary"
@@ -180,22 +187,39 @@ const ProxySettingModal: React.FC<Props> = (props) => {
                 })
               }}
             >
-              <Tab key="group" title="使用组配置" />
-              <Tab key="global" title="使用统一地址" />
+              <Tab key="group" title={t('delayTestUrlScopeGroup')} />
+              <Tab key="global" title={t('delayTestUrlScopeGlobal')} />
             </Tabs>
           </SettingItem>
-          <SettingItem title={t('delayTestConcurrency')} divider>
-            <Input
-              type="number"
+          <SettingItem title={t('delayTestUseGroupApi')} divider>
+            <Switch
               size="sm"
-              className="w-25"
-              value={delayTestConcurrency?.toString()}
-              placeholder={t('delayTestConcurrencyPlaceholder')}
+              isSelected={delayTestUseGroupApi}
               onValueChange={(v) => {
-                patchAppConfig({ delayTestConcurrency: parseInt(v) })
+                patchAppConfig({ delayTestUseGroupApi: v })
               }}
             />
           </SettingItem>
+          {!delayTestUseGroupApi && (
+            <SettingItem title={t('delayTestConcurrency')} divider>
+              <Input
+                type="number"
+                size="sm"
+                className="w-25"
+                value={delayTestConcurrency?.toString()}
+                min={MIN_DELAY_TEST_CONCURRENCY}
+                max={MAX_DELAY_TEST_CONCURRENCY}
+                placeholder={t('delayTestConcurrencyPlaceholder', {
+                  defaultValue: `默认 ${DEFAULT_DELAY_TEST_CONCURRENCY}`
+                })}
+                onValueChange={(v) => {
+                  patchAppConfig({
+                    delayTestConcurrency: normalizeDelayTestConcurrency(parseInt(v))
+                  })
+                }}
+              />
+            </SettingItem>
+          )}
           <SettingItem title={t('delayTestTimeout')}>
             <Input
               type="number"

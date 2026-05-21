@@ -6,10 +6,11 @@ import {
   getImageDataURL,
   mihomoChangeProxy,
   mihomoCloseConnections,
+  mihomoGroupDelay,
   mihomoProxyDelay
 } from '@renderer/utils/ipc'
 import { FaLocationCrosshairs } from 'react-icons/fa6'
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import { useEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react'
 import { GroupedVirtuoso, GroupedVirtuosoHandle } from 'react-virtuoso'
 import ProxyItem from '@renderer/components/proxies/proxy-item'
 import ProxySettingModal from '@renderer/components/proxies/proxy-setting-modal'
@@ -21,6 +22,25 @@ import CollapseInput from '@renderer/components/base/collapse-input'
 import { includesIgnoreCase } from '@renderer/utils/includes'
 import { useControledMihomoConfig } from '@renderer/hooks/use-controled-mihomo-config'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { runDelayTestsWithConcurrency } from '@renderer/utils/delay-test'
+
+type ProxyLike = ControllerProxiesDetail | ControllerGroupDetail
+
+const EMPTY_PROXIES: ProxyLike[] = []
+
+function getProxyDelay(proxy: ProxyLike): number {
+  return proxy.history.length > 0 ? proxy.history[proxy.history.length - 1].delay : -1
+}
+
+function compareProxyDelay(a: ProxyLike, b: ProxyLike): number {
+  const delayA = getProxyDelay(a)
+  const delayB = getProxyDelay(b)
+  if (delayA === -1) return -1
+  if (delayB === -1) return 1
+  if (delayA === 0) return 1
+  if (delayB === 0) return -1
+  return delayA - delayB
+}
 
 const Proxies: React.FC = () => {
   const { t } = useTranslation('proxy')
@@ -37,7 +57,8 @@ const Proxies: React.FC = () => {
     closeMode = 'all',
     proxyCols = 'auto',
     delayTestUrlScope = 'group',
-    delayTestConcurrency = 50
+    delayTestUseGroupApi = false,
+    delayTestConcurrency
   } = appConfig || {}
   const [cols, setCols] = useState(1)
   const [delaying, setDelaying] = useState<Map<string, boolean>>(new Map())
@@ -50,32 +71,27 @@ const Proxies: React.FC = () => {
 
   const { groupCounts, allProxies } = useMemo(() => {
     const groupCounts: number[] = []
-    const allProxies: (ControllerProxiesDetail | ControllerGroupDetail)[][] = []
+    const allProxies: ProxyLike[][] = []
     groups.forEach((group) => {
       const isGroupOpen = isOpenMap.get(group.name) ?? false
       const groupSearchValue = searchValueMap.get(group.name) ?? ''
       if (isGroupOpen) {
-        let groupProxies = group.all.filter(
-          (proxy) => proxy && includesIgnoreCase(proxy.name, groupSearchValue)
-        )
-        const count = Math.floor(groupProxies.length / cols)
-        groupCounts.push(groupProxies.length % cols === 0 ? count : count + 1)
+        let groupProxies = groupSearchValue
+          ? group.all.filter((proxy) => proxy && includesIgnoreCase(proxy.name, groupSearchValue))
+          : (group.all as ProxyLike[])
+
         if (proxyDisplayOrder === 'delay') {
-          groupProxies = groupProxies.sort((a, b) => {
-            if (a.history.length === 0) return -1
-            if (b.history.length === 0) return 1
-            if (a.history[a.history.length - 1].delay === 0) return 1
-            if (b.history[b.history.length - 1].delay === 0) return -1
-            return a.history[a.history.length - 1].delay - b.history[b.history.length - 1].delay
-          })
+          groupProxies = [...groupProxies].sort(compareProxyDelay)
         }
         if (proxyDisplayOrder === 'name') {
-          groupProxies = groupProxies.sort((a, b) => a.name.localeCompare(b.name))
+          groupProxies = [...groupProxies].sort((a, b) => a.name.localeCompare(b.name))
         }
+
+        groupCounts.push(Math.ceil(groupProxies.length / cols))
         allProxies.push(groupProxies)
       } else {
         groupCounts.push(0)
-        allProxies.push([])
+        allProxies.push(EMPTY_PROXIES)
       }
     })
     return { groupCounts, allProxies }
@@ -111,46 +127,60 @@ const Proxies: React.FC = () => {
     [getDelayTestUrl]
   )
 
+  const setGroupDelaying = useCallback((groupName: string, value: boolean): void => {
+    setDelaying((prev) => {
+      const next = new Map(prev)
+      next.set(groupName, value)
+      return next
+    })
+  }, [])
+
   const onGroupDelay = useCallback(
     async (index: number): Promise<void> => {
       const group = groups[index]
-      if (allProxies[index].length === 0) {
+      if (!group) return
+
+      const openedProxies = allProxies[index] || EMPTY_PROXIES
+      const proxies = openedProxies.length > 0 ? openedProxies : group.all
+      if (proxies.length === 0) return
+
+      if (openedProxies.length === 0) {
         setIsOpen(group.name, true)
       }
-      setDelaying((prev) => {
-        const next = new Map(prev)
-        next.set(group.name, true)
-        return next
-      })
-      const result: Promise<void>[] = []
-      const runningList: Promise<void>[] = []
-      for (const proxy of allProxies[index]) {
-        const promise = Promise.resolve().then(async () => {
+
+      const testUrl = getDelayTestUrl(group)
+      setGroupDelaying(group.name, true)
+
+      try {
+        if (delayTestUseGroupApi) {
+          await mihomoGroupDelay(group.name, testUrl)
+          return
+        }
+
+        await runDelayTestsWithConcurrency(proxies, delayTestConcurrency, async (proxy) => {
           try {
-            await mihomoProxyDelay(proxy.name, getDelayTestUrl(groups[index]))
+            await mihomoProxyDelay(proxy.name, testUrl)
           } catch {
             // ignore
-          } finally {
-            mutate()
           }
         })
-        result.push(promise)
-        const running = promise.then(() => {
-          runningList.splice(runningList.indexOf(running), 1)
-        })
-        runningList.push(running)
-        if (runningList.length >= (delayTestConcurrency || 50)) {
-          await Promise.race(runningList)
-        }
+      } catch {
+        // ignore
+      } finally {
+        mutate()
+        setGroupDelaying(group.name, false)
       }
-      await Promise.all(result)
-      setDelaying((prev) => {
-        const next = new Map(prev)
-        next.set(group.name, false)
-        return next
-      })
     },
-    [allProxies, groups, delayTestConcurrency, mutate, setIsOpen, getDelayTestUrl]
+    [
+      allProxies,
+      groups,
+      delayTestUseGroupApi,
+      delayTestConcurrency,
+      mutate,
+      setIsOpen,
+      getDelayTestUrl,
+      setGroupDelaying
+    ]
   )
 
   const calcCols = useCallback((): number => {
@@ -191,7 +221,8 @@ const Proxies: React.FC = () => {
       for (let j = 0; j < index; j++) {
         i += groupCounts[j]
       }
-      i += Math.floor(allProxies[index].findIndex((proxy) => proxy.name === group.now) / cols)
+      const proxies = allProxies[index].length > 0 ? allProxies[index] : group.all
+      i += Math.floor(proxies.findIndex((proxy) => proxy.name === group.now) / cols)
       virtuosoRef.current?.scrollToIndex({
         index: Math.floor(i),
         align: 'start'
@@ -344,10 +375,31 @@ const Proxies: React.FC = () => {
   const itemContent = useCallback(
     (index: number, groupIndex: number) => {
       let innerIndex = index
-      groupCounts.slice(0, groupIndex).forEach((count) => {
-        innerIndex -= count
-      })
-      return allProxies[groupIndex] ? (
+      for (let i = 0; i < groupIndex; i++) {
+        innerIndex -= groupCounts[i]
+      }
+
+      const proxies = allProxies[groupIndex]
+      const items: ReactNode[] = []
+      for (let i = 0; i < cols; i++) {
+        const proxy = proxies[innerIndex * cols + i]
+        if (!proxy) continue
+
+        items.push(
+          <ProxyItem
+            key={proxy.name}
+            mutateProxies={mutate}
+            onProxyDelay={onProxyDelay}
+            onSelect={onChangeProxy}
+            proxy={proxy}
+            group={groups[groupIndex]}
+            proxyDisplayLayout={proxyDisplayLayout}
+            selected={proxy.name === groups[groupIndex].now}
+          />
+        )
+      }
+
+      return proxies ? (
         <div
           style={
             proxyCols !== 'auto'
@@ -356,23 +408,7 @@ const Proxies: React.FC = () => {
           }
           className={`grid ${proxyCols === 'auto' ? 'sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5' : ''} ${groupIndex === groupCounts.length - 1 && innerIndex === groupCounts[groupIndex] - 1 ? 'pb-2' : ''} gap-2 pt-2 mx-2`}
         >
-          {Array.from({ length: cols }).map((_, i) => {
-            if (!allProxies[groupIndex][innerIndex * cols + i]) return null
-            return (
-              <ProxyItem
-                key={allProxies[groupIndex][innerIndex * cols + i].name}
-                mutateProxies={mutate}
-                onProxyDelay={(name) => onProxyDelay(name, groups[groupIndex])}
-                onSelect={onChangeProxy}
-                proxy={allProxies[groupIndex][innerIndex * cols + i]}
-                group={groups[groupIndex]}
-                proxyDisplayLayout={proxyDisplayLayout}
-                selected={
-                  allProxies[groupIndex][innerIndex * cols + i]?.name === groups[groupIndex].now
-                }
-              />
-            )
-          })}
+          {items}
         </div>
       ) : (
         <div>{t('neverSeeThis')}</div>
@@ -387,7 +423,8 @@ const Proxies: React.FC = () => {
       onProxyDelay,
       onChangeProxy,
       groups,
-      proxyDisplayLayout
+      proxyDisplayLayout,
+      t
     ]
   )
 
