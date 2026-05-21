@@ -7,14 +7,7 @@ import TunSwitcher from '@renderer/components/sider/tun-switcher'
 import { Button, Divider } from '@heroui/react'
 import { IoSettings } from 'react-icons/io5'
 import routes from '@renderer/routes'
-import {
-  DndContext,
-  closestCorners,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent
-} from '@dnd-kit/core'
+import { DndContext, closestCorners, DragEndEvent } from '@dnd-kit/core'
 import { SortableContext } from '@dnd-kit/sortable'
 import ProfileCard from '@renderer/components/sider/profile-card'
 import ProxyCard from '@renderer/components/sider/proxy-card'
@@ -36,6 +29,7 @@ import MihomoIcon from './components/base/mihomo-icon'
 import useSWR from 'swr'
 import ConfirmModal from '@renderer/components/base/base-confirm'
 import { useTranslation } from '@renderer/hooks/useTranslation'
+import { useCardDndSensors } from '@renderer/hooks/use-card-dnd-sensors'
 
 let navigate: NavigateFunction
 
@@ -96,13 +90,13 @@ const App: React.FC = () => {
   const siderWidthValueRef = useRef(siderWidthValue)
   const [resizing, setResizing] = useState(false)
   const resizingRef = useRef(resizing)
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8
-      }
-    })
-  )
+  const suppressSiderClickRef = useRef(false)
+  const suppressSiderClickTimerRef = useRef<number | undefined>(undefined)
+  const sensors = useCardDndSensors({
+    mouseDistance: 8,
+    touchDelay: 220,
+    touchTolerance: 10
+  })
   const { setTheme, systemTheme } = useTheme()
   navigate = useNavigate()
   const location = useLocation()
@@ -161,7 +155,12 @@ const App: React.FC = () => {
 
   useEffect(() => {
     window.addEventListener('mouseup', onResizeEnd)
-    return (): void => window.removeEventListener('mouseup', onResizeEnd)
+    return (): void => {
+      window.removeEventListener('mouseup', onResizeEnd)
+      if (suppressSiderClickTimerRef.current) {
+        window.clearTimeout(suppressSiderClickTimerRef.current)
+      }
+    }
   }, [])
 
   const onResizeEnd = (): void => {
@@ -184,7 +183,34 @@ const App: React.FC = () => {
     }
   }
 
+  const releaseSiderClickSuppression = (): void => {
+    if (suppressSiderClickTimerRef.current) {
+      window.clearTimeout(suppressSiderClickTimerRef.current)
+    }
+    suppressSiderClickTimerRef.current = window.setTimeout(() => {
+      suppressSiderClickRef.current = false
+    }, 160)
+  }
+
+  const onSiderDragStart = (): void => {
+    suppressSiderClickRef.current = true
+  }
+
+  const onSiderDragCancel = (): void => {
+    releaseSiderClickSuppression()
+  }
+
+  const onSiderDragEnd = (event: DragEndEvent): void => {
+    void onDragEnd(event).finally(releaseSiderClickSuppression)
+  }
+
   const onSiderClickCapture = (event: React.MouseEvent<HTMLDivElement>): void => {
+    if (suppressSiderClickRef.current) {
+      event.preventDefault()
+      event.stopPropagation()
+      return
+    }
+
     const target = event.target as HTMLElement
     if (target.closest(interactiveSelector)) return
 
@@ -441,7 +467,13 @@ const App: React.FC = () => {
             <OutboundModeSwitcher />
           </div>
           <div style={{ overflowX: 'clip' }}>
-            <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={onDragEnd}>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCorners}
+              onDragStart={onSiderDragStart}
+              onDragCancel={onSiderDragCancel}
+              onDragEnd={onSiderDragEnd}
+            >
               <div className="grid grid-cols-2 gap-2 m-2" onClickCapture={onSiderClickCapture}>
                 <SortableContext items={order}>
                   {order.map((key: string) => {
